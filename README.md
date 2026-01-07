@@ -1,1 +1,1 @@
-#Scikit implementation of RegMMD
+# Scikit implementation of RegMMD
