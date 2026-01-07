@@ -3,8 +3,18 @@
 .idea
 .empty
 .vscode
+.venv
+.ruff_cache
 
 # Python related files 
 **/__pycache__
+uv.lock
+dist
+*.egg-info
 
+# R environment files
+**/renv
+**/.Rprofile
+**/renv.lock
 
+articles
