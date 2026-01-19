@@ -1,14 +1,37 @@
-import numpy as np
-
 from abc import ABC, abstractmethod
+
+import numpy as np
 
 
 class StatisticalModel(ABC):
-    pass
-
     @abstractmethod
-    def sample(self) -> np.array:
+    def sample_n(self, n: int) -> np.array:
+        """Generate n samples of the distribution with the initialized
+        parameters of the distribution.
+
+        Parameters
+        ----------
+        n : int, How many samples to generate
+        """
         raise NotImplementedError
 
-    def log_likelihood(self, x) -> np.array:
+    @abstractmethod
+    def log_prob(self, x: np.array) -> np.array:
+        """Evaluates to the log likelihood at the values x.
+
+        Parameters
+        ----------
+        x : ndarray of shape (n_samples, n_features), the points to be evaluated
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def score(self, x) -> np.array:
+        """Evaluates to the gradient of the log likelihood with respect to the
+        parameters at the values x.
+
+        Parameters
+        ----------
+        x : ndarray of shape (n_samples, n_features), the points to be evaluated
+        """
         raise NotImplementedError
