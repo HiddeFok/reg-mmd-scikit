@@ -21,6 +21,9 @@ def _gd_gaussian_loc_exact(
     epsilon: float = 1e-4,
 ) -> Tuple[float, float]:
 
+    if bandwidth == "median":
+        bandwidth = np.median(x)
+
     if par_1 is None:
         par = np.median(x)
     elif isinstance(par_1, float): # and len(par_1) == 1:
@@ -62,7 +65,7 @@ def _gd_gaussian_loc_exact(
 
     par_mean = par
     for i in range(n_step):
-        diff = x - par_mean
+        diff = x - par
         Z = -4 / np.sqrt(1 + 2 * (par_2**2) / (bandwidth**2))
         grad = Z * np.mean(
             diff * np.exp(-np.square(diff) / (2 * (par_2**2) + bandwidth**2))

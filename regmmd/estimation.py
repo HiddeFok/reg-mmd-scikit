@@ -37,6 +37,7 @@ class MMDEstimator(BaseEstimator):
             burn_in=self.solver["burnin"],
             n_step=self.solver["n_step"],
             stepsize=self.solver["stepsize"],
+            bandwidth=self.bandwidth,
             epsilon=self.solver["epsilon"]
         )
         return res
