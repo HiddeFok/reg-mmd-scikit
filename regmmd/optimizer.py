@@ -1,13 +1,97 @@
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
 import numpy as np
 
+from regmmd.kernels import K1d
 from regmmd.models.base_model import StatisticalModel
 
 # NOTE:
 #   - The R implementation GD.MMD.loc also assumes the gaussian kernel and is
 #       implemented exactly
 #   -
+
+
+def _sgd(
+    x: np.array,
+    par: np.array,
+    model: StatisticalModel,
+    kernel: str,
+    burn_in: int = 500,
+    n_step: int = 1000,
+    stepsize: float = 1.0,
+    bandwidth: float = 1.0,
+    epsilon: float = 1e-4,
+) -> Tuple[float, float]:
+    n = x.shape[0]
+
+    if bandwidth == "median":
+        bandwidth = np.median(x)
+
+    # NOTE: SGD.MMD.Gaussian assumes that par1 par2 are mean and var, but in
+    # general these parameters might be different things. Do automatic_parameter
+    # start setting in the fit function dependend on the model, make this as
+    # general possible
+
+    # TODO: Write this
+    # _validate(par)
+
+    norm_grad = epsilon
+    res = {"par_start": np.copy(par), "stepsize": stepsize}
+    print(par)
+    trajectory = np.zeros(shape=(par.shape[0], burn_in + n_step + 1))
+    trajectory[:, 0] = par
+
+    for i in range(burn_in):
+        # NOTE: shouldn't there be 2 x_sampled? I guess this is for computational sake
+        x_sampled = model.sample_n(n=n)
+        ker_sampled_1 = (
+            K1d(x_sampled, x_sampled, kernel=kernel, bandwidth=bandwidth) - np.eye(n)
+        ).sum(axis=1) / (n - 1)
+        ker_sampled_2 = (
+            K1d(x_sampled, x, kernel=kernel, bandwidth=bandwidth)
+        ).sum(axis=0) / n
+        ker = (ker_sampled_1 - ker_sampled_2)[:, np.newaxis]
+
+        print(ker[:10])
+        grad = 2 * np.mean(
+            model.score(x_sampled) * ker, axis=0
+        )  # Expected outcome shape: (n, par.shape) -> (shape_par)
+        norm_grad += np.sum(np.square(grad))
+        par -= stepsize * grad / np.sqrt(norm_grad)
+        model.update(par1=par[0], par2=par[1])
+        # only for gaussian par[1] = max(par[1], 1 / (n ** 2))
+        trajectory[:, i + 1] = par
+
+    par_mean = par
+
+    for i in range(n_step):
+        x_sampled = model.sample_n(n=n)
+
+        ker_sampled_1 = (
+            K1d(x_sampled, x_sampled, kernel=kernel, bandwidth=bandwidth) - np.eye(n)
+        ).sum(axis=1) / (n - 1)
+        ker_sampled_2 = (
+            K1d(x_sampled, x, kernel=kernel, bandwidth=bandwidth)
+        ).sum(axis=0) / n
+        ker = (ker_sampled_1 - ker_sampled_2)[:, np.newaxis]
+
+        grad = 2 * np.mean(
+            model.score(x_sampled) * ker, axis=0
+        )  # Expected outcome shape: (n, par.shape) -> (shape_par)
+        norm_grad += np.sum(np.square(grad))
+        par -= stepsize * grad / np.sqrt(norm_grad)
+
+        # only for gaussian par[1] = max(par[1], 1 / (n ** 2))
+        # par[1] = max(par[1], 1 / n **2)
+        par_mean = (par_mean * (i + 1) + par) / (i + 2)
+
+        model.update(par1=par_mean[0], par2=par_mean[1])
+        trajectory[:, i + burn_in + 1] = par
+
+    res["estimator"] = par_mean
+    res["trajectory"] = trajectory
+
+    return res
 
 
 def _gd_gaussian_loc_exact(
@@ -20,20 +104,19 @@ def _gd_gaussian_loc_exact(
     bandwidth: float = 1.0,
     epsilon: float = 1e-4,
 ) -> Tuple[float, float]:
-
     if bandwidth == "median":
         bandwidth = np.median(x)
 
     if par_1 is None:
         par = np.median(x)
-    elif isinstance(par_1, float): # and len(par_1) == 1:
+    elif isinstance(par_1, float):  # and len(par_1) == 1:
         par = par_1
     else:
         raise ValueError("par_1 needs to be a float or None")
-    
+
     if par_2 is None:
         raise ValueError("par_2 is missing")
-    elif not isinstance(par_2, float): # or len(par_2) != 1):
+    elif not isinstance(par_2, float):  # or len(par_2) != 1):
         raise ValueError("par_2 must be numerical")
     elif par_2 <= 0:
         raise ValueError("par_2 must be positive")
@@ -42,21 +125,22 @@ def _gd_gaussian_loc_exact(
 
     res = {
         "par_1": par,
-        "par_2": par_2, 
+        "par_2": par_2,
         "stepsize": stepsize,
-    }   
+    }
 
     trajectory = np.zeros(shape=(burn_in + n_step + 1,))
     trajectory[0] = par
 
+    Z = -4 / np.sqrt(1 + 2 * (par_2**2) / (bandwidth**2))
+    denom = 2 * (par_2**2) + bandwidth**2
     for i in range(burn_in):
         diff = x - par
-        Z = -4 / np.sqrt(1 + 2 * (par_2**2) / (bandwidth**2))
         grad = Z * np.mean(
-            diff * np.exp(-np.square(diff) / (2 * (par_2**2) + bandwidth**2))
+            diff * np.exp(-np.square(diff) / denom)
         )  # TODO: implement generally
-        norm_grad = norm_grad + grad**2
-        par = par - stepsize * grad / np.sqrt(norm_grad)
+        norm_grad += grad**2
+        par -= stepsize * grad / np.sqrt(norm_grad)
         trajectory[i + 1] = par
 
     # AdaGrad optimization follows the following update
@@ -64,14 +148,12 @@ def _gd_gaussian_loc_exact(
     # for i in range(n_step):
 
     par_mean = par
+    Z = -4 / np.sqrt(1 + 2 * (par_2**2) / (bandwidth**2))
     for i in range(n_step):
         diff = x - par
-        Z = -4 / np.sqrt(1 + 2 * (par_2**2) / (bandwidth**2))
-        grad = Z * np.mean(
-            diff * np.exp(-np.square(diff) / (2 * (par_2**2) + bandwidth**2))
-        )
-        norm_grad = norm_grad + grad**2
-        par = par - stepsize * grad / np.sqrt(norm_grad)
+        grad = Z * np.mean(diff * np.exp(-np.square(diff) / denom))
+        norm_grad += grad**2
+        par -= stepsize * grad / np.sqrt(norm_grad)
         par_mean = (par_mean * (i + 1) + par) / (i + 2)
         trajectory[i + burn_in + 1] = par_mean
 

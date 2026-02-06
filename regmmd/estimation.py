@@ -1,9 +1,12 @@
 from typing import Dict, Optional
 
+import numpy as np
+
 from sklearn.base import BaseEstimator
 
 from regmmd.models.base_model import StatisticalModel
-from regmmd.optimizer import _gd_gaussian_loc_exact
+from regmmd.optimizer import _sgd, _gd_gaussian_loc_exact
+from regmmd.models import GaussianLoc
 
 
 class MMDEstimator(BaseEstimator):
@@ -29,17 +32,29 @@ class MMDEstimator(BaseEstimator):
         self.solver = solver
 
     def fit(self, X):
-
-        res = _gd_gaussian_loc_exact(
-            x=X,
-            par_1=self.par1,
-            par_2=self.par2,
-            burn_in=self.solver["burnin"],
-            n_step=self.solver["n_step"],
-            stepsize=self.solver["stepsize"],
-            bandwidth=self.bandwidth,
-            epsilon=self.solver["epsilon"]
-        )
+        if isinstance(self.model, GaussianLoc):
+            res = _gd_gaussian_loc_exact(
+                x=X,
+                par_1=self.par1,
+                par_2=self.par2,
+                burn_in=self.solver["burnin"],
+                n_step=self.solver["n_step"],
+                stepsize=self.solver["stepsize"],
+                bandwidth=self.bandwidth,
+                epsilon=self.solver["epsilon"],
+            )
+        else:
+            res = _sgd(
+                x=X, 
+                par=np.array([self.par1, self.par2]), 
+                model=self.model, 
+                kernel=self.kernel, 
+                burn_in=self.solver["burnin"],
+                n_step=self.solver["n_step"],
+                stepsize=self.solver["stepsize"],
+                bandwidth=self.bandwidth,
+                epsilon=self.solver["epsilon"]
+            )
         return res
 
     # def predict(self, X):

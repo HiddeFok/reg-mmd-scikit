@@ -35,3 +35,15 @@ class StatisticalModel(ABC):
         x : ndarray of shape (n_samples, n_features), the points to be evaluated
         """
         raise NotImplementedError
+
+    @abstractmethod
+    def update(self, par1, par2) -> None:
+        """Update the model with new parameters
+
+        Parameters
+        ----------
+        par1 : float
+
+        par2: float
+        """
+        raise NotImplementedError

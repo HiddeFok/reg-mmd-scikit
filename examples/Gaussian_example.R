@@ -9,7 +9,7 @@ Est = mmd_est(x, model="Gaussian")
 # print a summary
 summary(Est)
 # estimate the mean (assuming the data is Gaussian with known standard deviation =1.5)
-Est2 = mmd_est(x, model="Gaussian.loc", par2=1.5)
+system.time(Est2 <- mmd_est(x, model="Gaussian.loc", par2=1.5))
 # print a summary
 summary(Est2)
 # estimate the standard deviation (assuming the data is Gaussian with known mean = 0)
