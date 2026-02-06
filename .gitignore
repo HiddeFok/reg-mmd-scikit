@@ -12,6 +12,8 @@ uv.lock
 dist
 *.egg-info
 
+**/profile_stats
+
 # R environment files
 **/renv
 **/.Rprofile
