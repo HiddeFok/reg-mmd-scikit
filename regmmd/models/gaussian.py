@@ -1,9 +1,9 @@
 import numpy as np
 
-from regmmd.models.base_model import StatisticalModel
+from regmmd.models.base_model import EstimationModel
 
 
-class GaussianBase(StatisticalModel):
+class GaussianBase(EstimationModel):
     def __init__(self, par1=None, par2=None, random_state=None):
         self.par1 = par1
         self.par2 = par2
@@ -27,7 +27,7 @@ class GaussianBase(StatisticalModel):
             raise ValueError("Both parameters need to be defined to be able to sample")
 
         return self.rng.normal(loc=self.par1, scale=self.par2, size=(n,))
-    
+
     def update(self, par1, par2):
         self.par1 = par1
         self.par2 = par2
@@ -36,7 +36,7 @@ class GaussianBase(StatisticalModel):
         if par1 is None:
             par1 = np.median(X)
         if par2 is None:
-            par2 = (5 / 4) * np.median(abs(X-np.median(X)))
+            par2 = (5 / 4) * np.median(abs(X - np.median(X)))
         return np.array([par1, par2])
 
 

@@ -1,11 +1,12 @@
 from typing import Dict, Optional
 
-from sklearn.base import BaseEstimator
+from sklearn.base import BaseEstimator, RegressorMixin
 
-from regmmd.models.base_model import StatisticalModel
+from regmmd.models.base_model import EstimationModel
+from regmmd.optimizer import _sgd_tilde_regression
 
 
-class MMDRegression(BaseEstimator):
+class MMDRegressor(RegressorMixin, BaseEstimator):
     """Regression using the MMD criterion.
 
     MMD stands for Maximum Mean Discrepancy: TODO: write this
@@ -13,7 +14,7 @@ class MMDRegression(BaseEstimator):
 
     def __init__(
         self,
-        model: StatisticalModel,
+        model: EstimationModel,
         par1: float = None,
         par2: float = None,
         kernel: str = "gaussian",
@@ -27,8 +28,8 @@ class MMDRegression(BaseEstimator):
         self.bandwidth = bandwidth
         self.solver = solver
 
-    def fit(self, X):
-        pass
+    def fit(self, X, y):
+        res = _sgd_tilde_regression()
 
-    # def predict(self, X):
-    #     pass
+    def predict(self, X):
+        pass

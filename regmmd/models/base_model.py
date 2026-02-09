@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 
-class StatisticalModel(ABC):
+class EstimationModel(ABC):
     @abstractmethod
     def sample_n(self, n: int) -> np.array:
         """Generate n samples of the distribution with the initialized
@@ -49,6 +49,20 @@ class StatisticalModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def _project_params(self, par1, par2) -> np.array:
+        """Projection of potentially infeasible parameters to
+        the feasible set
+
+        Parameters
+        ----------
+        par1 : float
+
+        par2: float
+        """
+        # TODO: Write this in the models
+        pass
+
+    @abstractmethod
     def update(self, par1, par2) -> None:
         """Update the model with new parameters
 
@@ -57,5 +71,17 @@ class StatisticalModel(ABC):
         par1 : float
 
         par2: float
+        """
+        raise NotImplementedError
+
+
+class RegressionModel(EstimationModel):
+    @abstractmethod
+    def predict(self, X: np.array) -> np.array:
+        """Computes the mean of Y given X and the current parameters of the model
+
+        Parameters
+        ----------
+        X : np.array
         """
         raise NotImplementedError
