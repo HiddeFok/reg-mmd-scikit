@@ -32,6 +32,13 @@ class GaussianBase(StatisticalModel):
         self.par1 = par1
         self.par2 = par2
 
+    def _init_params(self, par1, par2, X):
+        if par1 is None:
+            par1 = np.median(X)
+        if par2 is None:
+            par2 = (5 / 4) * np.median(abs(X-np.median(X)))
+        return np.array([par1, par2])
+
 
 class GaussianLoc(GaussianBase):
     def __init__(self, par1=None, par2=None, random_state=None):

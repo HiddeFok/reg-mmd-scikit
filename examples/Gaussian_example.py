@@ -44,8 +44,8 @@ def main():
     print("Initializing estimator")
     mmd_estim = MMDEstimator(
         model=model,
-        par1=0.2, 
-        par2=1.2,
+        par1=1.0, 
+        par2=0.2,
         kernel="Gaussian",
         solver={
             "type": "SGD",

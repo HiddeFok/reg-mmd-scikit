@@ -2,6 +2,8 @@ from typing import Optional, Tuple
 
 import numpy as np
 
+from scipy.spatial.distance import pdist, squareform
+
 from regmmd.kernels import K1d
 from regmmd.models.base_model import StatisticalModel
 
@@ -10,6 +12,13 @@ from regmmd.models.base_model import StatisticalModel
 #       implemented exactly
 #   -
 
+def _median_heuristic(X: np.array):
+    if len(X.shape) == 1:
+        X = X[:, np.newaxis]
+
+    pairwise_dists = pdist(X, metric="euclidean")
+    median_dist = np.median(pairwise_dists)
+    return median_dist
 
 def _sgd(
     x: np.array,
@@ -18,15 +27,16 @@ def _sgd(
     kernel: str,
     burn_in: int = 500,
     n_step: int = 1000,
-    stepsize: float = 1.0,
+    stepsize: float = 1,
     bandwidth: float = 1.0,
     epsilon: float = 1e-4,
 ) -> Tuple[float, float]:
     n = x.shape[0]
 
     if bandwidth == "median":
-        bandwidth = np.median(x)
+        bandwidth = _median_heuristic(x)
 
+    print("bandwidth", bandwidth)
     # NOTE: SGD.MMD.Gaussian assumes that par1 par2 are mean and var, but in
     # general these parameters might be different things. Do automatic_parameter
     # start setting in the fit function dependend on the model, make this as
@@ -37,25 +47,25 @@ def _sgd(
 
     norm_grad = epsilon
     res = {"par_start": np.copy(par), "stepsize": stepsize}
-    print(par)
     trajectory = np.zeros(shape=(par.shape[0], burn_in + n_step + 1))
     trajectory[:, 0] = par
 
     for i in range(burn_in):
-        # NOTE: shouldn't there be 2 x_sampled? I guess this is for computational sake
         x_sampled = model.sample_n(n=n)
-        ker_sampled_1 = (
-            K1d(x_sampled, x_sampled, kernel=kernel, bandwidth=bandwidth) - np.eye(n)
-        ).sum(axis=1) / (n - 1)
-        ker_sampled_2 = (
-            K1d(x_sampled, x, kernel=kernel, bandwidth=bandwidth)
-        ).sum(axis=0) / n
-        ker = (ker_sampled_1 - ker_sampled_2)[:, np.newaxis]
 
-        print(ker[:10])
-        grad = 2 * np.mean(
-            model.score(x_sampled) * ker, axis=0
-        )  # Expected outcome shape: (n, par.shape) -> (shape_par)
+        # TODO: DOES NOT WORK YET, BUT ALMOST!
+        ker_sampled_1 = (
+            K1d(x_sampled, x_sampled, kernel=kernel, bandwidth=bandwidth)
+        ) / (n - 1)
+        np.fill_diagonal(ker_sampled_1, 0)
+
+        ker_sampled_2 = (
+            K1d(x, x_sampled, kernel=kernel, bandwidth=bandwidth)
+        ) / n
+        ker = (ker_sampled_1 - ker_sampled_2)
+
+        grad_ll = model.score(x_sampled)
+        grad = 2 * np.mean(ker @ grad_ll, axis=0)  # Expected outcome shape: (n, par.shape) -> (shape_par)
         norm_grad += np.sum(np.square(grad))
         par -= stepsize * grad / np.sqrt(norm_grad)
         model.update(par1=par[0], par2=par[1])
@@ -68,16 +78,17 @@ def _sgd(
         x_sampled = model.sample_n(n=n)
 
         ker_sampled_1 = (
-            K1d(x_sampled, x_sampled, kernel=kernel, bandwidth=bandwidth) - np.eye(n)
-        ).sum(axis=1) / (n - 1)
-        ker_sampled_2 = (
-            K1d(x_sampled, x, kernel=kernel, bandwidth=bandwidth)
-        ).sum(axis=0) / n
-        ker = (ker_sampled_1 - ker_sampled_2)[:, np.newaxis]
+            K1d(x_sampled, x_sampled, kernel=kernel, bandwidth=bandwidth)
+        ) / (n - 1)
+        np.fill_diagonal(ker_sampled_1, 0)
 
-        grad = 2 * np.mean(
-            model.score(x_sampled) * ker, axis=0
-        )  # Expected outcome shape: (n, par.shape) -> (shape_par)
+        ker_sampled_2 = (
+            K1d(x, x_sampled, kernel=kernel, bandwidth=bandwidth)
+        ) / n
+        ker = (ker_sampled_1 - ker_sampled_2)
+
+        grad_ll = model.score(x_sampled)
+        grad = 2 * np.mean(ker @ grad_ll, axis=0)  # Expected outcome shape: (n, par.shape) -> (shape_par)
         norm_grad += np.sum(np.square(grad))
         par -= stepsize * grad / np.sqrt(norm_grad)
 
@@ -86,7 +97,7 @@ def _sgd(
         par_mean = (par_mean * (i + 1) + par) / (i + 2)
 
         model.update(par1=par_mean[0], par2=par_mean[1])
-        trajectory[:, i + burn_in + 1] = par
+        trajectory[:, i + burn_in + 1] = par_mean
 
     res["estimator"] = par_mean
     res["trajectory"] = trajectory

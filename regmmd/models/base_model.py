@@ -37,6 +37,18 @@ class StatisticalModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def _init_params(self, par1, par2) -> None:
+        """Update the model with new parameters
+
+        Parameters
+        ----------
+        par1 : float
+
+        par2: float
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     def update(self, par1, par2) -> None:
         """Update the model with new parameters
 
