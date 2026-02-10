@@ -24,12 +24,20 @@ class LinearGaussianBase(RegressionModel):
         noise_sampled = self.rng.normal(loc=0, scale=np.sqrt(self.phi), size=(n,))
         return mu_given_x + noise_sampled
 
-    def update(self, beta, phi):
-        self.beta = beta
-        self.phi = phi
+    def update(self, par):
+        self.beta = par[:-1]
+        self.phi = par[-1]
+
+    def predict(self, X):
+        """Outputs the mean given X, parameters need to be initialized for this"""
+        return X @ self.beta
+    
+    # TODO: write these
+
+    def _project_params(self, par1, par2):
+        pass
 
     def _init_params(self, beta, phi, par2, X, y):
-        # TODO: write this using standard linear regression
         pass
 
 
@@ -38,10 +46,11 @@ class LinearGaussian(LinearGaussianBase):
         super().__init__(beta=beta, phi=phi, random_state=random_state)
 
     def score(self, X, y):
+        """ gradient of the log-likelihood for each individual data point"""
         n = X.shape[0]
 
-        residuals = y - X @ self.beta
-        score_beta = np.sum(X * residuals, axis=0) / self.phi
-        score_phi = -n / (2 * self.phi) + np.sum(residuals**2) / (2 * (self.phi**2))
+        residuals = (y - X @ self.beta)[:, np.newaxis]
+        score_beta = X * residuals / self.phi
+        score_phi = -1 / (2 * self.phi) + residuals**2 / (2 * (self.phi**2))
 
-        return np.concat(score_beta, np.array(score_phi))
+        return np.hstack((score_beta, score_phi))

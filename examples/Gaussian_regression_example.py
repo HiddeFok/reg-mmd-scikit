@@ -18,12 +18,20 @@ def main():
     y = 1 + X @ beta + noise
 
     print("Initializing model")
-    model = LinearGaussian()
+    par1_init = np.array([0.5, 1.5, 2.5, 3.2])
+    par2_init = 2
+    model = LinearGaussian(
+        beta=par1_init,
+        phi=par2_init
+    )
 
     mmd_reg = MMDRegressor(
         model=model,
-        par_init=None,
-        kernel="Gaussian",
+        par1=par1_init,
+        par2=par2_init, 
+        bandwidth_X=0,
+        bandwidth_y=1,
+        kernel_y="Gaussian",
         solver={
             "type": "SGD",
             "burnin": 500,

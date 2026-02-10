@@ -3,7 +3,7 @@ from typing import Dict, Optional, Tuple
 import numpy as np
 from scipy.spatial.distance import pdist
 
-from regmmd.kernels import K1d
+from regmmd.kernels import K1d_dist, K1d
 from regmmd.models.base_model import EstimationModel
 
 # NOTE:
@@ -203,6 +203,7 @@ def _sgd_tilde_regression(
     # par will be assumed to be an array of size d + 1, where the last is
     # log(sigma^2) of the noise
     n = X.shape[0]
+    print(par.shape)
 
     if bandwidth == "median":
         bandwidth = _median_heuristic(X)
@@ -222,21 +223,25 @@ def _sgd_tilde_regression(
 
     for i in range(burn_in):
         mu_given_x = model.predict(X)
-        var_y = np.exp(par[-1])
-        y_sampled_1 = model.sample_n(n, mu_given_x, np.sqrt(var_y))
-        y_sampled_2 = model.sample_n(n, mu_given_x, np.sqrt(var_y))
+        y_sampled_1 = model.sample_n(n, mu_given_x)
+        y_sampled_2 = model.sample_n(n, mu_given_x)
+        if i == 0:
+            print(y_sampled_1[:10])
+            print(y_sampled_2[:10])
 
-        ker_sampled_1 = K1d(
+        ker_sampled_1 = K1d_dist(
             y_sampled_1 - y_sampled_2, kernel=kernel, bandwidth=bandwidth
         )
-        ker_sampled_2 = K1d(y_sampled_1, y, kernel=kernel, bandwidth=bandwidth)
+        ker_sampled_2 = K1d_dist(
+            y_sampled_1 - y, kernel=kernel, bandwidth=bandwidth
+        )
         ker = ker_sampled_1 - ker_sampled_2
 
-        grad_ll = model.score(X, y)
+        grad_ll = model.score(X, y_sampled_1)
         grad = 2 * np.mean(
             ker @ grad_ll, axis=0
         )  # Expected outcome shape: (n, par.shape) -> (shape_par)
-        # NOTE: why sum of gradients
+        # 
         grad_all += grad
         norm_grad += np.sum(np.square(grad))
 
@@ -245,21 +250,21 @@ def _sgd_tilde_regression(
 
     for i in range(n_step):
         mu_given_x = model.predict(X)
-        var_y = np.exp(par[-1])
-        y_sampled_1 = model.sample_n(n, mu_given_x, np.sqrt(var_y))
-        y_sampled_2 = model.sample_n(n, mu_given_x, np.sqrt(var_y))
+        y_sampled_1 = model.sample_n(n, mu_given_x)
+        y_sampled_2 = model.sample_n(n, mu_given_x)
 
-        ker_sampled_1 = K1d(
+        ker_sampled_1 = K1d_dist(
             y_sampled_1 - y_sampled_2, kernel=kernel, bandwidth=bandwidth
         )
-        ker_sampled_2 = K1d(y_sampled_1, y, kernel=kernel, bandwidth=bandwidth)
+        ker_sampled_2 = K1d_dist(
+            y_sampled_1 - y, kernel=kernel, bandwidth=bandwidth)
         ker = ker_sampled_1 - ker_sampled_2
 
-        grad_ll = model.score(X, y)
+        grad_ll = model.score(X, y_sampled_1)
         grad = 2 * np.mean(
             ker @ grad_ll, axis=0
         )  # Expected outcome shape: (n, par.shape) -> (shape_par)
-        # NOTE: why sum of gradients
+        # 
         grad_all += grad
         norm_grad += np.sum(np.square(grad))
 
@@ -273,10 +278,12 @@ def _sgd_tilde_regression(
             break
 
     # NOTE: in R there is a double transpose and scaling with standard deviation X
-    n_step_done = int(i)
-    trajectory = trajectory[:, : n_step_done + 1]
+    n_step_done = int(i + 1)
+    trajectory = trajectory[:, :n_step_done]
+    print("non mean final", trajectory[:, -1])
     trajectory = np.cumsum(trajectory, axis=1) / np.arange(1, n_step_done + 1)
     res["estimator"] = trajectory[:, -1]
     res["trajectory"] = trajectory
+
 
     return res
