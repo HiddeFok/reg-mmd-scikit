@@ -94,8 +94,8 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         self,
         model: RegressionModel,
         fit_intercept: bool = True,
-        par1: np.array = None,
-        par2: float = None,
+        par_v: np.array = None,
+        par_c: np.array = None,
         kernel_y: str = "Gaussian",
         kernel_X: str = "Laplace",
         bandwidth_y: Union[str, float] = "auto",
@@ -104,8 +104,8 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
     ):
         self.fit_intercept = fit_intercept
         self.model = model
-        self.par1 = par1
-        self.par2 = par2
+        self.par_v = par_v
+        self.par_c = par_c
         self.kernel_y = kernel_y
         self.kernel_X = kernel_X
         self.bandwidth_y = bandwidth_y
@@ -132,7 +132,8 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                 res = _sgd_tilde_regression(
                     X=X,
                     y=y,
-                    par=np.concat((self.par1, np.array([self.par2]))),
+                    par_v=self.par_v,
+                    par_c=self.par_c,
                     model=self.model,
                     kernel=self.kernel_y,
                     burn_in=self.solver["burnin"],
