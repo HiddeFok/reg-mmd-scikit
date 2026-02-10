@@ -28,10 +28,10 @@ class GaussianBase(EstimationModel):
 
         return self.rng.normal(loc=self.loc, scale=self.scale, size=(n,))
 
-    def _init_params(self, loc, scale, X):
-        if loc is None:
+    def _init_params(self, X):
+        if self.loc is None:
             self.loc = np.median(X)
-        if scale is None:
+        if self.scale is None:
             self.scale = (5 / 4) * np.median(abs(X - np.median(X)))
         return self._get_params()
     

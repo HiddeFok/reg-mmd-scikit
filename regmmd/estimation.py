@@ -31,9 +31,12 @@ class MMDEstimator(BaseEstimator):
         self.solver = solver
 
     def fit(self, X):
-        pars = self.model._init_params(self.par_v, self.par_c, X)
+        print(self.par_v)
+        pars = self.model._init_params(X)
         self.par_v = pars[0]
         self.par_c = pars[1]
+
+        print(self.par_v)
 
         if isinstance(self.model, GaussianLoc):
             res = _gd_gaussian_loc_exact_estimation(

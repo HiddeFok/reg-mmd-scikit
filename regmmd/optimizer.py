@@ -47,7 +47,6 @@ def _sgd_estimation(
     if bandwidth == "auto":
         bandwidth = _median_heuristic(X)
 
-    print("bandwidth", bandwidth)
     # NOTE: SGD.MMD.Gaussian assumes that par1 par2 are mean and var, but in
     # general these parameters might be different things. Do automatic_parameter
     # start setting in the fit function dependent on the model, make this as
@@ -61,6 +60,7 @@ def _sgd_estimation(
         "par_v_init": np.copy(par_v),
         "par_c_init": np.copy(par_c),
         "stepsize": stepsize,
+        "bandwidth": bandwidth
     }
     trajectory = np.zeros(shape=(par_v.shape[0], burn_in + n_step + 1))
     trajectory[:, 0] = par_v
@@ -141,6 +141,7 @@ def _gd_gaussian_loc_exact_estimation(
         "par_v_init": np.copy(par_v),
         "par_c_init": np.copy(par_c),
         "stepsize": stepsize,
+        "bandwidth": bandwidth
     }
 
     trajectory = np.zeros(shape=(burn_in + n_step + 1,))
@@ -223,6 +224,7 @@ def _sgd_tilde_regression(
         "par_v_init": np.copy(par_v),
         "par_c_init": np.copy(par_c),
         "stepsize": stepsize,
+        "bandwidth": bandwidth
     }
     trajectory = np.zeros(shape=(*par_v.shape, n_step + 1))
     trajectory[:, 0] = par_v

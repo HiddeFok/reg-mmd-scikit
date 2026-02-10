@@ -42,5 +42,7 @@ def print_summary(res: MMDResult) -> None:
 #     print(f"  Final gradient norm: {np.sqrt(np.sum(np.square(res['trajectory'][:, -1] - res['trajectory'][:, -2]))):.4f}")
 
     print("\n" + "="*50)
-    print("End of Report")
+    end_str = "End of Report"
+    side_margins = (50 - len(end_str)) // 2
+    print(" " * side_margins + end_str + " " * side_margins)
     print("="*50 + "\n")
