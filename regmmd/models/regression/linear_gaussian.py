@@ -31,7 +31,7 @@ class LinearGaussianBase(RegressionModel):
     def predict(self, X):
         """Outputs the mean given X, parameters need to be initialized for this"""
         return X @ self.beta
-    
+
     # TODO: write these
 
     def _project_params(self, par1, par2):
@@ -46,7 +46,7 @@ class LinearGaussian(LinearGaussianBase):
         super().__init__(beta=beta, phi=phi, random_state=random_state)
 
     def score(self, X, y):
-        """ gradient of the log-likelihood for each individual data point"""
+        """gradient of the log-likelihood for each individual data point"""
         n = X.shape[0]
 
         residuals = (y - X @ self.beta)[:, np.newaxis]

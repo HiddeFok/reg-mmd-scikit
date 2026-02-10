@@ -1,30 +1,28 @@
 import numpy as np
 
 from regmmd import MMDRegressor
-from regmmd.models import LinearGaussian
+from regmmd.models import Logistic
 
 
 def main():
     n = 1000
     p = 4
     beta = np.arange(1, 5)
-    phi = 1
 
     rng = np.random.default_rng(seed=123)
     print("Sampling X points..")
     X = rng.normal(loc=0, scale=1, size=(n, p))
-    noise = rng.normal(0, phi, size=(n,))
-    y = 1 + X @ beta + noise
+    p = 1 / (1 + np.exp(- X @ beta))
+    y = rng.binomial(1, p, size=(n,))
 
     print("Initializing model")
     par1_init = np.array([0.5, 1.5, 2.5, 3.2])
-    par2_init = 2
-    model = LinearGaussian(beta=par1_init, phi=par2_init)
+    model = Logistic(
+        beta=par1_init,
+    )
 
     mmd_reg = MMDRegressor(
         model=model,
-        par1=par1_init,
-        par2=par2_init,
         bandwidth_X=0,
         bandwidth_y=1,
         kernel_y="Gaussian",

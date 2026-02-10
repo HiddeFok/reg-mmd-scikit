@@ -5,19 +5,15 @@ import numpy as np
 from sklearn.base import BaseEstimator, RegressorMixin
 
 from regmmd.models.base_model import RegressionModel
-from regmmd.optimizer import (
-    _sgd_tilde_regression,
-    _sgd_hat_regression
-)
+from regmmd.optimizer import _sgd_tilde_regression, _sgd_hat_regression
 
-from regmmd.models.linear_gaussian import LinearGaussian
+from regmmd.models import LinearGaussian
 
 from sklearn.linear_model import LinearRegression
 
 
-__REGRESSION_MODEL_LIST__ = {
-    "linear-gaussian": LinearGaussian
-}
+__REGRESSION_MODEL_LIST__ = {"linear-gaussian": LinearGaussian}
+
 
 def _preprocess_data(
     X,
@@ -81,8 +77,6 @@ def _preprocess_data(
     return X, y, X_offset, y_offset, X_scale
 
 
-
-
 class MMDRegressor(RegressorMixin, BaseEstimator):
     """Regression using the MMD criterion.
 
@@ -107,7 +101,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         bandwidth_y: Union[str, float] = "auto",
         bandwidth_X: Union[str, float] = "auto",
         solver: Optional[Dict] = None,
-    ):  
+    ):
         self.fit_intercept = fit_intercept
         self.model = model
         self.par1 = par1
@@ -133,17 +127,16 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         # self.par2 = np.mean((y_pred - y) ** 2)
         # print(self.par2)
 
-
-        if self.bandwidth_X ==  0:
+        if self.bandwidth_X == 0:
             if self.solver["type"] == "SGD":
                 res = _sgd_tilde_regression(
                     X=X,
-                    y=y, 
+                    y=y,
                     par=np.concat((self.par1, np.array([self.par2]))),
                     model=self.model,
                     kernel=self.kernel_y,
                     burn_in=self.solver["burnin"],
-                    n_step=self.solver["n_step"], 
+                    n_step=self.solver["n_step"],
                     stepsize=self.solver["stepsize"],
                     bandwidth=self.bandwidth_y,
                 )

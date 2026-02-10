@@ -19,6 +19,7 @@ dependencies = [
     "ruff>=0.14.10",
     "sphinx>=9.0.4",
     "scikit-learn>=1.8.0",
+    "pytest>=9.0.2",
 ]
 
 [tool.setuptools]

@@ -37,45 +37,55 @@ class EstimationModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _init_params(self, par1, par2) -> None:
+    def _init_params(self, par_v, par_c) -> None:
         """Update the model with new parameters
 
         Parameters
         ----------
-        par1 : float
+        par_v : float, variable parameters
 
-        par2: float
+        par_c: float, constant parameters
         """
         raise NotImplementedError
 
     @abstractmethod
-    def _project_params(self, par1, par2) -> np.array:
-        """Projection of potentially infeasible parameters to
-        the feasible set
+    def _project_params(self, par_v) -> np.array:
+        """Projection of potentially infeasible variable parameters to the
+        feasible set
 
         Parameters
         ----------
-        par1 : float
-
-        par2: float
+        par_v : float, variable parameters
         """
         # TODO: Write this in the models
         pass
 
     @abstractmethod
-    def update(self, par1, par2) -> None:
+    def update(self, par_v) -> None:
         """Update the model with new parameters
 
         Parameters
         ----------
-        par1 : float
-
-        par2: float
+        par_v : float, variable parameters
         """
         raise NotImplementedError
 
 
 class RegressionModel(EstimationModel):
+    @abstractmethod
+    def sample_n(self, n: int, mu_given_x: np.array) -> np.array:
+        """Generate n samples of the distribution with the initialized
+        parameters of the distribution and the conditional mean
+        of the covariates
+
+        Parameters
+        ----------
+        n : int, How many samples to generate
+
+        mu_given_x: np.array, the covariates
+        """
+        raise NotImplementedError
+
     @abstractmethod
     def predict(self, X: np.array) -> np.array:
         """Computes the mean of Y given X and the current parameters of the model

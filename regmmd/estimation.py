@@ -17,29 +17,29 @@ class MMDEstimator(BaseEstimator):
     def __init__(
         self,
         model: EstimationModel,
-        par1: float = None,
-        par2: float = None,
+        par_v: float = None,
+        par_c: float = None,
         kernel: str = "gaussian",
-        bandwidth: str = "median",
+        bandwidth: str = "auto",
         solver: Optional[Dict] = None,
     ):
         self.model = model
-        self.par1 = par1
-        self.par2 = par2
+        self.par_v = par_v
+        self.par_c = par_c
         self.kernel = kernel
         self.bandwidth = bandwidth
         self.solver = solver
 
     def fit(self, X):
-        pars = self.model._init_params(self.par1, self.par2, X)
-        self.par1 = pars[0]
-        self.par2 = pars[1]
+        pars = self.model._init_params(self.par_v, self.par_c, X)
+        self.par_v = pars[0]
+        self.par_c = pars[1]
 
         if isinstance(self.model, GaussianLoc):
             res = _gd_gaussian_loc_exact_estimation(
-                x=X,
-                par_1=self.par1,
-                par_2=self.par2,
+                X=X,
+                par_v=self.par_v,
+                par_c=self.par_c,
                 burn_in=self.solver["burnin"],
                 n_step=self.solver["n_step"],
                 stepsize=self.solver["stepsize"],
@@ -48,8 +48,9 @@ class MMDEstimator(BaseEstimator):
             )
         else:
             res = _sgd_estimation(
-                x=X,
-                par=np.array([self.par1, self.par2]),
+                X=X,
+                par_v=self.par_v,
+                par_c=self.par_c,
                 model=self.model,
                 kernel=self.kernel,
                 burn_in=self.solver["burnin"],
