@@ -24,35 +24,34 @@ class LogisticBase(RegressionModel):
         y_sampled = self.rng.binomial(1, mu_given_x, size=(n,))
         return y_sampled
 
-    def update(self, par):
-        self.beta = par
-
     def predict(self, X):
         """Outputs the mean given X, parameters need to be initialized for this"""
-        return X @ self.beta
+        return self._link_func(X @ self.beta)
 
     def _link_func(self, mu):
         return 1 / (1 + np.exp(-mu))
 
     # TODO: write these
 
-    def _project_params(self, par1, par2):
+    def _project_params(self, par_v):
         pass
 
-    def _init_params(self, beta, phi, par2, X, y):
+    def _init_params(self, X, y):
         pass
 
 
 class Logistic(LogisticBase):
-    def __init__(self, beta=None, phi=None, random_state=None):
-        super().__init__(beta=beta, phi=phi, random_state=random_state)
+    def __init__(self, par_v=None, par_c=None, random_state=None):
+        super().__init__(beta=par_v, random_state=random_state)
 
     def score(self, X, y):
         """gradient of the log-likelihood for each individual data point"""
-        mu = self.predict(X)
-        p = self._link_func(mu)
+        p = self.predict(X)
 
         residuals = (y - p)[:, np.newaxis]
         score_beta = X * residuals
 
         return score_beta
+
+    def update(self, par_v):
+        self.beta = par_v

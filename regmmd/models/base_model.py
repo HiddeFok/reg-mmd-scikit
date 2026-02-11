@@ -37,14 +37,11 @@ class EstimationModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _init_params(self, par_v, par_c) -> None:
+    def _init_params(self, X) -> None:
         """Update the model with new parameters
 
         Parameters
         ----------
-        par_v : float, variable parameters
-
-        par_c: float, constant parameters
         """
         raise NotImplementedError
 
@@ -93,5 +90,14 @@ class RegressionModel(EstimationModel):
         Parameters
         ----------
         X : np.array
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def _init_params(self, X, y) -> None:
+        """Update the model with new parameters
+
+        Parameters
+        ----------
         """
         raise NotImplementedError

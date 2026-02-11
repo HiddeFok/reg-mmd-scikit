@@ -7,7 +7,7 @@ from sklearn.base import BaseEstimator, RegressorMixin
 from regmmd.models.base_model import RegressionModel
 from regmmd.optimizer import _sgd_tilde_regression, _sgd_hat_regression
 
-from regmmd.models import LinearGaussian
+from regmmd.models import LinearGaussian, Logistic
 
 from sklearn.linear_model import LinearRegression
 
@@ -113,11 +113,12 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         self.solver = solver
 
     def fit(self, X, y):
-        X, y, X_offset, y_offset, X_scale = _preprocess_data(
-            X,
-            y,
-            fit_intercept=self.fit_intercept,
-        )
+        if not isinstance(self.model, Logistic):
+            X, y, X_offset, y_offset, X_scale = _preprocess_data(
+                X,
+                y,
+                fit_intercept=self.fit_intercept,
+            )
         # # TODO: write rescaling parts
         # lr = LinearRegression(fit_intercept=False)
         # lr.fit(X, y)

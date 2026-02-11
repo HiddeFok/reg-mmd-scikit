@@ -30,10 +30,10 @@ class LinearGaussianBase(RegressionModel):
 
     # TODO: write these
 
-    def _project_params(self, par1, par2):
+    def _project_params(self, par_v):
         pass
 
-    def _init_params(self, beta, phi, X, y):
+    def _init_params(self, X, y):
         pass
 
 
@@ -43,8 +43,9 @@ class LinearGaussian(LinearGaussianBase):
 
     def score(self, X, y):
         """gradient of the log-likelihood for each individual data point"""
+        mu = self.predict(X)
 
-        residuals = (y - X @ self.beta)[:, np.newaxis]
+        residuals = (y - mu)[:, np.newaxis]
         score_beta = X * residuals / self.phi
         score_phi = -1 / (2 * self.phi) + residuals**2 / (2 * (self.phi**2))
 

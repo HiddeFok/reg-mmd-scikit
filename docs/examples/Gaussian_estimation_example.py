@@ -47,8 +47,8 @@ def main():
         kernel="Gaussian",
         solver={
             "type": "SGD",
-            "burnin": 5000,
-            "n_step": 10000,
+            "burnin": 500,
+            "n_step": 1000,
             "stepsize": 1,
             "epsilon": 1e-4,
         },
