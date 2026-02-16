@@ -5,7 +5,7 @@ from sklearn.base import BaseEstimator, RegressorMixin
 
 from regmmd.models import LinearGaussian, Logistic
 from regmmd.models.base_model import RegressionModel
-from regmmd.optimizer import _sgd_tilde_regression
+from regmmd.optimizer import _sgd_tilde_regression, _sgd_hat_regression
 
 __REGRESSION_MODEL_LIST__ = {"linear-gaussian": LinearGaussian}
 
@@ -138,7 +138,21 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                     bandwidth=self.bandwidth_y,
                 )
         else:
-            res = _sgd_tilde_regression()
+            if self.solver["type"] == "SGD":
+                res = _sgd_hat_regression(
+                    X=X,
+                    y=y,
+                    par_v=self.par_v,
+                    par_c=self.par_c,
+                    model=self.model,
+                    kernel_y=self.kernel_y,
+                    kernel_x=self.kernel_x,
+                    burn_in=self.solver["burnin"],
+                    n_step=self.solver["n_step"],
+                    stepsize=self.solver["stepsize"],
+                    bandwidth_y=self.bandwidth_y,
+                    bandwidth_x=self.bandwidth_x,
+                )
         return res
 
     def predict(self, X):

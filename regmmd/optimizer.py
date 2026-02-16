@@ -1,10 +1,10 @@
-from typing import Optional, TypedDict
+from typing import Optional, TypedDict, Union
 
 import numpy as np
 from scipy.spatial.distance import pdist
 
 from regmmd.kernels import K1d, K1d_dist
-from regmmd.models.base_model import EstimationModel
+from regmmd.models.base_model import EstimationModel, RegressionModel
 
 # NOTE:
 #   - The R implementation GD.MMD.loc also assumes the gaussian kernel and is
@@ -180,15 +180,174 @@ def _sgd_hat_regression(
     y: np.array,
     par_v: np.array,
     par_c: np.array,
-    model: EstimationModel,
-    kernel: str,
+    model: RegressionModel,
+    kernel_y: str,
+    kernel_x: str = "Laplace",
     burn_in: int = 500,
     n_step: int = 1000,
     stepsize: float = 1,
-    bandwidth: float = 1.0,
+    bandwidth_y: Union[float, str] = "auto",
+    bandwidth_x: Union[float, str] = "auto",
     epsilon: float = 1e-4,
+    eps_sq: float = 1e-5,
+    rng: np.random.Generator = np.random.default_rng(10)
 ) -> MMDResult:
-    pass
+    n = X.shape[0]
+
+    if bandwidth_x == "auto":
+        bandwidth_x = _median_heuristic(X)
+
+    if bandwidth_y == "auto":
+        bandwidth_y = _median_heuristic(y)
+
+    norm_grad = epsilon
+    res = {
+        "par_v_init": np.copy(par_v),
+        "par_c_init": np.copy(par_c),
+        "stepsize": stepsize,
+        "bandwidth_y": bandwidth_y,
+        "bandwidth_x": bandwidth_x,
+    }
+    trajectory = np.zeros(shape=(*par_v.shape, n_step + 1))
+    trajectory[:, 0] = par_v
+    grad_all = np.zeros(shape=par_v.shape)
+    log_eps = np.log(eps_sq)
+
+    # TODO: change to arguments
+    ALPHA = 0.8
+    C_DET = 0.2
+    C_RAND = 0.1
+
+    # Precomputation stat 
+    sorted_obs = sort_obs(X)
+    K_X = K1d_dist(sort_obs["DIST"], kernel=kernel_x, bandwidth=bandwidth_x)
+    M_det = np.floor(n * C_DET)
+    M_rand = np.floor(n * C_RAND)
+    l_KX = K_X.shape[0]
+    if n + M_det + M_rand > l_KX:
+        M_det = l_KX - n - 2
+        M_rand = 2
+
+    cons = ((n - 1) * n - 2 * M_det) / M_rand
+
+    for i in range(burn_in):
+        mu_given_x = model.predict(X)
+        y_sampled_1 = model.sample_n(n, mu_given_x)
+        y_sampled_2 = model.sample_n(n, mu_given_x)
+
+        ker_sampled_1 = K1d_dist(
+            y_sampled_1 - y_sampled_2, kernel=kernel_y, bandwidth=bandwidth_y
+        )
+        ker_sampled_2 = K1d_dist(y_sampled_1 - y, kernel=kernel_y, bandwidth=bandwidth_y)
+        ker = ker_sampled_1 - ker_sampled_2
+
+        grad_ll_p1 = model.score(X, y_sampled_1)
+        grad_p1 = np.mean(ker @ grad_ll_p1, axis=0)
+        # Expected outcome shape: (n, par.shape) -> (shape_par)
+
+        set_1 = sorted_obs["IND"][n:(n + M_det + 1), 0]
+        set_2 = sorted_obs["IND"][n:(n + M_det + 1), 1]
+        ker_sampled_1 = K1d_dist(
+            y_sampled_1[set_1] - y_sampled_2[set_2], kernel=kernel_y, bandwidth=bandwidth_y
+        )
+        ker_sampled_2 = K1d_dist(y_sampled_1[set_1] - y[set_2], kernel=kernel_y, bandwidth=bandwidth_y)
+        ker = ker_sampled_1 - ker_sampled_2
+        ker = K_X[n:(n + M_det + 1)] * ker
+
+        grad_ll_p2 = model.score(X[set_1, :])
+        grad_p2 = np.mean(ker @ grad_ll_p2, axis=0)
+        
+        use_X = rng.choice(
+            np.arange(n + M_det, l_KX + 1), 
+            size=M_rand,
+            replace=False
+        )
+        set_1 = sort_obs["IND"][use_X, 0]
+        set_2 = sort_obs["IND"][use_X, 1]
+        ker_sampled_1 = K1d_dist(
+            y_sampled_1[set_1] - y_sampled_2[set_2], kernel=kernel_y, bandwidth=bandwidth_y
+        )
+        ker_sampled_2 = K1d_dist(y_sampled_1[set_1] - y[set_2], kernel=kernel_y, bandwidth=bandwidth_y)
+        ker = ker_sampled_1 - ker_sampled_2
+        ker = K_X[use_X] * ker
+
+        grad_ll_p3 = model.score(X[set_1, :])
+        grad_p3 = np.mean(ker @ grad_ll_p3, axis=0)
+        
+        grad = grad_p1 + 2 * grad_p2 + cons * grad_p3
+        
+        grad_all += grad
+        norm_grad += np.sum(np.square(grad))
+
+        par_v -= stepsize * grad / np.sqrt(norm_grad)
+        model.update(par_v=par_v)
+
+    for i in range(n_step):
+        mu_given_x = model.predict(X)
+        y_sampled_1 = model.sample_n(n, mu_given_x)
+        y_sampled_2 = model.sample_n(n, mu_given_x)
+
+        ker_sampled_1 = K1d_dist(
+            y_sampled_1 - y_sampled_2, kernel=kernel_y, bandwidth=bandwidth_y
+        )
+        ker_sampled_2 = K1d_dist(y_sampled_1 - y, kernel=kernel_y, bandwidth=bandwidth_y)
+        ker = ker_sampled_1 - ker_sampled_2
+
+        grad_ll_p1 = model.score(X, y_sampled_1)
+        grad_p1 = np.mean(ker @ grad_ll_p1, axis=0)
+        # Expected outcome shape: (n, par.shape) -> (shape_par)
+
+        set_1 = sorted_obs["IND"][n:(n + M_det + 1), 0]
+        set_2 = sorted_obs["IND"][n:(n + M_det + 1), 1]
+        ker_sampled_1 = K1d_dist(
+            y_sampled_1[set_1] - y_sampled_2[set_2], kernel=kernel_y, bandwidth=bandwidth_y
+        )
+        ker_sampled_2 = K1d_dist(y_sampled_1[set_1] - y[set_2], kernel=kernel_y, bandwidth=bandwidth_y)
+        ker = ker_sampled_1 - ker_sampled_2
+        ker = K_X[n:(n + M_det + 1)] * ker
+
+        grad_ll_p2 = model.score(X[set_1, :])
+        grad_p2 = np.mean(ker @ grad_ll_p2, axis=0)
+        
+        use_X = rng.choice(
+            np.arange(n + M_det, l_KX + 1), 
+            size=M_rand,
+            replace=False
+        )
+        set_1 = sort_obs["IND"][use_X, 0]
+        set_2 = sort_obs["IND"][use_X, 1]
+        ker_sampled_1 = K1d_dist(
+            y_sampled_1[set_1] - y_sampled_2[set_2], kernel=kernel_y, bandwidth=bandwidth_y
+        )
+        ker_sampled_2 = K1d_dist(y_sampled_1[set_1] - y[set_2], kernel=kernel_y, bandwidth=bandwidth_y)
+        ker = ker_sampled_1 - ker_sampled_2
+        ker = K_X[use_X] * ker
+
+        grad_ll_p3 = model.score(X[set_1, :])
+        grad_p3 = np.mean(ker @ grad_ll_p3, axis=0)
+        
+        grad = grad_p1 + 2 * grad_p2 + cons * grad_p3
+        
+        grad_all += grad
+        norm_grad += np.sum(np.square(grad))
+
+        par_v -= stepsize * grad / np.sqrt(norm_grad)
+        model.update(par_v=par_v)
+        # only for gaussian par[1] = max(par[1], 1 / (n ** 2))
+        trajectory[:, i + 1] = par_v
+
+        g_1 = np.sqrt(np.sum(np.square(grad_all / (burn_in + i + 1)))) / par_v.shape
+        if np.log(g_1) < log_eps:
+            break
+
+    # NOTE: in R there is a double transpose and scaling with standard deviation X
+    n_step_done = int(i + 1)
+    trajectory = trajectory[:, :n_step_done]
+    trajectory = np.cumsum(trajectory, axis=1) / np.arange(1, n_step_done + 1)
+    res["estimator"] = trajectory[:, -1]
+    res["trajectory"] = trajectory
+
+    return res
 
 
 def _sgd_tilde_regression(
@@ -196,7 +355,7 @@ def _sgd_tilde_regression(
     y: np.array,
     par_v: np.array,
     par_c: np.array,
-    model: EstimationModel,
+    model: RegressionModel,
     kernel: str,
     burn_in: int = 500,
     n_step: int = 1000,
@@ -205,14 +364,11 @@ def _sgd_tilde_regression(
     epsilon: float = 1e-4,
     eps_sq: float = 1e-5,
 ) -> MMDResult:
-    # par will be assumed to be an array of size d + 1, where the last is
-    # log(sigma^2) of the noise
     n = X.shape[0]
 
     if bandwidth == "auto":
         bandwidth = _median_heuristic(X)
 
-    print("bandwidth", bandwidth)
     # NOTE: SGD.MMD.Gaussian assumes that par1 par2 are mean and var, but in
     # general these parameters might be different things. Do automatic_parameter
     # start setting in the fit function dependent on the model, make this as
@@ -286,3 +442,15 @@ def _sgd_tilde_regression(
     res["trajectory"] = trajectory
 
     return res
+
+
+def sort_obs(X: np.array) -> np.array:
+    n, d = X.shape
+    m = n * (n + 1) / 2
+    dists = pdist(X, metric="euclidean")
+    indices = np.triu_indices(n, k=1)
+    indices = np.column_stack(indices)
+    J = np.argsort(dists, axis=0)
+
+    return {"DIST": dists[J], "IND": indices[J, :]}
+
