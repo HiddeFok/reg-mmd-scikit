@@ -14,7 +14,7 @@ def main():
 
     print("Sampling X points..")
     X = rng.normal(loc=0, scale=1, size=(n, p_param))
-    p = 1 / (1 + np.exp(- X @ beta))
+    p = 1 / (1 + np.exp(-X @ beta))
     y = rng.binomial(1, p, size=(n,))
 
     print("Initializing model")
@@ -47,4 +47,5 @@ if __name__ == "__main__":
     main()
     # cProfile.run("main()", "profile_stats")
     # stats = pstats.Stats("profile_stats")
-    # stats.sort_stats(pstats.SortKey.TIME).print_stats(10)  # Show top 10 time-consuming functions
+    # stats.sort_stats(pstats.SortKey.TIME).print_stats(10)  
+    # Show top 10 time-consuming functions

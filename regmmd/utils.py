@@ -1,17 +1,19 @@
 from regmmd.optimizer import MMDResult
 
+
 def print_summary(res: MMDResult) -> None:
     """
-    Prints a pretty summary report from the result dictionary of the estimation procedure.
+    Prints a pretty summary report from the result dictionary of 
+    the estimation procedure.
 
     Args:
-        res (Dict): Result dictionary 
+        res (Dict): Result dictionary
     """
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     title_str = "MMD Result Summary Report"
     side_margins = (50 - len(title_str)) // 2
-    print(side_margins*" " + title_str + side_margins*"")
-    print("="*50 + "\n")
+    print(side_margins * " " + title_str + side_margins * "")
+    print("=" * 50 + "\n")
 
     # Initial parameters
     print("Initial Parameters:")
@@ -28,21 +30,21 @@ def print_summary(res: MMDResult) -> None:
 
     # Trajectory summary
     print("Trajectory Summary:")
-    if len(res['trajectory'].shape) == 1:
+    if len(res["trajectory"].shape) == 1:
         print(f"\tNumber of steps: {res['trajectory'].shape[0]}")
         print(f"\tFinal trajectory values: {res['trajectory'][-1]:.4f}")
     else:
         print(f"\tNumber of steps: {res['trajectory'].shape[1]}")
-        par_str = [f"{val:.4f}" for val in res['trajectory'][:, -1]]
+        par_str = [f"{val:.4f}" for val in res["trajectory"][:, -1]]
         par_str = "[ " + ", ".join(par_str) + " ]"
-        print(f"\tFinal trajectory values: " + par_str)
+        print("\tFinal trajectory values: " + par_str)
 
-#     # Gradient norm summary
-#     print("\nGradient Norm Summary:")
-#     print(f"  Final gradient norm: {np.sqrt(np.sum(np.square(res['trajectory'][:, -1] - res['trajectory'][:, -2]))):.4f}")
+    #     # Gradient norm summary
+    #     print("\nGradient Norm Summary:")
+    #     print(f"  Final gradient norm: {np.sqrt(np.sum(np.square(res['trajectory'][:, -1] - res['trajectory'][:, -2]))):.4f}")
 
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     end_str = "End of Report"
     side_margins = (50 - len(end_str)) // 2
     print(" " * side_margins + end_str + " " * side_margins)
-    print("="*50 + "\n")
+    print("=" * 50 + "\n")

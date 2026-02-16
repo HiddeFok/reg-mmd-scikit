@@ -12,7 +12,6 @@ class LogisticBase(RegressionModel):
 
     def log_prob(self, X, y):
         # TODO: write validation checks
-        n = X.shape[0]
 
         mu = X @ self.beta
         p = self._link_func(mu)

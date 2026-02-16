@@ -34,7 +34,7 @@ class GaussianBase(EstimationModel):
         if self.scale is None:
             self.scale = (5 / 4) * np.median(abs(X - np.median(X)))
         return self._get_params()
-    
+
     def _project_params(self, par_v, par_c):
         pass
 
@@ -50,7 +50,7 @@ class GaussianLoc(GaussianBase):
             )
 
         return (x - self.loc) / (self.scale**2)
-    
+
     def update(self, par_v):
         self.loc = par_v
 

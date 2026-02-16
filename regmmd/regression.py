@@ -1,16 +1,11 @@
 from typing import Dict, Optional, Union
 
 import numpy as np
-
 from sklearn.base import BaseEstimator, RegressorMixin
 
-from regmmd.models.base_model import RegressionModel
-from regmmd.optimizer import _sgd_tilde_regression, _sgd_hat_regression
-
 from regmmd.models import LinearGaussian, Logistic
-
-from sklearn.linear_model import LinearRegression
-
+from regmmd.models.base_model import RegressionModel
+from regmmd.optimizer import _sgd_tilde_regression
 
 __REGRESSION_MODEL_LIST__ = {"linear-gaussian": LinearGaussian}
 
@@ -23,8 +18,8 @@ def _preprocess_data(
     copy_y=True,
     check_input=True,
 ):
-    """Common data preprocessing for fitting linear model, adapted to a condensed version
-    from sklearn.linear_models.base
+    """Common data preprocessing for fitting linear model, adapted 
+    to a condensed version from sklearn.linear_models.base
 
     - If `check_input=True`, perform standard input validation of `X`, `y`.
     - Perform copies if requested to avoid side-effects in case of inplace

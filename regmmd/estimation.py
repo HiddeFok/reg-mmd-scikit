@@ -1,6 +1,5 @@
 from typing import Dict, Optional
 
-import numpy as np
 from sklearn.base import BaseEstimator
 
 from regmmd.models import GaussianLoc

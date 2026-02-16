@@ -19,7 +19,7 @@ def main():
 
     print("Initializing model")
     beta_init = [0.5, 1.5, 2.5, 3.2]
-    phi_init = [2.]
+    phi_init = [2.0]
     par_v_init = np.array(beta_init + phi_init)
     par_c_init = None
     model = LinearGaussian(par_v=par_v_init, par_c=par_c_init)
@@ -50,4 +50,5 @@ if __name__ == "__main__":
     main()
     # cProfile.run("main()", "profile_stats")
     # stats = pstats.Stats("profile_stats")
-    # stats.sort_stats(pstats.SortKey.TIME).print_stats(10)  # Show top 10 time-consuming functions
+    # stats.sort_stats(pstats.SortKey.TIME).print_stats(10)  
+    # Show top 10 time-consuming functions

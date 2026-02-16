@@ -1,9 +1,9 @@
-from typing import Dict, Optional, Tuple, TypedDict
+from typing import Optional, TypedDict
 
 import numpy as np
 from scipy.spatial.distance import pdist
 
-from regmmd.kernels import K1d_dist, K1d
+from regmmd.kernels import K1d, K1d_dist
 from regmmd.models.base_model import EstimationModel
 
 # NOTE:
@@ -60,7 +60,7 @@ def _sgd_estimation(
         "par_v_init": np.copy(par_v),
         "par_c_init": np.copy(par_c),
         "stepsize": stepsize,
-        "bandwidth": bandwidth
+        "bandwidth": bandwidth,
     }
     trajectory = np.zeros(shape=(par_v.shape[0], burn_in + n_step + 1))
     trajectory[:, 0] = par_v
@@ -128,7 +128,6 @@ def _gd_gaussian_loc_exact_estimation(
     bandwidth: float = 1.0,
     epsilon: float = 1e-4,
 ) -> MMDResult:
-
     if bandwidth == "auto":
         bandwidth = _median_heuristic(X)
 
@@ -141,7 +140,7 @@ def _gd_gaussian_loc_exact_estimation(
         "par_v_init": np.copy(par_v),
         "par_c_init": np.copy(par_c),
         "stepsize": stepsize,
-        "bandwidth": bandwidth
+        "bandwidth": bandwidth,
     }
 
     trajectory = np.zeros(shape=(burn_in + n_step + 1,))
@@ -224,7 +223,7 @@ def _sgd_tilde_regression(
         "par_v_init": np.copy(par_v),
         "par_c_init": np.copy(par_c),
         "stepsize": stepsize,
-        "bandwidth": bandwidth
+        "bandwidth": bandwidth,
     }
     trajectory = np.zeros(shape=(*par_v.shape, n_step + 1))
     trajectory[:, 0] = par_v
@@ -243,7 +242,7 @@ def _sgd_tilde_regression(
         ker = ker_sampled_1 - ker_sampled_2
 
         grad_ll = model.score(X, y_sampled_1)
-        grad = 2 * np.mean(ker @ grad_ll, axis=0)  
+        grad = 2 * np.mean(ker @ grad_ll, axis=0)
         # Expected outcome shape: (n, par.shape) -> (shape_par)
 
         grad_all += grad
@@ -264,7 +263,7 @@ def _sgd_tilde_regression(
         ker = ker_sampled_1 - ker_sampled_2
 
         grad_ll = model.score(X, y_sampled_1)
-        grad = 2 * np.mean(ker @ grad_ll, axis=0)  
+        grad = 2 * np.mean(ker @ grad_ll, axis=0)
         # Expected outcome shape: (n, par.shape) -> (shape_par)
 
         grad_all += grad
