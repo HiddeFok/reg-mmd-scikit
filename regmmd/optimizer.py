@@ -235,27 +235,33 @@ def _sgd_hat_regression(
         y_sampled_1 = model.sample_n(n, mu_given_x)
         y_sampled_2 = model.sample_n(n, mu_given_x)
 
-        ker_sampled_1 = K1d_dist(
-            y_sampled_1 - y_sampled_2, kernel=kernel_y, bandwidth=bandwidth_y
+        grad_p1 = _get_grad_estimate(
+            set_1=None, set_2=None,
+            X=X, 
+            K_X=None,
+            y_sampled_1=y_sampled_1,
+            y_sampled_2=y_sampled_2,
+            y=y,
+            model=model,
+            kernel_y=kernel_y,
+            bandwidth_y=bandwidth_y
         )
-        ker_sampled_2 = K1d_dist(y_sampled_1 - y, kernel=kernel_y, bandwidth=bandwidth_y)
-        ker = ker_sampled_1 - ker_sampled_2
-
-        grad_ll_p1 = model.score(X, y_sampled_1)
-        grad_p1 = np.mean(ker @ grad_ll_p1, axis=0)
         # Expected outcome shape: (n, par.shape) -> (shape_par)
 
         set_1 = sorted_obs["IND"][n:(n + M_det + 1), 0]
         set_2 = sorted_obs["IND"][n:(n + M_det + 1), 1]
-        ker_sampled_1 = K1d_dist(
-            y_sampled_1[set_1] - y_sampled_2[set_2], kernel=kernel_y, bandwidth=bandwidth_y
+        grad_p2 = _get_grad_estimate(
+            set_1=set_1, 
+            set_2=set_2,
+            X=X, 
+            K_X=K_X[n:n + M_det + 1],
+            y_sampled_1=y_sampled_1,
+            y_sampled_2=y_sampled_2,
+            y=y,
+            model=model,
+            kernel_y=kernel_y,
+            bandwidth_y=bandwidth_y
         )
-        ker_sampled_2 = K1d_dist(y_sampled_1[set_1] - y[set_2], kernel=kernel_y, bandwidth=bandwidth_y)
-        ker = ker_sampled_1 - ker_sampled_2
-        ker = K_X[n:(n + M_det + 1)] * ker
-
-        grad_ll_p2 = model.score(X[set_1, :])
-        grad_p2 = np.mean(ker @ grad_ll_p2, axis=0)
         
         use_X = rng.choice(
             np.arange(n + M_det, l_KX + 1), 
@@ -264,17 +270,22 @@ def _sgd_hat_regression(
         )
         set_1 = sort_obs["IND"][use_X, 0]
         set_2 = sort_obs["IND"][use_X, 1]
-        ker_sampled_1 = K1d_dist(
-            y_sampled_1[set_1] - y_sampled_2[set_2], kernel=kernel_y, bandwidth=bandwidth_y
+        grad_p3 = _get_grad_estimate(
+            set_1=set_1, 
+            set_2=set_2,
+            X=X, 
+            K_X=K_X[use_X],
+            y_sampled_1=y_sampled_1,
+            y_sampled_2=y_sampled_2,
+            y=y,
+            model=model,
+            kernel_y=kernel_y,
+            bandwidth_y=bandwidth_y
         )
-        ker_sampled_2 = K1d_dist(y_sampled_1[set_1] - y[set_2], kernel=kernel_y, bandwidth=bandwidth_y)
-        ker = ker_sampled_1 - ker_sampled_2
-        ker = K_X[use_X] * ker
-
-        grad_ll_p3 = model.score(X[set_1, :])
-        grad_p3 = np.mean(ker @ grad_ll_p3, axis=0)
         
-        grad = grad_p1 + 2 * grad_p2 + cons * grad_p3
+        grad = (grad_p1.sum(axis=0) + \
+            2 * grad_p2.sum(axis=0) + \
+            cons * grad_p3.sum(axis=0)) / n
         
         grad_all += grad
         norm_grad += np.sum(np.square(grad))
@@ -287,27 +298,33 @@ def _sgd_hat_regression(
         y_sampled_1 = model.sample_n(n, mu_given_x)
         y_sampled_2 = model.sample_n(n, mu_given_x)
 
-        ker_sampled_1 = K1d_dist(
-            y_sampled_1 - y_sampled_2, kernel=kernel_y, bandwidth=bandwidth_y
+        grad_p1 = _get_grad_estimate(
+            set_1=None, set_2=None,
+            X=X, 
+            K_X=None,
+            y_sampled_1=y_sampled_1,
+            y_sampled_2=y_sampled_2,
+            y=y,
+            model=model,
+            kernel_y=kernel_y,
+            bandwidth_y=bandwidth_y
         )
-        ker_sampled_2 = K1d_dist(y_sampled_1 - y, kernel=kernel_y, bandwidth=bandwidth_y)
-        ker = ker_sampled_1 - ker_sampled_2
-
-        grad_ll_p1 = model.score(X, y_sampled_1)
-        grad_p1 = np.mean(ker @ grad_ll_p1, axis=0)
         # Expected outcome shape: (n, par.shape) -> (shape_par)
 
         set_1 = sorted_obs["IND"][n:(n + M_det + 1), 0]
         set_2 = sorted_obs["IND"][n:(n + M_det + 1), 1]
-        ker_sampled_1 = K1d_dist(
-            y_sampled_1[set_1] - y_sampled_2[set_2], kernel=kernel_y, bandwidth=bandwidth_y
+        grad_p2 = _get_grad_estimate(
+            set_1=set_1, 
+            set_2=set_2,
+            X=X, 
+            K_X=K_X[n:n + M_det + 1],
+            y_sampled_1=y_sampled_1,
+            y_sampled_2=y_sampled_2,
+            y=y,
+            model=model,
+            kernel_y=kernel_y,
+            bandwidth_y=bandwidth_y
         )
-        ker_sampled_2 = K1d_dist(y_sampled_1[set_1] - y[set_2], kernel=kernel_y, bandwidth=bandwidth_y)
-        ker = ker_sampled_1 - ker_sampled_2
-        ker = K_X[n:(n + M_det + 1)] * ker
-
-        grad_ll_p2 = model.score(X[set_1, :])
-        grad_p2 = np.mean(ker @ grad_ll_p2, axis=0)
         
         use_X = rng.choice(
             np.arange(n + M_det, l_KX + 1), 
@@ -316,17 +333,22 @@ def _sgd_hat_regression(
         )
         set_1 = sort_obs["IND"][use_X, 0]
         set_2 = sort_obs["IND"][use_X, 1]
-        ker_sampled_1 = K1d_dist(
-            y_sampled_1[set_1] - y_sampled_2[set_2], kernel=kernel_y, bandwidth=bandwidth_y
+        grad_p3 = _get_grad_estimate(
+            set_1=set_1, 
+            set_2=set_2,
+            X=X, 
+            K_X=K_X[use_X],
+            y_sampled_1=y_sampled_1,
+            y_sampled_2=y_sampled_2,
+            y=y,
+            model=model,
+            kernel_y=kernel_y,
+            bandwidth_y=bandwidth_y
         )
-        ker_sampled_2 = K1d_dist(y_sampled_1[set_1] - y[set_2], kernel=kernel_y, bandwidth=bandwidth_y)
-        ker = ker_sampled_1 - ker_sampled_2
-        ker = K_X[use_X] * ker
-
-        grad_ll_p3 = model.score(X[set_1, :])
-        grad_p3 = np.mean(ker @ grad_ll_p3, axis=0)
         
-        grad = grad_p1 + 2 * grad_p2 + cons * grad_p3
+        grad = (grad_p1.sum(axis=0) + \
+            2 * grad_p2.sum(axis=0) + \
+            cons * grad_p3.sum(axis=0)) / n
         
         grad_all += grad
         norm_grad += np.sum(np.square(grad))
@@ -454,3 +476,36 @@ def sort_obs(X: np.array) -> np.array:
 
     return {"DIST": dists[J], "IND": indices[J, :]}
 
+def _get_grad_estimate(
+    set_1: np.array[int],
+    set_2: np.array[int],
+    X: np.array,
+    K_X: np.array,
+    y_sampled_1: np.array,
+    y_sampled_2: np.array,
+    y: np.array,
+    model,
+    kernel_y,
+    bandwidth_y
+) -> np.array:
+    if set_1 is not None and set_2 is not None:
+        ker_sampled_1 = K1d_dist(
+            y_sampled_1[set_1] - y_sampled_2[set_2], kernel=kernel_y, bandwidth=bandwidth_y
+        )
+        ker_sampled_2 = K1d_dist(y_sampled_1[set_1] - y[set_2], kernel=kernel_y, bandwidth=bandwidth_y)
+        ker = ker_sampled_1 - ker_sampled_2
+        ker = K_X * ker
+
+        grad_ll = model.score(X[set_1, :])
+        grad_estimate = np.mean(ker @ grad_ll, axis=0)
+    else:
+        ker_sampled_1 = K1d_dist(
+            y_sampled_1 - y_sampled_2, kernel=kernel_y, bandwidth=bandwidth_y
+        )
+        ker_sampled_2 = K1d_dist(y_sampled_1 - y, kernel=kernel_y, bandwidth=bandwidth_y)
+        ker = ker_sampled_1 - ker_sampled_2
+
+        grad_ll = model.score(X)
+        grad_estimate = ker @ grad_ll
+
+    return grad_estimate
