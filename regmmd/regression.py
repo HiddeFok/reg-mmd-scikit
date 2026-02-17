@@ -2,12 +2,16 @@ from typing import Dict, Optional, Union
 
 import numpy as np
 from sklearn.base import BaseEstimator, RegressorMixin
+from sklearn.linear_model import LinearRegression, LogisticRegression
 
 from regmmd.models import LinearGaussian, Logistic
 from regmmd.models.base_model import RegressionModel
-from regmmd.optimizer import _sgd_tilde_regression, _sgd_hat_regression
+from regmmd.optimizer import _sgd_hat_regression, _sgd_tilde_regression
 
-__REGRESSION_MODEL_LIST__ = {"linear-gaussian": LinearGaussian}
+__REGRESSION_MODEL_LIST__ = {
+    "linear-gaussian": LinearGaussian,
+    "logistic": Logistic
+}
 
 
 def _preprocess_data(
@@ -18,7 +22,7 @@ def _preprocess_data(
     copy_y=True,
     check_input=True,
 ):
-    """Common data preprocessing for fitting linear model, adapted 
+    """Common data preprocessing for fitting linear model, adapted
     to a condensed version from sklearn.linear_models.base
 
     - If `check_input=True`, perform standard input validation of `X`, `y`.
@@ -107,6 +111,10 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         self.bandwidth_X = bandwidth_X
         self.solver = solver
 
+        self.X_offset = None
+        self.y_offset = None
+        self.X_scale = None
+
     def fit(self, X, y):
         if not isinstance(self.model, Logistic):
             X, y, X_offset, y_offset, X_scale = _preprocess_data(
@@ -114,6 +122,10 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                 y,
                 fit_intercept=self.fit_intercept,
             )
+            self.X_offset = X_offset
+            self.X_scale = X_scale
+            self.y_offset = y_offset
+
         # # TODO: write rescaling parts
         # lr = LinearRegression(fit_intercept=False)
         # lr.fit(X, y)
@@ -153,7 +165,22 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                     bandwidth_y=self.bandwidth_y,
                     bandwidth_x=self.bandwidth_X,
                 )
+        
+        self.par_v = res["estimator"]
+        self.model.update(par_v=self.par_v)
         return res
 
     def predict(self, X):
-        pass
+        # TODO: check is fitted
+        if self.X_offset is not None:
+            X /= self.X_scale
+            X -= self.X_offset
+
+            y_pred = self.model.predict(X)
+            y_pred += self.y_offset
+        else:
+            y_pred = self.model.predict(X)
+
+        return y_pred
+
+

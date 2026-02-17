@@ -3,7 +3,7 @@ from regmmd.optimizer import MMDResult
 
 def print_summary(res: MMDResult) -> None:
     """
-    Prints a pretty summary report from the result dictionary of 
+    Prints a pretty summary report from the result dictionary of
     the estimation procedure.
 
     Args:
@@ -39,9 +39,10 @@ def print_summary(res: MMDResult) -> None:
         par_str = "[ " + ", ".join(par_str) + " ]"
         print("\tFinal trajectory values: " + par_str)
 
-    #     # Gradient norm summary
-    #     print("\nGradient Norm Summary:")
-    #     print(f"  Final gradient norm: {np.sqrt(np.sum(np.square(res['trajectory'][:, -1] - res['trajectory'][:, -2]))):.4f}")
+    # Gradient norm summary
+    # print("\nGradient Norm Summary:")
+    # print(f"  Final gradient norm: {np.sqrt(np.sum(np.square(res['trajectory'][:, -1]
+    # - res['trajectory'][:, -2]))):.4f}")
 
     print("\n" + "=" * 50)
     end_str = "End of Report"
