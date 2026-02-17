@@ -1,6 +1,8 @@
 from typing import Optional, TypedDict, Union
 
 import numpy as np
+from numpy.typing import NDArray
+
 from scipy.spatial.distance import pdist
 
 from regmmd.kernels import K1d, K1d_dist
@@ -13,11 +15,11 @@ from regmmd.models.base_model import EstimationModel, RegressionModel
 
 
 class MMDResult(TypedDict):
-    par_v_init: np.ndarray
-    par_c_init: np.ndarray
+    par_v_init: NDArray
+    par_c_init: NDArray
     stepsize: float
-    estimator: np.ndarray
-    trajectory: np.ndarray
+    estimator: NDArray
+    trajectory: NDArray
     bandwidth: Optional[float]  # Optional if not always present
 
 
@@ -220,9 +222,9 @@ def _sgd_hat_regression(
 
     # Precomputation stat 
     sorted_obs = sort_obs(X)
-    K_X = K1d_dist(sort_obs["DIST"], kernel=kernel_x, bandwidth=bandwidth_x)
-    M_det = np.floor(n * C_DET)
-    M_rand = np.floor(n * C_RAND)
+    K_X = K1d_dist(sorted_obs["DIST"], kernel=kernel_x, bandwidth=bandwidth_x)
+    M_det = int(np.floor(n * C_DET))
+    M_rand = int(np.floor(n * C_RAND))
     l_KX = K_X.shape[0]
     if n + M_det + M_rand > l_KX:
         M_det = l_KX - n - 2
@@ -268,8 +270,8 @@ def _sgd_hat_regression(
             size=M_rand,
             replace=False
         )
-        set_1 = sort_obs["IND"][use_X, 0]
-        set_2 = sort_obs["IND"][use_X, 1]
+        set_1 = sorted_obs["IND"][use_X, 0]
+        set_2 = sorted_obs["IND"][use_X, 1]
         grad_p3 = _get_grad_estimate(
             set_1=set_1, 
             set_2=set_2,
@@ -331,8 +333,8 @@ def _sgd_hat_regression(
             size=M_rand,
             replace=False
         )
-        set_1 = sort_obs["IND"][use_X, 0]
-        set_2 = sort_obs["IND"][use_X, 1]
+        set_1 = sorted_obs["IND"][use_X, 0]
+        set_2 = sorted_obs["IND"][use_X, 1]
         grad_p3 = _get_grad_estimate(
             set_1=set_1, 
             set_2=set_2,
@@ -477,8 +479,8 @@ def sort_obs(X: np.array) -> np.array:
     return {"DIST": dists[J], "IND": indices[J, :]}
 
 def _get_grad_estimate(
-    set_1: np.array[int],
-    set_2: np.array[int],
+    set_1: NDArray[np.int32],
+    set_2: NDArray[np.int32],
     X: np.array,
     K_X: np.array,
     y_sampled_1: np.array,
@@ -496,7 +498,7 @@ def _get_grad_estimate(
         ker = ker_sampled_1 - ker_sampled_2
         ker = K_X * ker
 
-        grad_ll = model.score(X[set_1, :])
+        grad_ll = model.score(X[set_1, :], y_sampled_1[set_1])
         grad_estimate = np.mean(ker @ grad_ll, axis=0)
     else:
         ker_sampled_1 = K1d_dist(
@@ -505,7 +507,7 @@ def _get_grad_estimate(
         ker_sampled_2 = K1d_dist(y_sampled_1 - y, kernel=kernel_y, bandwidth=bandwidth_y)
         ker = ker_sampled_1 - ker_sampled_2
 
-        grad_ll = model.score(X)
+        grad_ll = model.score(X, y_sampled_1)
         grad_estimate = ker @ grad_ll
 
     return grad_estimate

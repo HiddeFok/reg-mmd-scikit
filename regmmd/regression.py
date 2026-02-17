@@ -146,12 +146,12 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                     par_c=self.par_c,
                     model=self.model,
                     kernel_y=self.kernel_y,
-                    kernel_x=self.kernel_x,
+                    kernel_x=self.kernel_X,
                     burn_in=self.solver["burnin"],
                     n_step=self.solver["n_step"],
                     stepsize=self.solver["stepsize"],
                     bandwidth_y=self.bandwidth_y,
-                    bandwidth_x=self.bandwidth_x,
+                    bandwidth_x=self.bandwidth_X,
                 )
         return res
 
