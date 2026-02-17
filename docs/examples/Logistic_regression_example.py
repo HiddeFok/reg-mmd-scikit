@@ -40,6 +40,15 @@ def main():
     res = mmd_reg.fit(X, y)
     print_summary(res)
 
+    print("Some test statistics")
+    X_test = rng.normal(loc=0, scale=1, size=(n, p_param))
+    p_test = 1 / (1 + np.exp(-X_test @ beta))
+    y_test = rng.binomial(1, p_test, size=(n,))
+
+    y_pred = (mmd_reg.predict(X_test) > 0.5).astype(np.int32)
+    acc = np.mean(y_pred == y_test)
+    print(f"Acc = {acc:.4f}\n")
+
     # y_hat = mmd_reg.predict(X)
     print("Doing the hat estimation")
     print("Sampling X points..")
@@ -70,6 +79,15 @@ def main():
 
     res = mmd_reg.fit(X, y)
     print_summary(res)
+
+    print("Some test statistics")
+    X_test = rng.normal(loc=0, scale=1, size=(n, p_param))
+    p_test = 1 / (1 + np.exp(-X_test @ beta))
+    y_test = rng.binomial(1, p_test, size=(n,))
+
+    y_pred = (mmd_reg.predict(X_test) > 0.5).astype(np.int32)
+    acc = np.mean(y_pred == y_test)
+    print(f"Acc = {acc:.4f}\n")
 
 
 if __name__ == "__main__":

@@ -2,16 +2,12 @@ from typing import Dict, Optional, Union
 
 import numpy as np
 from sklearn.base import BaseEstimator, RegressorMixin
-from sklearn.linear_model import LinearRegression, LogisticRegression
 
 from regmmd.models import LinearGaussian, Logistic
 from regmmd.models.base_model import RegressionModel
 from regmmd.optimizer import _sgd_hat_regression, _sgd_tilde_regression
 
-__REGRESSION_MODEL_LIST__ = {
-    "linear-gaussian": LinearGaussian,
-    "logistic": Logistic
-}
+__REGRESSION_MODEL_LIST__ = {"linear-gaussian": LinearGaussian, "logistic": Logistic}
 
 
 def _preprocess_data(
@@ -165,7 +161,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                     bandwidth_y=self.bandwidth_y,
                     bandwidth_x=self.bandwidth_X,
                 )
-        
+
         self.par_v = res["estimator"]
         self.model.update(par_v=self.par_v)
         return res
@@ -182,5 +178,3 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
             y_pred = self.model.predict(X)
 
         return y_pred
-
-

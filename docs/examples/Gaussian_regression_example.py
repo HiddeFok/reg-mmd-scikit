@@ -49,10 +49,9 @@ def main():
     y_test = X_test @ beta + noise_test
     y_pred = mmd_reg.predict(X_test)
     mse = np.mean((y_test - y_pred) ** 2)
-    mean_constant = np.mean((y_test - y_test.mean()) ** 2) 
+    mean_constant = np.mean((y_test - y_test.mean()) ** 2)
     print(f"MSE = {mse:.4f}")
-    print(f"R2 = {1 - mse/mean_constant:.4f}\n")
-    
+    print(f"R2 = {1 - mse / mean_constant:.4f}\n")
 
     # y_hat = mmd_reg.predict(X)
     print("Doing the hat estimation")
@@ -94,9 +93,9 @@ def main():
     y_test = X_test @ beta + noise_test
     y_pred = mmd_reg.predict(X_test)
     mse = np.mean((y_test - y_pred) ** 2)
-    mean_constant = np.mean((y_test - y_test.mean()) ** 2) 
+    mean_constant = np.mean((y_test - y_test.mean()) ** 2)
     print(f"MSE = {mse:.4f}")
-    print(f"R2 = {1 - mse/mean_constant:.4f}\n")
+    print(f"R2 = {1 - mse / mean_constant:.4f}\n")
 
 
 if __name__ == "__main__":
