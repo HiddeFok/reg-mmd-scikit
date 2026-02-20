@@ -1,3 +1,58 @@
 import numpy as np
-
+from scipy.special import factorial
 from regmmd.models.base_model import EstimationModel
+
+class Poisson(EstimationModel):
+    def __init__(self, lam: float = None, random_state=None):
+        self.lam = lam
+
+        self.random_state = random_state
+        self.rng = np.random.default_rng(seed=random_state)
+
+    def log_prob(self, x: int):
+        if self.lam is None:
+            raise ValueError(
+                "Labda needs to be defined"
+                + "to be able to calculate the log_prob"
+            )
+        
+        log_Z = - np.log(factorial(x))
+        log_exp = - self.lam
+        log_p = x * np.log(self.lam)
+        return log_Z + log_exp + log_p
+
+    def sample_n(self, n: int):
+        if self.lam is None:
+            raise ValueError(
+                "Labda needs to be defined"
+                + "to be able to calculate the sample"
+            )
+        
+        return self.rng.poisson(lam=self.labda, size=(n,))
+    
+    def _init_params(self, X):
+        if self.lam is None:
+            self.lam = 1 / np.median(X)
+        return self._get_params()
+
+    def _project_params(self, par_v):
+        pass
+
+    def score(self, x: int):
+        if self.p is None:
+            raise ValueError(
+                "Both parameters need to be defined to be able to calculate the score"
+            )
+        
+        return - 1 + x / self.lam
+
+    def update(self, par_v):
+        self.lam = par_v
+
+    def _get_params(self):
+        par_v = self.p
+        par_c = None
+        return par_v, par_c
+    
+
+
