@@ -35,7 +35,7 @@ class GaussianBase(EstimationModel):
             self.scale = (5 / 4) * np.median(abs(X - np.median(X)))
         return self._get_params()
 
-    def _project_params(self, par_v, par_c):
+    def _project_params(self, par_v):
         pass
 
 
