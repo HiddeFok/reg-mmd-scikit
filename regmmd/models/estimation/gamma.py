@@ -3,10 +3,11 @@ from scipy.special import gamma
 
 from regmmd.models.base_model import EstimationModel
 
+
 class GammaBase(EstimationModel):
     def __init__(self, shape: float = None, scale: float = None, random_state=None):
         # k and theta respectively
-        self.shape = shape 
+        self.shape = shape
         self.scale = scale
 
         self.random_state = random_state
@@ -18,11 +19,11 @@ class GammaBase(EstimationModel):
                 "Both parameters need to be defined"
                 + "to be able to calculate the log_prob"
             )
-        
-        log_Z = - np.log(gamma(x))
-        log_exp = -x / self.scale 
+
+        log_Z = -np.log(gamma(x))
+        log_exp = -x / self.scale
         log_x = (self.shape - 1) * np.log(x)
-        log_scale = - self.shape * np.log(self.scale)
+        log_scale = -self.shape * np.log(self.scale)
         return log_Z + log_exp + log_x + log_scale
 
     def sample_n(self, n: int):
@@ -62,5 +63,3 @@ class GammaShape(GammaBase):
         par_v = self.shape
         par_c = self.scale
         return par_v, par_c
-
-    

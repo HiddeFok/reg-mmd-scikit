@@ -92,7 +92,7 @@ def main():
     noise_test = rng.normal(0, phi, size=(n,))
     y_test = X_test @ beta + noise_test
     y_pred = mmd_reg.predict(X_test)
-    
+
     mse = np.mean((y_test - y_pred) ** 2)
     mean_constant = np.mean((y_test - y_test.mean()) ** 2)
     print(f"MSE = {mse:.4f}")
