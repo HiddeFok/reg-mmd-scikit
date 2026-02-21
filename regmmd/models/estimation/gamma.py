@@ -6,9 +6,10 @@ from regmmd.models.base_model import EstimationModel
 
 class GammaBase(EstimationModel):
     """Gamma distribution with density function
-    p(x) ~ x^(a - 1)exp(-bx) for a: shape, b: rate 
-    
+    p(x) ~ x^(a - 1)exp(-bx) for a: shape, b: rate
+
     """
+
     def __init__(self, shape: float = None, rate: float = None, random_state=None):
         # k and theta respectively
         self.shape = shape
@@ -34,14 +35,14 @@ class GammaBase(EstimationModel):
         if self.shape is None or self.rate is None:
             raise ValueError("Both parameters need to be defined to be able to sample")
 
-        return self.rng.gamma(shape=self.shape, scale=1/self.rate, size=(n,))
+        return self.rng.gamma(shape=self.shape, scale=1 / self.rate, size=(n,))
 
     def _init_params(self, X):
         mean = X.mean(axis=0)
-        var = (X.std(axis=0) ** 2)
+        var = X.std(axis=0) ** 2
 
         if self.shape is None:
-            self.shape = (mean ** 2) / var
+            self.shape = (mean**2) / var
         if self.rate is None:
             self.rate = mean / var
 
@@ -107,7 +108,7 @@ class Gamma(GammaBase):
     def score(self, x):
         _shape_grad = self._shape_grad(x)
         _rate_grad = self._rate_grad(x)
-        return np.array([_shape_grad, _rate_grad ]).T
+        return np.array([_shape_grad, _rate_grad]).T
 
     def update(self, par_v):
         self.rate = par_v

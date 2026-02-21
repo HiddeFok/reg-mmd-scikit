@@ -10,8 +10,9 @@ from regmmd.models.base_model import EstimationModel
 class BetaBase(EstimationModel):
     """Beta distribution with density function
     p(x) ~ x^(a - 1)*(1 - x)^(b-1)
-    
+
     """
+
     def __init__(self, alpha: float = None, beta: float = None, random_state=None):
         # k and theta respectively
         self.alpha = alpha
@@ -40,9 +41,9 @@ class BetaBase(EstimationModel):
 
     def _init_params(self, X):
         mean = X.mean(axis=0)
-        var = (X.std(axis=0) ** 2)
+        var = X.std(axis=0) ** 2
 
-        C = ((mean * (1 - mean) / var) - 1)
+        C = (mean * (1 - mean) / var) - 1
         if self.alpha is None:
             self.alpha = C * mean
         if self.beta is None:
@@ -52,12 +53,12 @@ class BetaBase(EstimationModel):
 
     def _alpha_grad(self, x):
         log_exp = np.log(x)
-        log_beta_func =  - digamma(self.alpha) + digamma(self.alpha + self.beta)
+        log_beta_func = -digamma(self.alpha) + digamma(self.alpha + self.beta)
         return log_exp + log_beta_func
 
     def _beta_grad(self, x):
         log_exp = np.log(1 - x)
-        log_beta_func =  - digamma(self.beta) + digamma(self.alpha + self.beta)
+        log_beta_func = -digamma(self.beta) + digamma(self.alpha + self.beta)
         return log_exp + log_beta_func
 
 
@@ -108,7 +109,7 @@ class Beta(BetaBase):
     def score(self, x):
         _alpha_grad = self._alpha_grad(x)
         _beta_grad = self._beta_grad(x)
-        return np.array([_alpha_grad, _beta_grad ]).T
+        return np.array([_alpha_grad, _beta_grad]).T
 
     def update(self, par_v):
         self.beta = par_v

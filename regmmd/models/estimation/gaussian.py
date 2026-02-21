@@ -114,6 +114,7 @@ class Gaussian(GaussianBase):
         par_v = np.array([self.loc, self.scale])
         par_c = None
         return par_v, par_c
+
     def _project_params(self, par_v):
         par_v[1] = max(1e-6, par_v[1])
         return par_v
