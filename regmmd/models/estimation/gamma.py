@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.special import gamma
+from scipy.special import gamma, digamma
 
 from regmmd.models.base_model import EstimationModel
 
@@ -50,7 +50,8 @@ class GammaBase(EstimationModel):
     def _shape_grad(self, x):
         log_exp = np.log(x)
         log_rate = np.log(self.rate)
-        return log_exp + log_rate
+        log_gamma = digamma(self.shape)
+        return log_exp + log_rate + log_gamma
 
     def _rate_grad(self, x):
         log_exp = -x
