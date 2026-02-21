@@ -39,7 +39,9 @@ class BinomialBase(EstimationModel):
         return self._get_params()
 
     def _project_params(self, par_v):
-        pass
+        eps = 1e-6
+        par_v = min(1 - eps, max(eps, par_v))
+        return par_v
 
 
 class Binomial(BinomialBase):
