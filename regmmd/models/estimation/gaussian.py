@@ -35,8 +35,11 @@ class GaussianBase(EstimationModel):
             self.scale = (5 / 4) * np.median(abs(X - np.median(X)))
         return self._get_params()
 
-    def _project_params(self, par_v):
-        pass
+    def _loc_grad(self, x):
+        return (x - self.loc) / (self.scale**2)
+
+    def _scale_grad(self, x):
+        return -1 / self.scale + (x - self.loc) ** 2 / (self.scale**3)
 
 
 class GaussianLoc(GaussianBase):
@@ -49,7 +52,7 @@ class GaussianLoc(GaussianBase):
                 "Both parameters need to be defined to be able to calculate the score"
             )
 
-        return (x - self.loc) / (self.scale**2)
+        return self._loc_grad(x)
 
     def update(self, par_v):
         self.loc = par_v
@@ -58,6 +61,9 @@ class GaussianLoc(GaussianBase):
         par_v = self.loc
         par_c = self.scale
         return par_v, par_c
+
+    def _project_params(self, par_v):
+        return par_v
 
 
 class GaussianScale(GaussianBase):
@@ -70,7 +76,7 @@ class GaussianScale(GaussianBase):
                 "Both parameters need to be defined to be able to calculate the score"
             )
 
-        return -1 / self.scale + (x - self.loc) ** 2 / (self.scale**3)
+        return self._scale_grad(x)
 
     def update(self, par_v):
         self.scale = par_v
@@ -79,6 +85,10 @@ class GaussianScale(GaussianBase):
         par_v = self.scale
         par_c = self.loc
         return par_v, par_c
+
+    def _project_params(self, par_v):
+        # TODO: Make this data-dependent maybe
+        return max(1e-6, par_v)
 
 
 class Gaussian(GaussianBase):
@@ -91,12 +101,10 @@ class Gaussian(GaussianBase):
                 "Both parameters need to be defined to be able to calculate the score"
             )
 
-        score_loc = (x - self.loc) / (self.scale**2)
-        score_scale = -1 / self.scale + (x - self.loc) ** 2 / (self.scale**3)
-        # NOTE: This is weird
-        # score_par2 = ((x - self.par1) ** 2) / (self.par2 ** 2 - 1) / self.par2
+        _score_loc = self._loc_grad(x)
+        _score_scale = self._scale_grad(x)
 
-        return np.array([score_loc, score_scale]).T
+        return np.array([_score_loc, _score_scale]).T
 
     def update(self, par_v):
         self.loc = par_v[0]
@@ -106,3 +114,6 @@ class Gaussian(GaussianBase):
         par_v = np.array([self.loc, self.scale])
         par_c = None
         return par_v, par_c
+    def _project_params(self, par_v):
+        par_v[1] = max(1e-6, par_v[1])
+        return par_v
