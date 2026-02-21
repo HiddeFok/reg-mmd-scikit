@@ -2,6 +2,7 @@ import numpy as np
 from scipy.special import factorial
 from regmmd.models.base_model import RegressionModel
 
+
 class PoissonRegression(RegressionModel):
     def __init__(self, beta=None, random_state=None):
         self.beta = beta
@@ -13,11 +14,11 @@ class PoissonRegression(RegressionModel):
         dot_prod = X @ self.beta
 
         log_y = y * dot_prod
-        log_exp = - np.exp(dot_prod)
+        log_exp = -np.exp(dot_prod)
         log_Z = np.log(factorial(y))
         return np.sum(log_y + log_exp + log_Z)
 
-    def sample_n(self, n: int , mu_given_x: np.array) -> np.array:
+    def sample_n(self, n: int, mu_given_x: np.array) -> np.array:
         return self.rng.poisson(lam=1 / mu_given_x, size=(n,))
 
     def predict(self, X: np.array) -> np.array:

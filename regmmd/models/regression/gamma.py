@@ -24,8 +24,8 @@ class GammaBase(RegressionModel):
                 + "to be able to calculate the log_prob"
             )
         dot_prod = X @ self.beta
-        exp_dot_prod = 0 # TODO: Finish this. 
-        log_Z = - np.log(gamma(self.shape))
+        exp_dot_prod = 0  # TODO: Finish this.
+        log_Z = -np.log(gamma(self.shape))
         log_x = (self.shape - 1) * np.log(y)
         log_rate = self.shape * np.log(self.rate)
         return log_Z + log_exp + log_x + log_rate
