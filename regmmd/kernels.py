@@ -23,6 +23,8 @@ def K1d_dist(u: np.array, kernel: str, bandwidth: float = 1) -> np.array:
         return np.exp(-np.abs(u))
     elif kernel == "Cauchy":
         return 1 / (2 + u**2)
+    else:
+        raise ValueError
 
 
 def K1d(x: np.array, y: np.array, kernel: str, bandwidth: float = 1) -> np.array:
@@ -97,7 +99,8 @@ def Kmd(x: np.array, y: np.array, kernel: str, bandwidth: float = 1) -> np.array
         return np.exp(-u)
     elif kernel == "Cauchy":
         return 1 / (2 + u**2)
-
+    else:
+        raise ValueError
 
 def Kmd_grad(x: np.array, y: np.array, kernel: str, bandwidth: float = 1) -> np.array:
     """Multi-Dimensional Kernel gradient evaluation function
@@ -129,3 +132,5 @@ def Kmd_grad(x: np.array, y: np.array, kernel: str, bandwidth: float = 1) -> np.
         return -dir * np.exp(-nrm)[:, :, None]
     elif kernel == "Cauchy":
         return -2 * diff / ((2 + w)[:, :, None] ** 2)
+    else:
+        raise ValueError
