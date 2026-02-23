@@ -5,8 +5,9 @@ from regmmd.models.base_model import RegressionModel
 
 
 class GammaBase(RegressionModel):
-    """Gamma regression with density function
-    p(y | x) ~ x^(a - 1)exp(-bx) for a: shape, b: rate
+    """Gamma regression, where exp(X^T \\beta) = mean(Y). The
+    mean parametrized gamma density is given by
+    p(y | x) ~ (shape * y / mean)^shape exp(-shape * y / mean) /  y for a: shape, b: rate
 
     """
 
@@ -18,23 +19,27 @@ class GammaBase(RegressionModel):
         self.rng = np.random.default_rng(seed=random_state)
 
     def log_prob(self, X: np.array, y: np.array) -> np.array:
-        if self.shape is None or self.rate is None:
+        if self.shape is None or self.beta is None:
             raise ValueError(
                 "Both parameters need to be defined"
                 + "to be able to calculate the log_prob"
             )
-        dot_prod = X @ self.beta
-        exp_dot_prod = 0  # TODO: Finish this.
+        mu_given_x = self.predict(X)
         log_Z = -np.log(gamma(self.shape))
-        log_x = (self.shape - 1) * np.log(y)
-        log_rate = self.shape * np.log(self.rate)
-        return log_Z + log_exp + log_x + log_rate
+        log_y = (self.shape - 1) * np.log(y)
+        log_shape = self.shape * np.log(self.shape)
+        log_mu = -self.shape * np.log(mu_given_x)
+        log_exp = self.shape * y / mu_given_x
+        return log_Z + log_y + log_shape + log_mu + log_exp
 
-    def sample_n(self, n: int):
-        if self.shape is None or self.rate is None:
+    def sample_n(self, n: int, mu_given_x: np.array):
+        if self.shape is None or self.beta is None:
             raise ValueError("Both parameters need to be defined to be able to sample")
 
-        return self.rng.gamma(shape=self.shape, scale=1 / self.rate, size=(n,))
+        return self.rng.gamma(shape=self.shape, scale=mu_given_x / self.shape, size=(n,))
+
+    def predict(self, X):
+        return np.exp(X @ self.beta)
 
     def _init_params(self, X):
         mean = X.mean(axis=0)
@@ -47,16 +52,25 @@ class GammaBase(RegressionModel):
 
         return self._get_params()
 
-    def _shape_grad(self, x):
-        log_exp = np.log(x)
-        log_rate = np.log(self.rate)
-        log_gamma = digamma(self.shape)
-        return log_exp + log_rate + log_gamma
+    def _shape_grad(self, X: np.array, y: np.array) -> np.array:
+        mu_given_x = self.predict(X)
 
-    def _rate_grad(self, x):
-        log_exp = -x
-        log_rate = self.shape / self.rate
-        return log_exp + log_rate
+        log_gamma = -digamma(self.shape)
+        log_y = np.log(y)
+        log_shape = np.log(self.shape) + 1
+        log_mu = - np.log(mu_given_x)
+        log_exp = y / mu_given_x
+        return log_gamma + log_y + log_shape + log_mu + log_exp
+
+    def _beta_grad(self, X: np.array, y: np.array) -> np.array:
+        mu_given_x = self.predict(X)
+
+        residuals = (- self.shape + self.shape * y / mu_given_x)  / mu_given_x
+        return X * residuals
+
+    def _project_params(self, par_v):
+        pass
+        
 
 
 class GammaShape(GammaBase):
