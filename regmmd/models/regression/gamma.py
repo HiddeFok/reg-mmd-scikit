@@ -36,7 +36,9 @@ class GammaBase(RegressionModel):
         if self.shape is None or self.beta is None:
             raise ValueError("Both parameters need to be defined to be able to sample")
 
-        return self.rng.gamma(shape=self.shape, scale=mu_given_x / self.shape, size=(n,))
+        return self.rng.gamma(
+            shape=self.shape, scale=mu_given_x / self.shape, size=(n,)
+        )
 
     def predict(self, X):
         return np.exp(X @ self.beta)
@@ -58,19 +60,18 @@ class GammaBase(RegressionModel):
         log_gamma = -digamma(self.shape)
         log_y = np.log(y)
         log_shape = np.log(self.shape) + 1
-        log_mu = - np.log(mu_given_x)
+        log_mu = -np.log(mu_given_x)
         log_exp = y / mu_given_x
         return log_gamma + log_y + log_shape + log_mu + log_exp
 
     def _beta_grad(self, X: np.array, y: np.array) -> np.array:
         mu_given_x = self.predict(X)
 
-        residuals = (- self.shape + self.shape * y / mu_given_x)  / mu_given_x
+        residuals = (-self.shape + self.shape * y / mu_given_x) / mu_given_x
         return X * residuals
 
     def _project_params(self, par_v):
         pass
-        
 
 
 class GammaShape(GammaBase):
