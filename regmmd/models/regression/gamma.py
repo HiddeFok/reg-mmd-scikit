@@ -92,6 +92,7 @@ class GammaLoc(GammaBase):
     def _project_params(self, par_v):
         return par_v
 
+
 class Gamma(GammaBase):
     def __init__(self, par_v=None, par_c=None, random_state=None):
         super().__init__(shape=par_v[:-1], rate=par_v[-1], random_state=random_state)

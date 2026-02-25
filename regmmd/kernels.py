@@ -102,6 +102,7 @@ def Kmd(x: np.array, y: np.array, kernel: str, bandwidth: float = 1) -> np.array
     else:
         raise ValueError
 
+
 def Kmd_grad(x: np.array, y: np.array, kernel: str, bandwidth: float = 1) -> np.array:
     """Multi-Dimensional Kernel gradient evaluation function
 
