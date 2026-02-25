@@ -5,7 +5,10 @@ from sklearn.base import BaseEstimator, RegressorMixin
 
 from regmmd.models import LinearGaussian, Logistic
 from regmmd.models.base_model import RegressionModel
-from regmmd.optimizer import _sgd_hat_regression, _sgd_tilde_regression
+from regmmd.optimizer import _sgd_hat_regression, _sgd_tilde_regression, MMDResult
+
+from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
+
 
 __REGRESSION_MODEL_LIST__ = {"linear-gaussian": LinearGaussian, "logistic": Logistic}
 
@@ -64,16 +67,88 @@ def _preprocess_data(
 
 
 class MMDRegressor(RegressorMixin, BaseEstimator):
-    """Regression using the MMD criterion.
+    """Regression using the Maximum Mean Discrepancy (MMD) criterion.
 
-    MMD stands for Maximum Mean Discrepancy: TODO: write this
+    This class implements regression using the MMD criterion, which is a kernel-based
+    method to compare distributions by measuring the distance between mean embeddings
+    in a Reproducing Kernel Hilbert Space (RKHS). 
+
+    MMDRegressor fits a regression model by minimizing the MMD between the distributions
+    of the observed data and the model's predictions. It supports various kernel types
+    and bandwidth selection methods for both the input features and the target variables.
 
     Parameters
     ----------
+    model : RegressionModel
+        The statistical model used for regression, provided as an instance of a
+        `RegressionModel` class with initialized parameters. This model defines the
+        relationship between the input features and the target variable.
+
     fit_intercept : bool, default=True
-        Whether to calculate the intercept for this model. If set
-        to False, no intercept will be used in calculations
-        (i.e. data is expected to be centered).
+        Specifies whether to calculate the intercept for the model. If set to `False`,
+        the model assumes that the data is already centered, and no intercept will be
+        fitted.
+
+    par_v : np.array, optional
+        Initial values for the variable parameters of the model. If `None`, the model
+        will use default initial values.
+
+    par_c : np.array, optional
+        Initial values for the constant parameters of the model. If `None`, the model
+        will use default initial values.
+
+    kernel_y : str, default="Gaussian"
+        The kernel type used for the target variable `y`. Supported options are
+        "Gaussian", "Laplace", and "Cauchy".
+
+    kernel_X : str, default="Laplace"
+        The kernel type used for the input features `X`. Supported options are
+        "Gaussian", "Laplace", and "Cauchy".
+
+    bandwidth_y : Union[str, float], default="auto"
+        The bandwidth parameter for the kernel applied to the target variable `y`.
+        If set to "auto", the bandwidth is determined using a heuristic method,
+        such as the median heuristic.
+
+    bandwidth_X : Union[str, float], default="auto"
+        The bandwidth parameter for the kernel applied to the input features `X`.
+        If set to "auto", the bandwidth is determined using a heuristic method,
+        such as the median heuristic.
+
+    solver : dict, optional
+        A dictionary specifying the solver parameters for the optimization process.
+        It should include keys such as "type" (e.g., "SGD" for Stochastic Gradient
+        Descent), "burnin" (number of burn-in iterations), "n_step" (number of
+        optimization steps), and "stepsize" (learning rate for the optimizer).
+        If `None`, default solver settings are used.
+
+    Attributes
+    ----------
+    X_offset : np.array or None
+        The offset applied to the input features `X` during preprocessing. This is
+        used when `fit_intercept` is `True`.
+
+    y_offset : np.array or None
+        The offset applied to the target variable `y` during preprocessing.
+
+    X_scale : np.array or None
+        The scale factor applied to the input features `X` during preprocessing.
+
+    beta_ : np.array
+        The coefficients of the features in the regression model.
+
+    intercept_ : float
+        The intercept term in the regression model. This is `0.0` if `fit_intercept`
+        is `False`.
+
+    par_v : np.array
+        The estimated variable parameters of the model after fitting.
+
+    Notes
+    -----
+    - The `fit` method preprocesses the data, fits the model using the specified solver,
+      and updates the model parameters.
+    - The `predict` method uses the fitted model to make predictions on new data.
     """
 
     def __init__(
@@ -102,9 +177,26 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         self.y_offset = None
         self.X_scale = None
 
-    def fit(self, X, y):
+    def fit(self, X: np.ndarray, y: np.ndarray) -> MMDResult:
+        """Fit the MMD regression model according to the given training data.
+
+        Parameters
+        ----------
+        X : np.ndarray, shape (n_samples, n_features)
+            Training input samples.
+
+        y : np.ndarray, shape (n_samples,)
+            Target values.
+
+        Returns
+        -------
+        res : MMDResult
+            A dictionary containing the results of the optimization process, including
+            the estimated parameters and the optimization trajectory.
+        """
+        X, y = self._validate_data(X, y)
         n_features = X.shape[1]
-        print(n_features)
+
         if not isinstance(self.model, Logistic):
             X, y, X_offset, X_scale = _preprocess_data(
                 X,
@@ -113,15 +205,6 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
             )
             self.X_offset = X_offset
             self.X_scale = X_scale
-
-        # # TODO: write rescaling parts
-        # lr = LinearRegression(fit_intercept=False)
-        # lr.fit(X, y)
-        # y_pred = lr.predict(X)
-        # self.par1 = lr.coef_
-        # print(self.par1)
-        # self.par2 = np.mean((y_pred - y) ** 2)
-        # print(self.par2)
 
         if self.bandwidth_X == 0:
             if self.solver["type"] == "SGD":
@@ -155,7 +238,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                 )
 
         if not isinstance(self.model, Logistic):
-            self.beta_ = res["estimator"][:n_features] / X_scale
+            self.beta_ = res["estimator"][:n_features] / self.X_scale
             res["estimator"][:n_features] = self.beta_
 
             if self.fit_intercept:
@@ -176,6 +259,65 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         self.model.update(par_v=self.par_v)
         return res
 
-    def predict(self, X):
-        # TODO: check is fitted
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        """Predict using the MMD regression model.
+
+        Parameters
+        ----------
+        X : np.ndarray, shape (n_samples, n_features)
+            Input samples for which to compute the predictions.
+
+        Returns
+        -------
+        y_pred : np.ndarray, shape (n_samples,)
+            The predicted target values.
+        """
+        # TODO: Add a check to ensure the model is fitted before making predictions.
+        X = self._validate_data(X)
+        self._check_is_fitted()
+
         return self.model.predict(X)
+
+    def _validate_data(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> Union[np.ndarray, tuple]:
+        """Validate input arrays X and y.
+
+        Parameters
+        ----------
+        X : np.ndarray, shape (n_samples, n_features)
+            Input feature array.
+
+        y : np.ndarray, shape (n_samples,), optional
+            Target array.
+
+        Returns
+        -------
+        X_validated : np.ndarray
+            Validated input feature array.
+
+        y_validated : np.ndarray, optional
+            Validated target array, if provided.
+        """
+        if y is not None:
+            X, y = check_X_y(X, y, multi_output=False, y_numeric=True)
+            return X, y
+        else:
+            X = check_array(X)
+            return X
+
+    def _check_is_fitted(self) -> None:
+        """Check if the model is fitted.
+
+        Raises
+        ------
+        NotFittedError
+            If the model is not fitted yet.
+        """
+        if not hasattr(self, 'beta_'):
+            raise NotFittedError("This MMDRegressor instance is not fitted yet. Call 'fit' with appropriate arguments before using this method.")
+        if not hasattr(self, 'X_scale') and self.fit_intercept:
+            raise NotFittedError("This MMDRegressor instance is not fitted yet. Call 'fit' with appropriate arguments before using this method.")
+
+
+class NotFittedError(ValueError):
+    """Exception class to raise if the model is used before fitting."""
+    pass
