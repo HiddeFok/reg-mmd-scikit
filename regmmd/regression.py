@@ -49,27 +49,18 @@ def _preprocess_data(
         The mean per column of input X.
     y_offset : float or ndarray of shape (n_features,)
     """
-    n_samples, n_features = X.shape
+    n_samples, _ = X.shape
 
-    dtype_ = X.dtype
+    X_offset = X.mean(axis=0)
+    X -= X_offset
 
     X_scale = np.std(X, axis=0)[np.newaxis, :]
-    X = X / X_scale
+    X /= X_scale
 
     if fit_intercept:
-        X_offset = X.mean(axis=0)
-        X -= X_offset
+        X = np.hstack((X, np.ones(shape=(n_samples, 1))))
 
-        y_offset = y.mean(axis=0)
-        y -= y_offset
-    else:
-        X_offset = np.zeros(n_features, dtype=dtype_)
-        if y.ndim == 1:
-            y_offset = np.asarray(0.0, dtype=dtype_)
-        else:
-            y_offset = np.zeros(y.shape[1], dtype=dtype_)
-
-    return X, y, X_offset, y_offset, X_scale
+    return X, y, X_offset, X_scale
 
 
 class MMDRegressor(RegressorMixin, BaseEstimator):
@@ -112,15 +103,16 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         self.X_scale = None
 
     def fit(self, X, y):
+        n_features = X.shape[1]
+        print(n_features)
         if not isinstance(self.model, Logistic):
-            X, y, X_offset, y_offset, X_scale = _preprocess_data(
+            X, y, X_offset, X_scale = _preprocess_data(
                 X,
                 y,
                 fit_intercept=self.fit_intercept,
             )
             self.X_offset = X_offset
             self.X_scale = X_scale
-            self.y_offset = y_offset
 
         # # TODO: write rescaling parts
         # lr = LinearRegression(fit_intercept=False)
@@ -161,20 +153,27 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                     bandwidth_y=self.bandwidth_y,
                     bandwidth_x=self.bandwidth_X,
                 )
+        
+        if not isinstance(self.model, Logistic):
+            self.beta_ = res["estimator"][:n_features] / X_scale
+            res["estimator"][:n_features] = self.beta_
 
-        self.par_v = res["estimator"]
+            if self.fit_intercept:
+                if self.beta_.ndim == 1:
+                    self.intercept_ = res["estimator"][n_features] - self.X_offset @ self.beta_
+                else:
+                    self.intercept_ = res["estimator"][n_features] - self.X_offset @ self.beta_.T
+                res["estimator"][n_features] = self.intercept_[0]
+            else:
+                self.intercept_ = 0.0
+
+
+
+            self.par_v = res["estimator"]
+
         self.model.update(par_v=self.par_v)
         return res
 
     def predict(self, X):
-        # TODO: check is fitted
-        if self.X_offset is not None:
-            X /= self.X_scale
-            X -= self.X_offset
-
-            y_pred = self.model.predict(X)
-            y_pred += self.y_offset
-        else:
-            y_pred = self.model.predict(X)
-
-        return y_pred
+        # TODO: check is fitted      
+        return self.model.predict(X)

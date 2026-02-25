@@ -6,7 +6,7 @@ from regmmd.models.estimation.poisson import Poisson
 
 from regmmd.models.regression.linear_gaussian import LinearGaussian, LinearGaussianLoc
 from regmmd.models.regression.logistic import Logistic
-from regmmd.models.regression.gamma import Gamma, GammaLoc
+from regmmd.models.regression.gamma import GammaRegression, GammaRegressionLoc
 
 __all_estimation__ = [
     Gaussian,
@@ -16,11 +16,18 @@ __all_estimation__ = [
     BetaA,
     BetaB,
     Binomial,
+    Gamma,
     GammaShape,
     GammaRate,
-    Poisson,
+    Poisson
 ]
 
-__all_regression__ = [LinearGaussian, LinearGaussianLoc, Logistic, Gamma, GammaLoc]
+__all_regression__ = [
+    LinearGaussian,
+    LinearGaussianLoc,
+    Logistic,
+    GammaRegression,
+    GammaRegressionLoc,
+]
 
 __all__ = __all_estimation__ + __all_regression__

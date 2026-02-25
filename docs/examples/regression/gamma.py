@@ -1,103 +1,50 @@
 import numpy as np
 
 from regmmd import MMDRegressor
-from regmmd.models import Gamma
+from regmmd.models import GammaRegressionLoc
 from regmmd.utils import print_summary
 
 
 def main():
-    n = 1000
+    n = 10000
     p = 4
     beta = np.arange(1, 5)
-    phi = 1
+    model_true = GammaRegressionLoc(
+        par_v=beta, 
+        par_c=1,
+        random_state=12
+    )
 
     rng = np.random.default_rng(seed=123)
-    print("Sampling X points..")
     X = rng.normal(loc=0, scale=1, size=(n, p))
-    noise = rng.normal(0, phi, size=(n,))
-    y = 1 + X @ beta + noise
+    mu_given_x = model_true.predict(X=X)
+    y = model_true.sample_n(n=n, mu_given_x=mu_given_x)
 
-    print("Initializing model")
-    beta_init = [0.5, 1.5, 2.5, 3.2]
-    phi_init = [2.0]
-    par_v_init = np.array(beta_init + phi_init)
-    par_c_init = None
-    model = LinearGaussian(par_v=par_v_init, par_c=par_c_init)
+    beta_init = np.array([0.5, 1.5, 2.5, 3.2])
+    model = GammaRegressionLoc(
+        par_v=beta_init, 
+        par_c=1
+    )
 
     mmd_reg = MMDRegressor(
         model=model,
-        par_v=par_v_init,
-        par_c=par_c_init,
+        par_v=beta_init,
+        par_c=None,
+        fit_intercept=False,
         bandwidth_X=0,
         bandwidth_y=1,
         kernel_y="Gaussian",
         solver={
             "type": "SGD",
             "burnin": 500,
-            "n_step": 1000,
+            "n_step": 10000,
             "stepsize": 1,
-            "epsilon": 1e-4,
+            "epsilon": 1e-8,
         },
     )
 
     res = mmd_reg.fit(X, y)
     print_summary(res)
-
-    print("Some test statistics")
-    X_test = rng.normal(loc=0, scale=1, size=(n, p))
-    noise_test = rng.normal(0, phi, size=(n,))
-    y_test = X_test @ beta + noise_test
-    y_pred = mmd_reg.predict(X_test)
-    mse = np.mean((y_test - y_pred) ** 2)
-    mean_constant = np.mean((y_test - y_test.mean()) ** 2)
-    print(f"MSE = {mse:.4f}")
-    print(f"R2 = {1 - mse / mean_constant:.4f}\n")
-
-    # y_hat = mmd_reg.predict(X)
-    print("Doing the hat estimation")
-    print("Sampling X points..")
-    X = rng.normal(loc=0, scale=1, size=(n, p))
-    noise = rng.normal(0, phi, size=(n,))
-    y = 1 + X @ beta + noise
-
-    print("Initializing model")
-    beta_init = [0.5, 1.5, 2.5, 3.2]
-    phi_init = [2.0]
-    par_v_init = np.array(beta_init + phi_init)
-    par_c_init = None
-    model = LinearGaussian(par_v=par_v_init, par_c=par_c_init)
-
-    mmd_reg = MMDRegressor(
-        model=model,
-        par_v=par_v_init,
-        par_c=par_c_init,
-        bandwidth_X=1,
-        bandwidth_y=1,
-        kernel_y="Gaussian",
-        kernel_X="Laplace",
-        solver={
-            "type": "SGD",
-            "burnin": 500,
-            "n_step": 1000,
-            "stepsize": 1,
-            "epsilon": 1e-4,
-        },
-    )
-
-    res = mmd_reg.fit(X, y)
-    print_summary(res)
-
-    print("Some test statistics")
-    X_test = rng.normal(loc=0, scale=1, size=(n, p))
-    noise_test = rng.normal(0, phi, size=(n,))
-    y_test = X_test @ beta + noise_test
-    y_pred = mmd_reg.predict(X_test)
-
-    mse = np.mean((y_test - y_pred) ** 2)
-    mean_constant = np.mean((y_test - y_test.mean()) ** 2)
-    print(f"MSE = {mse:.4f}")
-    print(f"R2 = {1 - mse / mean_constant:.4f}\n")
-
 
 if __name__ == "__main__":
     main()

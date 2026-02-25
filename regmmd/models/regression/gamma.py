@@ -4,7 +4,7 @@ from scipy.special import gamma, digamma
 from regmmd.models.base_model import RegressionModel
 
 
-class GammaBase(RegressionModel):
+class GammaRegressionBase(RegressionModel):
     """Gamma regression, where exp(X^T \\beta) = mean(Y). The
     mean parametrized gamma density is given by
     p(y | x) ~ (shape * y / mean)^shape exp(-shape * y / mean) /  y for a: shape, b: rate
@@ -74,7 +74,7 @@ class GammaBase(RegressionModel):
         pass
 
 
-class GammaLoc(GammaBase):
+class GammaRegressionLoc(GammaRegressionBase):
     def __init__(self, par_v=None, par_c=None, random_state=None):
         super().__init__(beta=par_v, shape=par_c, random_state=random_state)
 
@@ -93,7 +93,7 @@ class GammaLoc(GammaBase):
         return par_v
 
 
-class Gamma(GammaBase):
+class GammaRegression(GammaRegressionBase):
     def __init__(self, par_v=None, par_c=None, random_state=None):
         super().__init__(shape=par_v[:-1], rate=par_v[-1], random_state=random_state)
 
