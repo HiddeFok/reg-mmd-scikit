@@ -62,78 +62,54 @@ class GammaBase(RegressionModel):
         log_shape = np.log(self.shape) + 1
         log_mu = -np.log(mu_given_x)
         log_exp = y / mu_given_x
-        return log_gamma + log_y + log_shape + log_mu + log_exp
+        return (log_gamma + log_y + log_shape + log_mu + log_exp)[:, np.newaxis]
 
     def _beta_grad(self, X: np.array, y: np.array) -> np.array:
         mu_given_x = self.predict(X)
 
         residuals = (-self.shape + self.shape * y / mu_given_x) / mu_given_x
-        return X * residuals
+        return X * (residuals[:, np.newaxis])
 
     def _project_params(self, par_v):
         pass
 
 
-class GammaShape(GammaBase):
+class GammaLoc(GammaBase):
     def __init__(self, par_v=None, par_c=None, random_state=None):
-        super().__init__(shape=par_v, rate=par_c, random_state=random_state)
+        super().__init__(beta=par_v, shape=par_c, random_state=random_state)
 
-    def score(self, x):
-        return self._shape_grad(x)
+    def score(self, X, y):
+        return self._beta_grad(X, y)
 
     def update(self, par_v):
-        self.shape = par_v
+        self.beta = par_v
 
     def _get_params(self):
-        par_v = self.shape
-        par_c = self.rate
-        return par_v, par_c
-
-    def _project_params(self, par_v):
-        par_v = max(1e-6, par_v)
-        return par_v
-
-
-class GammaRate(GammaBase):
-    def __init__(self, par_v=None, par_c=None, random_state=None):
-        super().__init__(shape=par_c, rate=par_v, random_state=random_state)
-
-    def score(self, x):
-        return self._rate_grad(x)
-
-    def update(self, par_v):
-        self.rate = par_v
-
-    def _get_params(self):
+        par_v = self.beta
         par_c = self.shape
-        par_v = self.rate
         return par_v, par_c
 
     def _project_params(self, par_v):
-        # par_v = max(0.5 , par_v) This was found empirically in the development of the R package
-        par_v = max(1e-6, par_v)
         return par_v
-
 
 class Gamma(GammaBase):
     def __init__(self, par_v=None, par_c=None, random_state=None):
-        super().__init__(shape=par_v[0], rate=par_v[1], random_state=random_state)
+        super().__init__(shape=par_v[:-1], rate=par_v[-1], random_state=random_state)
 
-    def score(self, x):
-        _shape_grad = self._shape_grad(x)
-        _rate_grad = self._rate_grad(x)
-        return np.array([_shape_grad, _rate_grad]).T
+    def score(self, X, y):
+        _rate_grad = self._beta_grad(X, y)
+        _shape_grad = self._shape_grad(X, y)
+        return np.hstack((_shape_grad, _rate_grad))
 
     def update(self, par_v):
-        self.rate = par_v
+        self.beta = par_v[:-1]
+        self.shape = par_v[-1]
 
     def _get_params(self):
-        par_c = self.shape
-        par_v = self.rate
-        return par_v, par_c
+        par_v = np.concat((self.beta, np.array([self.shape])))
+        return par_v, None
 
     def _project_params(self, par_v):
         # par_v = max(0.5 , par_v) This was found empirically in the development of the R package
-        par_v[0] = max(1e-6, par_v[0])
-        par_v[1] = max(1e-6, par_v[1])
+        par_v[-1] = max(1e-6, par_v[-1])
         return par_v
