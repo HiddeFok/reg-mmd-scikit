@@ -19,7 +19,7 @@ __all_estimation__ = [
     Gamma,
     GammaShape,
     GammaRate,
-    Poisson
+    Poisson,
 ]
 
 __all_regression__ = [

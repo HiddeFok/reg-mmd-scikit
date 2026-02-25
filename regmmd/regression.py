@@ -153,21 +153,23 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                     bandwidth_y=self.bandwidth_y,
                     bandwidth_x=self.bandwidth_X,
                 )
-        
+
         if not isinstance(self.model, Logistic):
             self.beta_ = res["estimator"][:n_features] / X_scale
             res["estimator"][:n_features] = self.beta_
 
             if self.fit_intercept:
                 if self.beta_.ndim == 1:
-                    self.intercept_ = res["estimator"][n_features] - self.X_offset @ self.beta_
+                    self.intercept_ = (
+                        res["estimator"][n_features] - self.X_offset @ self.beta_
+                    )
                 else:
-                    self.intercept_ = res["estimator"][n_features] - self.X_offset @ self.beta_.T
+                    self.intercept_ = (
+                        res["estimator"][n_features] - self.X_offset @ self.beta_.T
+                    )
                 res["estimator"][n_features] = self.intercept_[0]
             else:
                 self.intercept_ = 0.0
-
-
 
             self.par_v = res["estimator"]
 
@@ -175,5 +177,5 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         return res
 
     def predict(self, X):
-        # TODO: check is fitted      
+        # TODO: check is fitted
         return self.model.predict(X)

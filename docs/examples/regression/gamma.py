@@ -9,11 +9,7 @@ def main():
     n = 10000
     p = 4
     beta = np.arange(1, 5)
-    model_true = GammaRegressionLoc(
-        par_v=beta, 
-        par_c=1,
-        random_state=12
-    )
+    model_true = GammaRegressionLoc(par_v=beta, par_c=1, random_state=12)
 
     rng = np.random.default_rng(seed=123)
     X = rng.normal(loc=0, scale=1, size=(n, p))
@@ -21,10 +17,7 @@ def main():
     y = model_true.sample_n(n=n, mu_given_x=mu_given_x)
 
     beta_init = np.array([0.5, 1.5, 2.5, 3.2])
-    model = GammaRegressionLoc(
-        par_v=beta_init, 
-        par_c=1
-    )
+    model = GammaRegressionLoc(par_v=beta_init, par_c=1)
 
     mmd_reg = MMDRegressor(
         model=model,
@@ -45,6 +38,7 @@ def main():
 
     res = mmd_reg.fit(X, y)
     print_summary(res)
+
 
 if __name__ == "__main__":
     main()
