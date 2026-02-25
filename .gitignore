@@ -5,13 +5,20 @@
 .vscode
 .venv
 .ruff_cache
+build
 
 # Python related files 
 **/__pycache__
 uv.lock
-dist
+dist/
 *.egg-info
 .coverage
+*.pyc*
+*.pyd
+
+# Docs related
+
+docs/build
 
 **/profile_stats
 

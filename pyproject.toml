@@ -21,6 +21,8 @@ dependencies = [
     "ruff>=0.14.10",
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
+    "sphinx>=9.0.4",
+    "pydata-sphinx-theme>=0.16.1",
 ]
 
 [project.optional-dependencies]
