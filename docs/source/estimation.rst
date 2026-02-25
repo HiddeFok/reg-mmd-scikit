@@ -7,4 +7,3 @@ regmmd.estimation
    :members:
    :undoc-members:
    :show-inheritance:
-   :private-members:

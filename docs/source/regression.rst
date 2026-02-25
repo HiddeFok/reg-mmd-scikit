@@ -7,4 +7,3 @@ regmmd.regression
    :members:
    :undoc-members:
    :show-inheritance:
-   :private-members:

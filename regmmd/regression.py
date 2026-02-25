@@ -30,11 +30,11 @@ def _preprocess_data(
 
     Then, if `fit_intercept=True` this preprocessing centers both `X` and `y` as
     follows:
-        - if `X` is dense, center the data and
-        store the mean vector in `X_offset`.
-        - in either case, always center `y` and store the mean in `y_offset`.
-        - both `X_offset` and `y_offset` are always weighted by `sample_weight`
-          if not set to `None`.
+    - if `X` is dense, center the data and
+    store the mean vector in `X_offset`.
+    - in either case, always center `y` and store the mean in `y_offset`.
+    - both `X_offset` and `y_offset` are always weighted by `sample_weight` 
+    if not set to `None`.
 
     If `fit_intercept=False`, no centering is performed and `X_offset`, `y_offset`
     are set to zero.
@@ -45,12 +45,16 @@ def _preprocess_data(
         If copy=True a copy of the input X is triggered, otherwise operations are
         inplace.
         If input X is dense, then X_out is centered.
+
     y_out : {ndarray, sparse matrix} of shape (n_samples,) or (n_samples, n_targets)
         Centered version of y. Possibly performed inplace on input y depending
         on the copy_y parameter.
+
     X_offset : ndarray of shape (n_features,)
         The mean per column of input X.
+
     y_offset : float or ndarray of shape (n_features,)
+
     """
     n_samples, _ = X.shape
 
@@ -133,13 +137,6 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
 
     X_scale : np.array or None
         The scale factor applied to the input features `X` during preprocessing.
-
-    beta_ : np.array
-        The coefficients of the features in the regression model.
-
-    intercept_ : float
-        The intercept term in the regression model. This is `0.0` if `fit_intercept`
-        is `False`.
 
     par_v : np.array
         The estimated variable parameters of the model after fitting.

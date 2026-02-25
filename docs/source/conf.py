@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'RegMMD Scikit-Learn'
+project = 'RegMMD'
 copyright = '2026, Hidde Fokkema'
 author = 'Hidde Fokkema'
 release = '0.1.0'
@@ -21,6 +21,8 @@ extensions = [
 templates_path = ['_templates']
 exclude_patterns = []
 
+# conf.py
+suppress_warnings = ['ref.term', 'ref.ref']
 
 
 # -- Options for HTML output -------------------------------------------------
