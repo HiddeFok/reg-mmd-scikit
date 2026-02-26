@@ -15,6 +15,7 @@ dist/
 .coverage
 *.pyc*
 *.pyd
+.pytest_cache
 
 # Docs related
 

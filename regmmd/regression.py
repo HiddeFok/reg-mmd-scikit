@@ -7,7 +7,7 @@ from regmmd.models import LinearGaussian, Logistic
 from regmmd.models.base_model import RegressionModel
 from regmmd.optimizer import _sgd_hat_regression, _sgd_tilde_regression, MMDResult
 
-from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
+from sklearn.utils.validation import check_X_y, check_array
 
 
 __REGRESSION_MODEL_LIST__ = {"linear-gaussian": LinearGaussian, "logistic": Logistic}
@@ -152,8 +152,8 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         self,
         model: RegressionModel,
         fit_intercept: bool = True,
-        par_v: np.array = None,
-        par_c: np.array = None,
+        par_v: Optional[np.array] = None,
+        par_c: Optional[np.array] = None,
         kernel_y: str = "Gaussian",
         kernel_X: str = "Laplace",
         bandwidth_y: Union[str, float] = "auto",
@@ -269,7 +269,6 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         y_pred : np.ndarray, shape (n_samples,)
             The predicted target values.
         """
-        # TODO: Add a check to ensure the model is fitted before making predictions.
         X = self._validate_data(X)
         self._check_is_fitted()
 

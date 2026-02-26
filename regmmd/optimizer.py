@@ -25,9 +25,11 @@ class MMDResult(TypedDict):
 def _median_heuristic(X: np.array):
     if len(X.shape) == 1:
         X = X[:, np.newaxis]
-
     pairwise_dists = pdist(X, metric="euclidean")
-    median_dist = np.median(pairwise_dists)
+    if len(pairwise_dists) > 0:
+        median_dist = np.median(pairwise_dists)
+    else:
+        median_dist = 0
     return median_dist
 
 
@@ -63,7 +65,10 @@ def _sgd_estimation(
         "stepsize": stepsize,
         "bandwidth": bandwidth,
     }
-    trajectory = np.zeros(shape=(par_v.shape[0], burn_in + n_step + 1))
+    if len(par_v.shape) == 0:
+        trajectory = np.zeros(shape=(1, burn_in + n_step + 1))
+    else:
+        trajectory = np.zeros(shape=(par_v.shape[0], burn_in + n_step + 1))
     trajectory[:, 0] = par_v
 
     for i in range(burn_in):
