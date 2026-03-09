@@ -1,10 +1,37 @@
 from typing import Dict, Optional
+from enum import Enum
 
 from sklearn.base import BaseEstimator
 
-from regmmd.models import GaussianLoc
+from regmmd.models import (
+    GaussianLoc,
+    GaussianScale, 
+    Gaussian,
+    Beta, 
+    BetaA, 
+    BetaB,
+    Binomial,
+    Gamma,
+    GammaRate, 
+    GammaShape,
+    Poisson
+)
 from regmmd.models.base_model import EstimationModel
 from regmmd.optimizer import _gd_gaussian_loc_exact_estimation, _sgd_estimation
+
+class DefinedModels(Enum):
+    GAUSSIAN_LOC = GaussianLoc
+    GAUSSIAN_SCALE = GaussianScale
+    GAUSSIAN = Gaussian
+    BETA = Beta
+    BETA_A = BetaA
+    BETA_B = BetaB
+    BINOMIAL = Binomial
+    GAMMA = Gamma
+    GAMMA_RATE = GammaRate
+    GAMMA_SHAPE = GammaShape
+    POISSON = Poisson
+
 
 
 class MMDEstimator(BaseEstimator):
@@ -26,21 +53,26 @@ class MMDEstimator(BaseEstimator):
         ``EstimationModel``. This model defines the distributional form assumed
         for the data and exposes an ``_init_params`` method used to initialise
         parameters before optimisation.
+
     par_v : float, optional
         Initial value for the variable parameters of the model. If ``None``, it
         will be initialised automatically by the model's ``_init_params`` method
         when :meth:`fit` is called.
+
     par_c : float, optional
         Initial value for the constant parameters of the model. If
         ``None``, it will be initialised automatically by the model's
         ``_init_params`` method when :meth:`fit` is called.
+
     kernel : str, default="Gaussian"
         The kernel function used to compute the MMD. Currently supports
         ``"Gaussian"``, ``"Laplace"`` or ``"Cauchy"``.
+
     bandwidth : str or float, default="auto"
         The bandwidth of the kernel. If set to ``"auto"``, the bandwidth is
         selected automatically using a heuristic method such as the median
         heuristic.
+
     solver : dict, optional
         A dictionary specifying the solver parameters for the optimisation
         procedure. Expected keys are:
@@ -69,14 +101,20 @@ class MMDEstimator(BaseEstimator):
 
     def __init__(
         self,
-        model: EstimationModel,
+        model: DefinedModels | EstimationModel,
         par_v: float = None,
         par_c: float = None,
         kernel: str = "Gaussian",
         bandwidth: str = "auto",
         solver: Optional[Dict] = None,
     ):
-        self.model = model
+        if isinstance(model, str):
+            self.model = DefinedModels(model.upper().replace("-", "_"))
+        elif isinstance(model, EstimationModel):
+            self.model = model
+        else:
+            raise TypeError("Expected either string or EstimationModel!")
+
         self.par_v = par_v
         self.par_c = par_c
         self.kernel = kernel
@@ -84,10 +122,23 @@ class MMDEstimator(BaseEstimator):
         self.solver = solver
 
     def fit(self, X):
-        pars = self.model._init_params(X)
-        self.par_v = pars[0]
-        self.par_c = pars[1]
+        """Fit the MMD estimation model according to the given training data.
 
+        Parameters
+        ----------
+        X : np.ndarray, shape (n_samples, n_features)
+            Training input samples.
+
+        Returns
+        -------
+        res : MMDResult
+            A dictionary containing the results of the optimization process, including
+            the estimated parameters and the optimization trajectory.
+        """
+        if self.par_v is None or self.par_c is None:
+            pars = self.model._init_params(X)
+            self.par_v = pars[0]
+            self.par_c = pars[1]
 
         if isinstance(self.model, GaussianLoc) and self.kernel == "Gaussian":
             res = _gd_gaussian_loc_exact_estimation(
