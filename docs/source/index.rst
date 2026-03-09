@@ -12,8 +12,9 @@ RegMMD Scikit-Learn Implementation documentation
    :maxdepth: 2
    :caption: Contents:
 
-   api
    examples
+   robustness 
+   api
 
 Indices and tables
 ==================
