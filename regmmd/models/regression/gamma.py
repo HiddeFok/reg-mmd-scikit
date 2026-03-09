@@ -95,7 +95,7 @@ class GammaRegressionLoc(GammaRegressionBase):
 
 class GammaRegression(GammaRegressionBase):
     def __init__(self, par_v=None, par_c=None, random_state=None):
-        super().__init__(shape=par_v[:-1], rate=par_v[-1], random_state=random_state)
+        super().__init__(beta=par_v[:-1], shape=par_v[-1], random_state=random_state)
 
     def score(self, X, y):
         _rate_grad = self._beta_grad(X, y)

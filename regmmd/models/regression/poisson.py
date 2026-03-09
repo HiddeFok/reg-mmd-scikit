@@ -3,7 +3,7 @@ from scipy.special import factorial
 from regmmd.models.base_model import RegressionModel
 
 
-class PoissonRegression(RegressionModel):
+class PoissonRegressionBase(RegressionModel):
     def __init__(self, beta=None, random_state=None):
         self.beta = beta
 
@@ -40,3 +40,7 @@ class PoissonRegression(RegressionModel):
 
     def update(self, par_v):
         self.beta = par_v
+
+class PoissonRegression(PoissonRegressionBase):
+    def __init__(self, par_v=None, par_c=None, random_state=None):
+        super().__init__(beta=par_v, random_state=random_state)

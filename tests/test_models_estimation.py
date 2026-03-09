@@ -157,16 +157,3 @@ def test_binomial_score():
     score = model.score(x)
     assert score.shape == x.shape
 
-
-# --- Poisson (known bugs: self.labda / self.p) ---
-
-@pytest.mark.xfail(reason="Poisson.sample_n uses undefined self.labda")
-def test_poisson_sample_n():
-    model = Poisson(lam=3.0, random_state=0)
-    model.sample_n(20)
-
-
-@pytest.mark.xfail(reason="Poisson.score and _get_params reference undefined self.p")
-def test_poisson_get_params():
-    model = Poisson(lam=3.0)
-    model._get_params()

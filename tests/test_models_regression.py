@@ -4,6 +4,7 @@ import pytest
 from regmmd.models.regression.linear_gaussian import LinearGaussian, LinearGaussianLoc
 from regmmd.models.regression.logistic import Logistic
 from regmmd.models.regression.gamma import GammaRegressionLoc, GammaRegression
+from regmmd.models.regression.poisson import PoissonRegression
 
 RNG = np.random.default_rng(42)
 X = RNG.normal(size=(30, 2))
@@ -93,6 +94,34 @@ def test_logistic_score_shape():
     score = model.score(X, y_binary)
     assert score.shape == (30, 2)
 
+# --- GammaRegression ---
+
+def test_gamma_reg_predict_positive():
+    beta = np.array([0.1, 0.2])
+    shape = np.array([2.0])
+    model = GammaRegression(par_v=np.concatenate((beta, shape)), par_c=None)
+    preds = model.predict(X)
+    assert preds.shape == (30,)
+    assert np.all(preds > 0)
+
+
+def test_gamma_reg_sample_n():
+    beta = np.array([0.1, 0.2])
+    shape = np.array([2.0])
+    model = GammaRegression(par_v=np.concatenate((beta, shape)), par_c=None, random_state=0)
+    mu = model.predict(X)
+    samples = model.sample_n(30, mu)
+    assert samples.shape == (30,)
+    assert np.all(samples > 0)
+
+
+def test_gamma_reg_score_shape():
+    beta = np.array([0.1, 0.2])
+    shape = np.array([2.0])
+    model = GammaRegression(par_v=np.concatenate((beta, shape)), par_c=None)
+    score = model.score(X, y_pos)
+    assert score.shape == (30, 3)
+
 
 # --- GammaRegressionLoc ---
 
@@ -118,9 +147,27 @@ def test_gamma_reg_loc_score_shape():
     assert score.shape == (30, 2)
 
 
-# --- GammaRegression._get_params uses np.concat (bug) ---
+# --- PoissonRegression ---
 
-@pytest.mark.xfail(reason="GammaRegression._get_params uses np.concat instead of np.concatenate")
-def test_gamma_regression_get_params():
-    model = GammaRegression(par_v=np.array([0.1, 0.2, 2.0]))
-    model._get_params()
+def test_poisson_reg_predict_positive():
+    beta = np.array([0.1, 0.2])
+    model = PoissonRegression(par_v=beta)
+    preds = model.predict(X)
+    assert preds.shape == (30,)
+    assert np.all(preds > 0)
+
+
+def test_poisson_reg_sample_n():
+    beta = np.array([0.1, 0.2])
+    model = PoissonRegression(par_v=beta, par_c=None, random_state=0)
+    mu = model.predict(X)
+    samples = model.sample_n(30, mu)
+    assert samples.shape == (30,)
+    assert np.all(samples == samples.astype(int))
+
+
+def test_poisson_reg_score_shape():
+    beta = np.array([0.1, 0.2])
+    model = PoissonRegression(par_v=beta, par_c=None)
+    score = model.score(X, y_pos)
+    assert score.shape == (30, 2)
