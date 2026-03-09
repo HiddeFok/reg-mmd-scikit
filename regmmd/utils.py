@@ -6,8 +6,14 @@ def print_summary(res: MMDResult) -> None:
     Prints a pretty summary report from the result dictionary of
     the estimation procedure.
 
-    Args:
-        res (Dict): Result dictionary
+    Parameters
+    ----------
+    res : MMDResult, 
+        Result from the fit procedure of either MMDEstimator or MMDRegressor 
+
+    Returns
+    ------- 
+    None 
     """
     print("\n" + "=" * 50)
     title_str = "MMD Result Summary Report"
@@ -15,20 +21,16 @@ def print_summary(res: MMDResult) -> None:
     print(side_margins * " " + title_str + side_margins * "")
     print("=" * 50 + "\n")
 
-    # Initial parameters
     print("Initial Parameters:")
     print(f"\tpar_v: {res['par_v_init']}")
     print(f"\tpar_c: {res.get('par_c_init', 'Not provided')}\n")
 
-    # Stepsize and bandwidth
     print(f"Stepsize: {res['stepsize']}")
     print(f"Bandwidth: {res.get('bandwidth', 'Not provided')}\n")
 
-    # Estimated parameters
     print("Estimated Parameters:")
     print(f"\t par_v: {res['estimator']}\n")
 
-    # Trajectory summary
     print("Trajectory Summary:")
     if len(res["trajectory"].shape) == 1:
         print(f"\tNumber of steps: {res['trajectory'].shape[0]}")

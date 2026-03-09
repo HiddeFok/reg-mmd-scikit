@@ -7,6 +7,7 @@ from regmmd.models.estimation.poisson import Poisson
 from regmmd.models.regression.linear_gaussian import LinearGaussian, LinearGaussianLoc
 from regmmd.models.regression.logistic import Logistic
 from regmmd.models.regression.gamma import GammaRegression, GammaRegressionLoc
+from regmmd.models.regression.poisson import PoissonRegression
 
 __all_estimation__ = [
     Gaussian,
@@ -28,6 +29,7 @@ __all_regression__ = [
     Logistic,
     GammaRegression,
     GammaRegressionLoc,
+    PoissonRegression
 ]
 
 __all__ = __all_estimation__ + __all_regression__

@@ -1,16 +1,31 @@
 from typing import Dict, Optional, Union
+from enum import Enum 
 
 import numpy as np
 from sklearn.base import BaseEstimator, RegressorMixin
 
-from regmmd.models import LinearGaussian, Logistic
+from regmmd.models import (
+    LinearGaussianLoc,
+    LinearGaussian, 
+    Logistic,
+    GammaRegression, 
+    GammaRegressionLoc,
+    PoissonRegression
+)
 from regmmd.models.base_model import RegressionModel
 from regmmd.optimizer import _sgd_hat_regression, _sgd_tilde_regression, MMDResult
 
 from sklearn.utils.validation import check_X_y, check_array
 
 
-__REGRESSION_MODEL_LIST__ = {"linear-gaussian": LinearGaussian, "logistic": Logistic}
+class DefinedModels(Enum):
+    LINEAR_GAUSSIAN = LinearGaussian
+    LOGISTIC = Logistic
+    LINEAR_GAUSSIAN_LOC = LinearGaussianLoc
+    GAMMA = GammaRegression
+    GAMMA_LOC = GammaRegressionLoc
+    POISSON = PoissonRegression
+
 
 
 def _preprocess_data(
@@ -150,7 +165,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
 
     def __init__(
         self,
-        model: RegressionModel,
+        model: DefinedModels | RegressionModel,
         fit_intercept: bool = True,
         par_v: Optional[np.array] = None,
         par_c: Optional[np.array] = None,
@@ -161,7 +176,13 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         solver: Optional[Dict] = None,
     ):
         self.fit_intercept = fit_intercept
-        self.model = model
+        if isinstance(model, str):
+            self.model = DefinedModels(model.upper().replace("-", "_"))
+        elif isinstance(model, RegressionModel):
+            self.model = model
+        else:
+            raise TypeError("Expected either string or RegressionModel!")
+
         self.par_v = par_v
         self.par_c = par_c
         self.kernel_y = kernel_y
@@ -193,6 +214,9 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         """
         X, y = self._validate_data(X, y)
         n_features = X.shape[1]
+
+        if self.par_v is None or self.par_c is None:
+            self.model._init_params(X=X, y=y)
 
         if not isinstance(self.model, Logistic):
             X, y, X_offset, X_scale = _preprocess_data(

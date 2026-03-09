@@ -15,9 +15,6 @@ are:
     Badr-Eddine Chérief-Abdellatif, Pierre Alquier, 2022
 
 
-
-
-
 ## Installation
 
 This package is developed for Python 3.12+ and can be installed by cloning this repository and installing through `pip`.
@@ -29,7 +26,7 @@ pip install -e .
 
 ## Examples
 
-The package has 2 main classes, `MMDEstimator` and `MMDRegression` that
+The package has 2 main classes, `MMDEstimator` and `MMDRegressor` that
 implement the estimation and regression procedures respectively. They follow
 a scikit-learn style implementation
 
@@ -40,6 +37,6 @@ from regmmd import MMDestimator
 
 ### Regression
 ```python
-from regmmd import MMDRegression
+from regmmd import MMDRegressor
 ```
 
