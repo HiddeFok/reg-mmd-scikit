@@ -53,3 +53,7 @@ doctest_global_setup = '''
 import numpy as np
 rng = np.random.default_rng(0)
 '''
+
+
+# GH Pages
+html_baseurl = "https://<username>.github.io/<repository>/"
