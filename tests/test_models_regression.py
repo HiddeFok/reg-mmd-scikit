@@ -282,7 +282,7 @@ def test_poisson_inits_params():
 
 @pytest.mark.parametrize("model", __all_regression__)
 def test_models_no_par_raises(model):
-    model = model(par_v=None)
+    model = eval(model)(par_v=None)
     x = np.array([[2, 1], [5, 8], [3, 4]], dtype=float)
     y = np.array([2, 5, 8], dtype=float)
     with pytest.raises(ValueError):

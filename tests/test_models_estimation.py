@@ -382,7 +382,7 @@ def test_poisson_updates():
 
 @pytest.mark.parametrize("model", __all_estimation__)
 def test_models_no_par_raises(model):
-    model = model(par_v=None)
+    model = eval(model)(par_v=None)
     x = np.array([2, 5, 8], dtype=float)
     with pytest.raises(ValueError):
         _ = model.score(x)
