@@ -34,10 +34,62 @@ a scikit-learn style implementation
 ### Estimation
 ```python
 from regmmd import MMDestimator
+import numpy as np
+
+rng = np.random.default_rng(seed=123)
+x = rng.normal(loc=0, scale=1.5, size=500)
+
+mmd_estim = MMDEstimator(
+    model="gaussian-loc",
+    par_v=None,
+    par_c=1.5,
+    kernel="Gaussian",
+    solver={
+        "type": "GD",
+        "burnin": 5000,
+        "n_step": 10000,
+        "stepsize": 1,
+        "epsilon": 1e-4,
+    }
+)
+res = mmd_estim.fit(X=x)
 ```
 
 ### Regression
 ```python
 from regmmd import MMDRegressor
+import numpy as np
+
+rng = np.random.default_rng(seed=123)
+
+n = 10000
+p = 4
+beta = np.arange(1, 5)
+model_true = GammaRegressionLoc(par_v=beta, par_c=1, random_state=12)
+
+X = rng.normal(loc=0, scale=1, size=(n, p))
+mu_given_x = model_true.predict(X=X)
+y = model_true.sample_n(n=n, mu_given_x=mu_given_x)
+
+beta_init = np.array([0.5, 1.5, 2.5, 3.2])
+
+mmd_reg = MMDRegressor(
+    model="gamma-regression-loc",
+    par_v=beta_init,
+    par_c=None,
+    fit_intercept=False,
+    bandwidth_X=1,
+    bandwidth_y=1,
+    kernel_y="Laplace",
+    solver={
+        "type": "SGD",
+        "burnin": 500,
+        "n_step": 10000,
+        "stepsize": 1,
+        "epsilon": 1e-8,
+    },
+)
+
+res = mmd_reg.fit(X, y)
 ```
 

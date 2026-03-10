@@ -6,18 +6,12 @@ from regmmd.utils import print_summary
 
 
 def main():
-    print("Estimating only the mean")
     rng = np.random.default_rng(seed=123)
 
-    print("Sampling points..")
     x = rng.normal(loc=0, scale=1.5, size=500)
 
-    print("Initializing model")
-    model = GaussianLoc(par_c=1.5)
-
-    print("Initializing estimator")
     mmd_estim = MMDEstimator(
-        model=model,
+        model="gaussian-loc",
         par_v=None,
         par_c=1.5,
         kernel="Gaussian",
@@ -29,7 +23,6 @@ def main():
             "epsilon": 1e-4,
         },
     )
-    print("fitting estimator")
     res = mmd_estim.fit(X=x)
     print_summary(res)
 

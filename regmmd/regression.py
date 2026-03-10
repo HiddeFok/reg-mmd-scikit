@@ -140,6 +140,9 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         optimization steps), and "stepsize" (learning rate for the optimizer).
         If `None`, default solver settings are used.
 
+    random_state : int, optional
+        random seed to be passed to the model and any sampler used in the SGD optimizers.
+
     Attributes
     ----------
     X_offset : np.array or None
@@ -173,11 +176,14 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         bandwidth_y: Union[str, float] = "auto",
         bandwidth_X: Union[str, float] = "auto",
         solver: Optional[Dict] = None,
+        random_state: Optional[int] = None,
     ):
         self.fit_intercept = fit_intercept
         if isinstance(model, str):
             try:
-                self.model = DefinedModels[model.upper().replace("-", "_")].value()
+                self.model = DefinedModels[model.upper().replace("-", "_")].value(
+                    par_v=par_v, par_c=par_c, random_state=random_state
+                )
             except KeyError:
                 raise ValueError("model string is not defined by the package.")
         elif isinstance(model, RegressionModel):

@@ -84,17 +84,20 @@ class MMDEstimator(BaseEstimator):
 
         If ``None``, solver settings must be provided before calling :meth:`fit`.
 
+    random_state : int, optional
+        random seed to be passed to the model and any sampler used in the SGD optimizers.
+
     Attributes
     ----------
     par_v : float
         The variable parameter, updated with the optimised value after fitting.
     par_c : float
-        The constante parameter, not updated with the optimised value after fitting.
+        The constant parameter, not updated with the optimised value after fitting.
 
     Notes
     -----
     - For :class:`GaussianLoc` models, an exact gradient descent routine
-      (``_gd_gaussian_loc_exact_estimation``) is used during fitting.
+      (``_gd_gaussian_loc_exact_estimation``) can be used, when the kernel is ``"Gaussian"`` as wellduring fitting.
     - For all other models, a stochastic gradient descent routine
       (``_sgd_estimation``) is applied instead.
     """
