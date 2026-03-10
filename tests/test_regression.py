@@ -7,7 +7,6 @@ from regmmd.regression import MMDRegressor, _preprocess_data, NotFittedError
 RNG = np.random.default_rng(42)
 
 
-
 def test_log_prob():
     X = np.array([[1, 2], [3, 4]], dtype=float)
     y = np.array([5.0, 6.0])
@@ -59,6 +58,7 @@ def test_score():
 
 # --- _preprocess_data ---
 
+
 def test_preprocess_data_centers_X():
     X = RNG.normal(5.0, 1.0, size=(20, 2))
     y = RNG.normal(size=(20,))
@@ -70,14 +70,18 @@ def test_preprocess_data_centers_X():
 def test_preprocess_data_adds_intercept_column():
     X = RNG.normal(size=(20, 2))
     y = RNG.normal(size=(20,))
-    X_out, y_out, X_offset, X_scale = _preprocess_data(X.copy(), y.copy(), fit_intercept=True)
+    X_out, y_out, X_offset, X_scale = _preprocess_data(
+        X.copy(), y.copy(), fit_intercept=True
+    )
     assert X_out.shape == (20, 3)
 
 
 def test_preprocess_data_no_intercept():
     X = RNG.normal(size=(20, 2))
     y = RNG.normal(size=(20,))
-    X_out, y_out, X_offset, X_scale = _preprocess_data(X.copy(), y.copy(), fit_intercept=False)
+    X_out, y_out, X_offset, X_scale = _preprocess_data(
+        X.copy(), y.copy(), fit_intercept=False
+    )
     assert X_out.shape == (20, 2)
 
 
@@ -118,6 +122,7 @@ def test_mmd_regressor_not_fitted_raises():
     with pytest.raises(NotFittedError):
         reg.predict(X_test)
 
+
 def test_mmd_regressor_fitted_hat_predicts():
     X = RNG.normal(size=(50, 2))
     noise = RNG.normal(size=(50,))
@@ -132,6 +137,7 @@ def test_mmd_regressor_fitted_hat_predicts():
     mse = np.mean((y - y_hat) ** 2)
     assert mse < 0.5
 
+
 def test_mmd_regressor_fitted_tilde_predicts():
     X = RNG.normal(size=(50, 2))
     noise = RNG.normal(size=(50,))
@@ -140,19 +146,24 @@ def test_mmd_regressor_fitted_tilde_predicts():
 
     par_v = np.array([1.2, 2.1])
     model = LinearGaussianLoc(par_v=par_v, par_c=0.1)
-    reg = MMDRegressor(model=model, par_v=par_v, solver=SOLVER, fit_intercept=False, bandwidth_X=0)
+    reg = MMDRegressor(
+        model=model, par_v=par_v, solver=SOLVER, fit_intercept=False, bandwidth_X=0
+    )
     reg.fit(X, y)
     y_hat = reg.predict(X)
     mse = np.mean((y - y_hat) ** 2)
     assert mse < 0.5
 
+
 def test_mmd_regressor_model_str_inits():
     reg = MMDRegressor(model="linear-gaussian", solver=SOLVER)
+
 
 def test_mmd_regressor_wrong_model_str_raises():
     par_v = np.zeros(3)
     with pytest.raises(ValueError):
         reg = MMDRegressor(model="not-defined", par_v=par_v, solver=SOLVER)
+
 
 def test_mmd_regressor_wrong_model_type_raises():
     par_v = np.zeros(3)
@@ -176,6 +187,3 @@ def test_mmd_regressor_inits_params():
     assert par_c_before is None
     assert par_v_after.shape == (2,)
     assert isinstance(par_c_after, float)
-
-
-

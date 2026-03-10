@@ -47,6 +47,7 @@ def K1d(x: np.array, y: np.array, kernel: str, bandwidth: float = 1) -> np.array
     u = x[:, None] - y
     return K1d_dist(u, kernel, bandwidth)
 
+
 def Kmd_dist(u: np.array, kernel: str, bandwidth: float = 1) -> np.array:
     """m-Dimensional Kernel evaluation function
 
@@ -64,11 +65,11 @@ def Kmd_dist(u: np.array, kernel: str, bandwidth: float = 1) -> np.array:
     u = u / bandwidth
     u = np.linalg.norm(u, axis=1, ord=2)
     if kernel == "Gaussian":
-        return np.exp(-u** 2)
+        return np.exp(-(u**2))
     elif kernel == "Laplace":
         return np.exp(-u)
     elif kernel == "Cauchy":
-        return 1 / (2 + u** 2)
+        return 1 / (2 + u**2)
     else:
         raise ValueError
 
@@ -100,4 +101,3 @@ def Kmd(x: np.array, y: np.array, kernel: str, bandwidth: float = 1) -> np.array
         return 1 / (2 + u**2)
     else:
         raise ValueError
-

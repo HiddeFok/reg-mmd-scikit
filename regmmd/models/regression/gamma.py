@@ -4,6 +4,7 @@ from scipy.special import gamma, digamma
 from regmmd.models.base_model import RegressionModel
 from sklearn.linear_model import GammaRegressor
 
+
 class GammaRegressionBase(RegressionModel):
     """Gamma regression, where exp(X^T \\beta) = mean(Y). The
     mean parametrized gamma density is given by
@@ -96,7 +97,9 @@ class GammaRegression(GammaRegressionBase):
         if par_v is None:
             super().__init__(beta=None, shape=None, random_state=random_state)
         else:
-            super().__init__(beta=par_v[:-1], shape=par_v[-1], random_state=random_state)
+            super().__init__(
+                beta=par_v[:-1], shape=par_v[-1], random_state=random_state
+            )
 
     def score(self, X, y):
         _beta_grad = self._beta_grad(X, y)

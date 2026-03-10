@@ -3,6 +3,7 @@ import numpy as np
 from regmmd.models.base_model import RegressionModel
 from sklearn.linear_model import LogisticRegression
 
+
 class LogisticBase(RegressionModel):
     def __init__(self, beta=None, random_state=None):
         self.beta = beta
@@ -12,7 +13,9 @@ class LogisticBase(RegressionModel):
 
     def log_prob(self, X, y):
         if self.beta is None:
-            raise ValueError("Both parameters need to be defined to calculate the log_prob")
+            raise ValueError(
+                "Both parameters need to be defined to calculate the log_prob"
+            )
 
         mu = X @ self.beta
         p = self._link_func(mu)
@@ -53,7 +56,9 @@ class Logistic(LogisticBase):
     def score(self, X, y):
         """gradient of the log-likelihood for each individual data point"""
         if self.beta is None:
-            raise ValueError("Both parameters need to be defined to calculate the score")
+            raise ValueError(
+                "Both parameters need to be defined to calculate the score"
+            )
         p = self.predict(X)
 
         residuals = (y - p)[:, np.newaxis]

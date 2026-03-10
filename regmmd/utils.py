@@ -8,12 +8,12 @@ def print_summary(res: MMDResult) -> None:
 
     Parameters
     ----------
-    res : MMDResult, 
-        Result from the fit procedure of either MMDEstimator or MMDRegressor 
+    res : MMDResult,
+        Result from the fit procedure of either MMDEstimator or MMDRegressor
 
     Returns
-    ------- 
-    None 
+    -------
+    None
     """
     print("\n" + "=" * 50)
     title_str = "MMD Result Summary Report"

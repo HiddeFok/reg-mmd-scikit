@@ -5,19 +5,20 @@ from sklearn.base import BaseEstimator
 
 from regmmd.models import (
     GaussianLoc,
-    GaussianScale, 
+    GaussianScale,
     Gaussian,
-    Beta, 
-    BetaA, 
+    Beta,
+    BetaA,
     BetaB,
     Binomial,
     Gamma,
-    GammaRate, 
+    GammaRate,
     GammaShape,
-    Poisson
+    Poisson,
 )
 from regmmd.models.base_model import EstimationModel
 from regmmd.optimizer import _gd_gaussian_loc_exact_estimation, _sgd_estimation
+
 
 class DefinedModels(Enum):
     GAUSSIAN_LOC = GaussianLoc
@@ -31,7 +32,6 @@ class DefinedModels(Enum):
     GAMMA_RATE = GammaRate
     GAMMA_SHAPE = GammaShape
     POISSON = Poisson
-
 
 
 class MMDEstimator(BaseEstimator):
@@ -107,10 +107,13 @@ class MMDEstimator(BaseEstimator):
         kernel: str = "Gaussian",
         bandwidth: str = "auto",
         solver: Optional[Dict] = None,
+        random_state: Optional[int] = None,
     ):
         if isinstance(model, str):
             try:
-                self.model = DefinedModels[model.upper().replace("-", "_")].value()
+                self.model = DefinedModels[model.upper().replace("-", "_")].value(
+                    par_c=par_c, par_v=par_v, random_state=random_state
+                )
             except KeyError:
                 raise ValueError("model string is not defined by the package.")
         elif isinstance(model, EstimationModel):
@@ -168,4 +171,3 @@ class MMDEstimator(BaseEstimator):
                 epsilon=self.solver["epsilon"],
             )
         return res
-

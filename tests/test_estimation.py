@@ -2,7 +2,14 @@ import numpy as np
 import pytest
 
 from regmmd import MMDEstimator
-from regmmd.models import GaussianLoc, GaussianScale, Gaussian, BetaA, GammaRate, Binomial
+from regmmd.models import (
+    GaussianLoc,
+    GaussianScale,
+    Gaussian,
+    BetaA,
+    GammaRate,
+    Binomial,
+)
 
 RNG = np.random.default_rng(0)
 
@@ -11,12 +18,20 @@ SOLVER = {"burnin": 50, "n_step": 100, "stepsize": 1.0, "epsilon": 1e-4}
 
 # --- Result structure ---
 
+
 def test_result_has_required_keys():
     X = RNG.normal(2.0, 1.0, size=(50,))
     model = GaussianLoc(random_state=0)
     est = MMDEstimator(model=model, kernel="Gaussian", bandwidth="auto", solver=SOLVER)
     res = est.fit(X)
-    for key in ("par_v_init", "par_c_init", "stepsize", "estimator", "trajectory", "bandwidth"):
+    for key in (
+        "par_v_init",
+        "par_c_init",
+        "stepsize",
+        "estimator",
+        "trajectory",
+        "bandwidth",
+    ):
         assert key in res
 
 
@@ -29,6 +44,7 @@ def test_gaussian_loc_estimator_is_scalar():
 
 
 # --- GaussianLoc: exact GD path ---
+
 
 def test_gaussian_loc_estimates_mean():
     true_loc = 3.0
@@ -50,6 +66,7 @@ def test_gaussian_loc_float_bandwidth():
 
 # --- BetaA: SGD path ---
 
+
 def test_betaA_fit_returns_result():
     X = RNG.beta(2.0, 5.0, size=(50,))
     model = BetaA(par_c=5.0, random_state=0)
@@ -60,6 +77,7 @@ def test_betaA_fit_returns_result():
 
 # --- GammaRate: SGD path ---
 
+
 def test_gamma_rate_fit_returns_result():
     X = RNG.gamma(shape=2.0, scale=1.0, size=(50,))
     model = GammaRate(par_c=2.0, random_state=0)
@@ -69,6 +87,7 @@ def test_gamma_rate_fit_returns_result():
 
 
 # --- Kernel options via Gaussian (SGD path) ---
+
 
 @pytest.mark.parametrize("kernel", ["Gaussian", "Laplace", "Cauchy"])
 def test_gaussian_sgd_kernels(kernel):
@@ -83,10 +102,12 @@ def test_gaussian_sgd_kernels(kernel):
 def test_mmd_estimator_model_str_inits():
     reg = MMDEstimator(model="gaussian", solver=SOLVER)
 
+
 def test_mmd_estimator_wrong_model_str_raises():
     par_v = np.zeros(3)
     with pytest.raises(ValueError):
         reg = MMDEstimator(model="not-defined", par_v=par_v, solver=SOLVER)
+
 
 def test_mmd_estimator_wrong_model_type_raises():
     par_v = np.zeros(3)

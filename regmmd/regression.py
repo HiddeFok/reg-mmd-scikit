@@ -1,16 +1,16 @@
 from typing import Dict, Optional, Union
-from enum import Enum 
+from enum import Enum
 
 import numpy as np
 from sklearn.base import BaseEstimator, RegressorMixin
 
 from regmmd.models import (
     LinearGaussianLoc,
-    LinearGaussian, 
+    LinearGaussian,
     Logistic,
-    GammaRegression, 
+    GammaRegression,
     GammaRegressionLoc,
-    PoissonRegression
+    PoissonRegression,
 )
 from regmmd.models.base_model import RegressionModel
 from regmmd.optimizer import _sgd_hat_regression, _sgd_tilde_regression, MMDResult
@@ -25,7 +25,6 @@ class DefinedModels(Enum):
     GAMMA = GammaRegression
     GAMMA_LOC = GammaRegressionLoc
     POISSON = PoissonRegression
-
 
 
 def _preprocess_data(
@@ -48,7 +47,7 @@ def _preprocess_data(
     - if `X` is dense, center the data and
     store the mean vector in `X_offset`.
     - in either case, always center `y` and store the mean in `y_offset`.
-    - both `X_offset` and `y_offset` are always weighted by `sample_weight` 
+    - both `X_offset` and `y_offset` are always weighted by `sample_weight`
     if not set to `None`.
 
     If `fit_intercept=False`, no centering is performed and `X_offset`, `y_offset`
@@ -90,7 +89,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
 
     This class implements regression using the MMD criterion, which is a kernel-based
     method to compare distributions by measuring the distance between mean embeddings
-    in a Reproducing Kernel Hilbert Space (RKHS). 
+    in a Reproducing Kernel Hilbert Space (RKHS).
 
     MMDRegressor fits a regression model by minimizing the MMD between the distributions
     of the observed data and the model's predictions. It supports various kernel types
@@ -102,7 +101,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         The statistical model used for regression, provided as an instance of a
         `RegressionModel` class with initialized parameters. This model defines the
         relationship between the input features and the target variable.
-        
+
     fit_intercept : bool, default=True
         Specifies whether to calculate the intercept for the model. If set to `False`,
         the model assumes that the data is already centered, and no intercept will be
@@ -301,7 +300,9 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
 
         return self.model.predict(X)
 
-    def _validate_data(self, X: np.ndarray, y: Optional[np.ndarray] = None) -> Union[np.ndarray, tuple]:
+    def _validate_data(
+        self, X: np.ndarray, y: Optional[np.ndarray] = None
+    ) -> Union[np.ndarray, tuple]:
         """Validate input arrays X and y.
 
         Parameters
@@ -335,10 +336,13 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         NotFittedError
             If the model is not fitted yet.
         """
-        if not hasattr(self, 'beta_'):
-            raise NotFittedError("This MMDRegressor instance is not fitted yet. Call 'fit' with appropriate arguments before using this method.")
+        if not hasattr(self, "beta_"):
+            raise NotFittedError(
+                "This MMDRegressor instance is not fitted yet. Call 'fit' with appropriate arguments before using this method."
+            )
 
 
 class NotFittedError(ValueError):
     """Exception class to raise if the model is used before fitting."""
+
     pass

@@ -15,7 +15,9 @@ class LinearGaussianBase(RegressionModel):
     def log_prob(self, X, y):
         # TODO: write validation checks
         if self.beta is None or self.phi is None:
-            raise ValueError("Both parameters need to be defined to calculate the log_prob")
+            raise ValueError(
+                "Both parameters need to be defined to calculate the log_prob"
+            )
 
         n = X.shape[0]
 
@@ -26,7 +28,9 @@ class LinearGaussianBase(RegressionModel):
 
     def sample_n(self, n: int, mu_given_x: np.array) -> np.array:
         if self.beta is None or self.phi is None:
-            raise ValueError("Both parameters need to be defined to calculate the log_prob")
+            raise ValueError(
+                "Both parameters need to be defined to calculate the log_prob"
+            )
 
         noise_sampled = self.rng.normal(loc=0, scale=np.sqrt(self.phi), size=(n,))
         return mu_given_x + noise_sampled
@@ -34,7 +38,9 @@ class LinearGaussianBase(RegressionModel):
     def predict(self, X):
         """Outputs the mean given X, parameters need to be initialized for this"""
         if self.beta is None or self.phi is None:
-            raise ValueError("Both parameters need to be defined to calculate the log_prob")
+            raise ValueError(
+                "Both parameters need to be defined to calculate the log_prob"
+            )
 
         return X @ self.beta
 
@@ -71,7 +77,9 @@ class LinearGaussian(LinearGaussianBase):
     def score(self, X, y):
         """gradient of the log-likelihood for each individual data point"""
         if self.beta is None or self.phi is None:
-            raise ValueError("Both parameters need to be defined to calculate the score")
+            raise ValueError(
+                "Both parameters need to be defined to calculate the score"
+            )
 
         score_beta = self._beta_grad(X, y)
         score_phi = self._phi_grad(X, y)
@@ -99,7 +107,9 @@ class LinearGaussianLoc(LinearGaussianBase):
     def score(self, X, y):
         """gradient of the log-likelihood for each individual data point"""
         if self.beta is None or self.phi is None:
-            raise ValueError("Both parameters need to be defined to calculate the score")
+            raise ValueError(
+                "Both parameters need to be defined to calculate the score"
+            )
 
         score_beta = self._beta_grad(X, y)
         return score_beta

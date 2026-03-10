@@ -68,7 +68,9 @@ class BetaA(BetaBase):
 
     def score(self, x):
         if self.alpha is None or self.beta is None:
-            raise ValueError("Both parameters need to be defined to be able to calculate the score")
+            raise ValueError(
+                "Both parameters need to be defined to be able to calculate the score"
+            )
 
         return self._alpha_grad(x)
 
@@ -91,7 +93,9 @@ class BetaB(BetaBase):
 
     def score(self, x):
         if self.alpha is None or self.beta is None:
-            raise ValueError("Both parameters need to be defined to be able to calculate the score")
+            raise ValueError(
+                "Both parameters need to be defined to be able to calculate the score"
+            )
         return self._beta_grad(x)
 
     def update(self, par_v):
@@ -116,7 +120,9 @@ class Beta(BetaBase):
 
     def score(self, x):
         if self.alpha is None or self.beta is None:
-            raise ValueError("Both parameters need to be defined to be able to calculate the score")
+            raise ValueError(
+                "Both parameters need to be defined to be able to calculate the score"
+            )
         _alpha_grad = self._alpha_grad(x)
         _beta_grad = self._beta_grad(x)
         return np.array([_alpha_grad, _beta_grad]).T

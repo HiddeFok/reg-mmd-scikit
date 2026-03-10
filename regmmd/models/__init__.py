@@ -29,7 +29,7 @@ __all_regression__ = [
     Logistic,
     GammaRegression,
     GammaRegressionLoc,
-    PoissonRegression
+    PoissonRegression,
 ]
 
 __all__ = __all_estimation__ + __all_regression__

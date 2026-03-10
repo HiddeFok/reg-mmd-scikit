@@ -17,6 +17,7 @@ y_pos = np.abs(y_cont) + 0.1
 
 # --- LinearGaussian ---
 
+
 def test_linear_gaussian_predict():
     beta = np.array([0.5, -0.3])
     phi = 1.0
@@ -43,6 +44,7 @@ def test_linear_gaussian_score_shape():
     model = LinearGaussian(par_v=np.array([0.5, -0.3, 1.0]))
     score = model.score(X, y_cont)
     assert score.shape == (30, 3)
+
 
 def test_linear_gaussian_updates():
     # par_v = [beta0, beta1, phi], so score has 3 columns
@@ -71,6 +73,7 @@ def test_linear_gaussian_project_params():
 
 # --- LinearGaussianLoc ---
 
+
 def test_linear_gaussian_loc_predict():
     beta = np.array([0.5, -0.3])
     model = LinearGaussianLoc(par_v=beta, par_c=1.0)
@@ -92,6 +95,7 @@ def test_linear_gaussian_loc_update():
 
 
 # --- Logistic ---
+
 
 def test_logistic_predict_range():
     beta = np.array([0.5, -0.3])
@@ -128,13 +132,16 @@ def test_logistic_update():
     model.update(new_param)
     assert np.allclose(model.beta, new_param)
 
+
 def test_logistic_inits_params():
     model = Logistic(par_v=None)
     par_v, par_c = model._init_params(X=X, y=y_binary)
     assert par_v.shape == (2,)
     assert par_c is None
 
+
 # --- GammaRegression ---
+
 
 def test_gamma_reg_predict_positive():
     beta = np.array([0.1, 0.2])
@@ -148,7 +155,9 @@ def test_gamma_reg_predict_positive():
 def test_gamma_reg_sample_n():
     beta = np.array([0.1, 0.2])
     shape = np.array([2.0])
-    model = GammaRegression(par_v=np.concatenate((beta, shape)), par_c=None, random_state=0)
+    model = GammaRegression(
+        par_v=np.concatenate((beta, shape)), par_c=None, random_state=0
+    )
     mu = model.predict(X)
     samples = model.sample_n(30, mu)
     assert samples.shape == (30,)
@@ -172,6 +181,7 @@ def test_gamma_update():
     assert np.allclose(model.beta, new_param[:-1])
     assert model.shape == new_param[-1]
 
+
 def test_gamma_inits_params():
     model = GammaRegression(par_v=None)
     par_v, par_c = model._init_params(X=X, y=y_pos)
@@ -180,6 +190,7 @@ def test_gamma_inits_params():
 
 
 # --- GammaRegressionLoc ---
+
 
 def test_gamma_reg_loc_predict_positive():
     beta = np.array([0.1, 0.2])
@@ -210,6 +221,7 @@ def test_gamma_loc_update():
     model.update(new_beta)
     assert np.allclose(model.beta, new_beta)
 
+
 def test_gamma_loc_inits_params():
     model = GammaRegressionLoc(par_v=None)
     par_v, par_c = model._init_params(X=X, y=y_pos)
@@ -218,6 +230,7 @@ def test_gamma_loc_inits_params():
 
 
 # --- PoissonRegression ---
+
 
 def test_poisson_reg_predict_positive():
     beta = np.array([0.1, 0.2])
@@ -235,6 +248,7 @@ def test_poisson_reg_sample_n():
     assert samples.shape == (30,)
     assert np.all(samples == samples.astype(int))
 
+
 def test_poisson_log_prob():
     model = PoissonRegression(par_v=np.array([0.5, -0.3]))
     result = model.log_prob(X, y_pos)
@@ -247,12 +261,14 @@ def test_poisson_reg_score_shape():
     score = model.score(X, y_pos)
     assert score.shape == (30, 2)
 
+
 def test_poisson_update():
     beta = np.array([0.1, 0.2])
     model = PoissonRegression(par_v=beta)
     new_beta = np.array([1.0, 2.0])
     model.update(new_beta)
     assert np.allclose(model.beta, new_beta)
+
 
 def test_poisson_inits_params():
     model = PoissonRegression(par_v=None)
@@ -261,9 +277,8 @@ def test_poisson_inits_params():
     assert par_c is None
 
 
-
-
 # --- Parametrized test ---
+
 
 @pytest.mark.parametrize("model", __all_regression__)
 def test_models_no_par_raises(model):
@@ -278,4 +293,3 @@ def test_models_no_par_raises(model):
         _ = model.sample_n(n=10, mu_given_x=x)
     with pytest.raises(ValueError):
         _ = model.predict(x)
-
