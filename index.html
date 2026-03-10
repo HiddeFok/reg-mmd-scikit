@@ -42,6 +42,7 @@
     <script src="_static/documentation_options.js?v=01f34227"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
     <link rel="canonical" href="https://HiddeFok.github.io/reg-mmd-scikit/index.html" />
     <link rel="index" title="Index" href="genindex.html" />
@@ -292,6 +293,45 @@
                   
   <section id="regmmd-scikit-learn-implementation-documentation">
 <h1>RegMMD Scikit-Learn Implementation documentation<a class="headerlink" href="#regmmd-scikit-learn-implementation-documentation" title="Link to this heading">#</a></h1>
+<p>This is a <em>scikit-learn</em> style implementation of the estimation and regression
+procedures based one the <em>Maximum Mean Discrepancy (MMD)</em> principle between the sample
+and the statistical model. These procedures are provable universally consistent and
+extremely robust to outliers. For more information about the theoretical side, the relevant papers
+are:</p>
+<ol class="arabic simple">
+<li><dl class="simple">
+<dt><a class="reference external" href="https://academic.oup.com/biomet/article/111/1/71/7159184">Universal robust regression via maximum mean discrepancy1</a>,</dt><dd><p>Badr-Eddine Chérief-Abdellatif, Pierre Alquier, 2022</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><a class="reference external" href="https://projecteuclid.org/journals/bernoulli/volume-28/issue-1/Finite-sample-properties-of-parametric-MMD-estimation--Robustness-to/10.3150/21-BEJ1338.full">Finite sample properties of parametric MMD estimation: Robustness to misspecification and dependence</a>,</dt><dd><p>Badr-Eddine Chérief-Abdellatif, Pierre Alquier, 2022</p>
+</dd>
+</dl>
+</li>
+</ol>
+<p>In short, the estimator is based on the minimum distance estimator <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>, which
+is defined as</p>
+<div class="math notranslate nohighlight">
+\[\hat{\theta} \in \underset{\theta \in \Theta}{\text{argmin}}
+d(P_\theta, \hat{P}_n),\]</div>
+<p>for some statistical model <span class="math notranslate nohighlight">\(\left\{P_\theta \mid \theta \in \Theta\right\}\)</span> and the empirical distrbution
+<span class="math notranslate nohighlight">\(\hat{P}_n = \frac{1}{n} \sum_{i=1}^n \delta_{X_i}\)</span>.</p>
+<p>The MMD estimator and regression procedure are derived from taking a specific
+distance metric in the above definition.  The distances metric comes from
+embedding the distributions in an RKHS <span class="math notranslate nohighlight">\(\mathcal{H}\)</span> using the feature max
+<span class="math notranslate nohighlight">\(\varphi \colon : \mathcal{X} \to\mathcal{H}\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}D(P, Q) &amp;:= \|\mu(P) - \mu(Q)\|_\mathcal{H}.\\
+\mu(P) &amp;:= \mathbb{E}_{X \sim P}\left[\varphi(X)\right].\end{split}\]</div>
+<p>Letting <span class="math notranslate nohighlight">\(k(x, y) = \langle \varphi(x), \varphi(y) \rangle_\mathcal{H}\)</span>, the actual distance
+can be calculated through:</p>
+<div class="math notranslate nohighlight">
+\[D^2(P, Q) = \mathbb{E}_{X, X' \sim P}\left[k(X, X')\right]
+            - 2\mathbb{E}_{X \sim P, X' \sim Q}\left[k(X, X')\right]
+            + \mathbb{E}_{X, X' \sim Q}\left[k(X, X')\right].\]</div>
+<p>This expression is used to calculate gradients or stochastic gradients to do
+the actual optimisation, which is done automatically by the package.</p>
 <div class="toctree-wrapper compound">
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
