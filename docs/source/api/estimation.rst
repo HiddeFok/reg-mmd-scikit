@@ -1,5 +1,5 @@
-regmmd.estimation
-=================
+Estimation Class
+================
 
 .. automodule:: regmmd.estimation
    :members:

@@ -6,3 +6,4 @@ API Reference
 
    regression
    estimation
+   model_base

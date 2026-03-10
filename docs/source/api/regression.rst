@@ -1,7 +1,5 @@
-.. _regression-api:
-
-regmmd.regression
-=================
+Regression Class
+================
 
 .. automodule:: regmmd.regression
    :members:
