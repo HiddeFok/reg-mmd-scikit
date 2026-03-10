@@ -8,10 +8,12 @@ from regmmd.utils import print_summary
 def main():
     rng = np.random.default_rng(seed=123)
 
+    # Sample Gaussian data
     x = rng.normal(loc=0, scale=1.5, size=500)
 
+    # initialize the MMD estimator class
     mmd_estim = MMDEstimator(
-        model="gaussian-loc",
+        model="gaussian",
         par_v=None,
         par_c=1.5,
         kernel="Gaussian",

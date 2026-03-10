@@ -22,9 +22,9 @@ class DefinedModels(Enum):
     LINEAR_GAUSSIAN = LinearGaussian
     LOGISTIC = Logistic
     LINEAR_GAUSSIAN_LOC = LinearGaussianLoc
-    GAMMA = GammaRegression
-    GAMMA_LOC = GammaRegressionLoc
-    POISSON = PoissonRegression
+    GAMMA_REGRESSION = GammaRegression
+    GAMMA_REGRESSION_LOC = GammaRegressionLoc
+    POISSON_REGRESSION = PoissonRegression
 
 
 def _preprocess_data(

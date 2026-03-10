@@ -31,6 +31,7 @@ extensions = [
     "sphinx.ext.extlinks",
     "sphinx.ext.napoleon",
     "sphinx.ext.mathjax",
+    "sphinx.ext.doctest",
 ]
 
 templates_path = ["_templates"]
@@ -47,3 +48,8 @@ html_theme = "pydata_sphinx_theme"
 
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
+
+doctest_global_setup = '''
+import numpy as np
+rng = np.random.default_rng(0)
+'''
