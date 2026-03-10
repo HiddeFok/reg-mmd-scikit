@@ -13,6 +13,8 @@ class PoissonRegressionBase(RegressionModel):
         self.rng = np.random.default_rng(seed=self.random_state)
 
     def log_prob(self, X: np.array, y: np.array) -> np.array:
+        if self.beta is None:
+            raise ValueError("Both parameters need to be defined to calculate the log_prob")
         dot_prod = X @ self.beta
 
         log_y = y * dot_prod
@@ -25,9 +27,15 @@ class PoissonRegressionBase(RegressionModel):
 
     def predict(self, X: np.array) -> np.array:
         """Outputs the mean given X, parameters need to be initialized for this"""
+        if self.beta is None:
+            raise ValueError("Both parameters need to be defined to calculate the predict")
+
         return np.exp(X @ self.beta)
 
     def score(self, X: np.array, y: np.array) -> np.array:
+        if self.beta is None:
+            raise ValueError("Both parameters need to be defined to calculate the score")
+
         mu = self.predict(X)
 
         residuals = (y - mu)[:, np.newaxis]
@@ -40,11 +48,8 @@ class PoissonRegressionBase(RegressionModel):
         return par_v
     
     def _init_params(self, X, y):
-        init_model = PoissonRegression(fit_intercept=False).fit(X, y)
-        y_hat = init_model.predict(X)
-        phi_estimate = max(np.var(y_hat - y), 1e-6)
+        init_model = PoissonRegressor(fit_intercept=False).fit(X, y)
         self.beta = init_model.coef_
-        self.phi = phi_estimate
         return self._get_params()
 
 

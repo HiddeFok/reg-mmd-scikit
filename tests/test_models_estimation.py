@@ -14,6 +14,7 @@ from regmmd.models import (
     Binomial,
     Poisson,
 )
+from regmmd.models import __all_estimation__
 from regmmd.models.base_model import EstimationModel
 
 RNG = np.random.default_rng(42)
@@ -23,19 +24,7 @@ X_GAMMA = RNG.gamma(shape=2.0, scale=1 / 1.5, size=(50,))
 X_POISSON = RNG.poisson(lam=2, size=(50,))
 X_BIN = RNG.binomial(n=10, p=0.7, size=(50,))
 
-MODELS = [
-    Gaussian,
-    GaussianLoc,
-    GaussianScale,
-    Beta,
-    BetaA,
-    BetaB,
-    Gamma,
-    GammaShape,
-    GammaRate,
-    Binomial,
-    Poisson
-]
+
 
 # --- BaseModel ---
 
@@ -228,7 +217,7 @@ def test_poisson_updates():
 
 # --- Parametrized test ---
 
-@pytest.mark.parametrize("model", MODELS)
+@pytest.mark.parametrize("model", __all_estimation__)
 def test_models_no_par_raises(model):
     model = model(par_v=None)
     x = np.array([2, 5, 8], dtype=float)

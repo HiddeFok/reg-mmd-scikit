@@ -2,7 +2,7 @@ import numpy as np
 from scipy.special import gamma, digamma
 
 from regmmd.models.base_model import RegressionModel
-
+from sklearn.linear_model import GammaRegressor
 
 class GammaRegressionBase(RegressionModel):
     """Gamma regression, where exp(X^T \\beta) = mean(Y). The
@@ -29,7 +29,7 @@ class GammaRegressionBase(RegressionModel):
         log_y = (self.shape - 1) * np.log(y)
         log_shape = self.shape * np.log(self.shape)
         log_mu = -self.shape * np.log(mu_given_x)
-        log_exp = self.shape * y / mu_given_x
+        log_exp = -self.shape * y / mu_given_x
         return log_Z + log_y + log_shape + log_mu + log_exp
 
     def sample_n(self, n: int, mu_given_x: np.array):
@@ -43,14 +43,15 @@ class GammaRegressionBase(RegressionModel):
     def predict(self, X):
         return np.exp(X @ self.beta)
 
-    def _init_params(self, X):
-        mean = X.mean(axis=0)
-        var = X.std(axis=0) ** 2
+    def _init_params(self, X, y):
+        init_model = GammaRegressor(fit_intercept=False).fit(X, y)
+        self.beta = init_model.coef_
 
-        if self.shape is None:
-            self.shape = (mean**2) / var
-        if self.rate is None:
-            self.rate = mean / var
+        # Var(Y) = mu^2 / shape, -> shape =mu^2 / var(Y)
+        y_hat = init_model.predict(X)
+        mu_2 = np.mean(y_hat) ** 2
+        var_y = np.var(y)
+        self.shape = mu_2 / var_y
 
         return self._get_params()
 
@@ -61,7 +62,7 @@ class GammaRegressionBase(RegressionModel):
         log_y = np.log(y)
         log_shape = np.log(self.shape) + 1
         log_mu = -np.log(mu_given_x)
-        log_exp = y / mu_given_x
+        log_exp = -y / mu_given_x
         return (log_gamma + log_y + log_shape + log_mu + log_exp)[:, np.newaxis]
 
     def _beta_grad(self, X: np.array, y: np.array) -> np.array:
@@ -69,9 +70,6 @@ class GammaRegressionBase(RegressionModel):
 
         residuals = (-self.shape + self.shape * y / mu_given_x) / mu_given_x
         return X * (residuals[:, np.newaxis])
-
-    def _project_params(self, par_v):
-        pass
 
 
 class GammaRegressionLoc(GammaRegressionBase):
@@ -101,9 +99,9 @@ class GammaRegression(GammaRegressionBase):
             super().__init__(beta=par_v[:-1], shape=par_v[-1], random_state=random_state)
 
     def score(self, X, y):
-        _rate_grad = self._beta_grad(X, y)
+        _beta_grad = self._beta_grad(X, y)
         _shape_grad = self._shape_grad(X, y)
-        return np.hstack((_shape_grad, _rate_grad))
+        return np.hstack((_beta_grad, _shape_grad))
 
     def update(self, par_v):
         self.beta = par_v[:-1]
@@ -111,7 +109,8 @@ class GammaRegression(GammaRegressionBase):
 
     def _get_params(self):
         par_v = np.concat((self.beta, np.array([self.shape])))
-        return par_v, None
+        par_c = None
+        return par_v, par_c
 
     def _project_params(self, par_v):
         # par_v = max(0.5 , par_v) This was found empirically in the development of the R package

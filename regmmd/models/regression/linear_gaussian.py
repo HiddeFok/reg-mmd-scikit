@@ -14,6 +14,9 @@ class LinearGaussianBase(RegressionModel):
 
     def log_prob(self, X, y):
         # TODO: write validation checks
+        if self.beta is None or self.phi is None:
+            raise ValueError("Both parameters need to be defined to calculate the log_prob")
+
         n = X.shape[0]
 
         log_Z = -n * 0.5 * np.log(2 * np.pi)
@@ -22,11 +25,17 @@ class LinearGaussianBase(RegressionModel):
         return log_Z + log_sigma + log_exp
 
     def sample_n(self, n: int, mu_given_x: np.array) -> np.array:
+        if self.beta is None or self.phi is None:
+            raise ValueError("Both parameters need to be defined to calculate the log_prob")
+
         noise_sampled = self.rng.normal(loc=0, scale=np.sqrt(self.phi), size=(n,))
         return mu_given_x + noise_sampled
 
     def predict(self, X):
         """Outputs the mean given X, parameters need to be initialized for this"""
+        if self.beta is None or self.phi is None:
+            raise ValueError("Both parameters need to be defined to calculate the log_prob")
+
         return X @ self.beta
 
     def _beta_grad(self, X, y):
@@ -61,6 +70,9 @@ class LinearGaussian(LinearGaussianBase):
 
     def score(self, X, y):
         """gradient of the log-likelihood for each individual data point"""
+        if self.beta is None or self.phi is None:
+            raise ValueError("Both parameters need to be defined to calculate the score")
+
         score_beta = self._beta_grad(X, y)
         score_phi = self._phi_grad(X, y)
 
@@ -86,6 +98,9 @@ class LinearGaussianLoc(LinearGaussianBase):
 
     def score(self, X, y):
         """gradient of the log-likelihood for each individual data point"""
+        if self.beta is None or self.phi is None:
+            raise ValueError("Both parameters need to be defined to calculate the score")
+
         score_beta = self._beta_grad(X, y)
         return score_beta
 

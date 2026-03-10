@@ -6,6 +6,8 @@ from regmmd.models.regression.logistic import Logistic
 from regmmd.models.regression.gamma import GammaRegressionLoc, GammaRegression
 from regmmd.models.regression.poisson import PoissonRegression
 
+from regmmd.models import __all_regression__
+
 RNG = np.random.default_rng(42)
 X = RNG.normal(size=(30, 2))
 y_cont = RNG.normal(size=(30,))
@@ -41,6 +43,30 @@ def test_linear_gaussian_score_shape():
     model = LinearGaussian(par_v=np.array([0.5, -0.3, 1.0]))
     score = model.score(X, y_cont)
     assert score.shape == (30, 3)
+
+def test_linear_gaussian_updates():
+    # par_v = [beta0, beta1, phi], so score has 3 columns
+    model = LinearGaussian(par_v=np.array([0.5, -0.3, 1.0]))
+    beta_before = model.beta
+    phi_before = model.phi
+
+    model.update(par_v=np.array([1.5, -0.5, 2.0]))
+    beta_after = model.beta
+    phi_after = model.phi
+
+    assert np.all(beta_before == np.array([0.5, -0.3]))
+    assert np.all(beta_after == np.array([1.5, -0.5]))
+    assert phi_before == 1.0
+    assert phi_after == 2.0
+
+
+def test_linear_gaussian_project_params():
+    # par_v = [beta0, beta1, phi], so score has 3 columns
+    model = LinearGaussian(par_v=np.array([0.5, -0.3, 1.0]))
+    par_v = model._project_params(np.array([0.5, -0.3, 0.0]))
+
+    assert par_v[-1] > 0
+    assert np.all(par_v[:-1] == np.array([0.5, -0.3]))
 
 
 # --- LinearGaussianLoc ---
@@ -94,6 +120,20 @@ def test_logistic_score_shape():
     score = model.score(X, y_binary)
     assert score.shape == (30, 2)
 
+
+def test_logistic_update():
+    beta = np.array([0.1, 0.2])
+    model = Logistic(par_v=beta)
+    new_param = np.array([1.0, 2.0])
+    model.update(new_param)
+    assert np.allclose(model.beta, new_param)
+
+def test_logistic_inits_params():
+    model = Logistic(par_v=None)
+    par_v, par_c = model._init_params(X=X, y=y_binary)
+    assert par_v.shape == (2,)
+    assert par_c is None
+
 # --- GammaRegression ---
 
 def test_gamma_reg_predict_positive():
@@ -123,6 +163,22 @@ def test_gamma_reg_score_shape():
     assert score.shape == (30, 3)
 
 
+def test_gamma_update():
+    beta = np.array([0.1, 0.2])
+    shape = 1.0
+    model = GammaRegression(par_v=np.concatenate((beta, np.array([shape]))))
+    new_param = np.array([1.0, 2.0, 3.0])
+    model.update(new_param)
+    assert np.allclose(model.beta, new_param[:-1])
+    assert model.shape == new_param[-1]
+
+def test_gamma_inits_params():
+    model = GammaRegression(par_v=None)
+    par_v, par_c = model._init_params(X=X, y=y_pos)
+    assert par_v.shape == (3,)
+    assert par_c is None
+
+
 # --- GammaRegressionLoc ---
 
 def test_gamma_reg_loc_predict_positive():
@@ -147,6 +203,20 @@ def test_gamma_reg_loc_score_shape():
     assert score.shape == (30, 2)
 
 
+def test_gamma_loc_update():
+    beta = np.array([0.1, 0.2])
+    model = GammaRegressionLoc(par_v=beta)
+    new_beta = np.array([1.0, 2.0])
+    model.update(new_beta)
+    assert np.allclose(model.beta, new_beta)
+
+def test_gamma_loc_inits_params():
+    model = GammaRegressionLoc(par_v=None)
+    par_v, par_c = model._init_params(X=X, y=y_pos)
+    assert par_v.shape == (2,)
+    assert isinstance(par_c, float)
+
+
 # --- PoissonRegression ---
 
 def test_poisson_reg_predict_positive():
@@ -165,9 +235,47 @@ def test_poisson_reg_sample_n():
     assert samples.shape == (30,)
     assert np.all(samples == samples.astype(int))
 
+def test_poisson_log_prob():
+    model = PoissonRegression(par_v=np.array([0.5, -0.3]))
+    result = model.log_prob(X, y_pos)
+    assert isinstance(result, float)
+
 
 def test_poisson_reg_score_shape():
     beta = np.array([0.1, 0.2])
     model = PoissonRegression(par_v=beta, par_c=None)
     score = model.score(X, y_pos)
     assert score.shape == (30, 2)
+
+def test_poisson_update():
+    beta = np.array([0.1, 0.2])
+    model = PoissonRegression(par_v=beta)
+    new_beta = np.array([1.0, 2.0])
+    model.update(new_beta)
+    assert np.allclose(model.beta, new_beta)
+
+def test_poisson_inits_params():
+    model = PoissonRegression(par_v=None)
+    par_v, par_c = model._init_params(X=X, y=y_pos)
+    assert par_v.shape == (2,)
+    assert par_c is None
+
+
+
+
+# --- Parametrized test ---
+
+@pytest.mark.parametrize("model", __all_regression__)
+def test_models_no_par_raises(model):
+    model = model(par_v=None)
+    x = np.array([[2, 1], [5, 8], [3, 4]], dtype=float)
+    y = np.array([2, 5, 8], dtype=float)
+    with pytest.raises(ValueError):
+        _ = model.score(x, y)
+    with pytest.raises(ValueError):
+        _ = model.log_prob(x, y)
+    with pytest.raises(ValueError):
+        _ = model.sample_n(n=10, mu_given_x=x)
+    with pytest.raises(ValueError):
+        _ = model.predict(x)
+
