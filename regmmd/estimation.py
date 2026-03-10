@@ -17,7 +17,7 @@ from regmmd.models import (
     Poisson,
 )
 from regmmd.models.base_model import EstimationModel
-from regmmd.optimizer import _gd_gaussian_loc_exact_estimation, _sgd_estimation
+from regmmd.optimizer import _gd_gaussian_loc_exact_estimation, _sgd_estimation, MMDResult
 
 
 class DefinedModels(Enum):
@@ -130,7 +130,7 @@ class MMDEstimator(BaseEstimator):
         self.bandwidth = bandwidth
         self.solver = solver
 
-    def fit(self, X):
+    def fit(self, X) -> MMDResult:
         """Fit the MMD estimation model according to the given training data.
 
         Parameters
