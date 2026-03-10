@@ -54,6 +54,5 @@ import numpy as np
 rng = np.random.default_rng(0)
 '''
 
-
 # GH Pages
 html_baseurl = "https://HiddeFok.github.io/reg-mmd-scikit/"
