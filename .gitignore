@@ -13,6 +13,7 @@ uv.lock
 dist/
 *.egg-info
 .coverage
+coverage.*
 *.pyc*
 *.pyd
 .pytest_cache

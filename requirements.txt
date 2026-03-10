@@ -24,6 +24,8 @@ colorama==0.4.6 ; sys_platform == 'win32'
     #   sphinx
 coverage==7.13.4
     # via pytest-cov
+defusedxml==0.7.1
+    # via genbadge
 docutils==0.22.4
     # via
     #   pydata-sphinx-theme
