@@ -67,6 +67,9 @@ class BetaA(BetaBase):
         super().__init__(alpha=par_v, beta=par_c, random_state=random_state)
 
     def score(self, x):
+        if self.alpha is None or self.beta is None:
+            raise ValueError("Both parameters need to be defined to be able to calculate the score")
+
         return self._alpha_grad(x)
 
     def update(self, par_v):
@@ -87,6 +90,8 @@ class BetaB(BetaBase):
         super().__init__(alpha=par_c, beta=par_v, random_state=random_state)
 
     def score(self, x):
+        if self.alpha is None or self.beta is None:
+            raise ValueError("Both parameters need to be defined to be able to calculate the score")
         return self._beta_grad(x)
 
     def update(self, par_v):
@@ -104,9 +109,14 @@ class BetaB(BetaBase):
 
 class Beta(BetaBase):
     def __init__(self, par_v=None, par_c=None, random_state=None):
-        super().__init__(alpha=par_v[0], beta=par_v[1], random_state=random_state)
+        if par_v is None:
+            super().__init__(alpha=None, beta=None, random_state=random_state)
+        else:
+            super().__init__(alpha=par_v[0], beta=par_v[1], random_state=random_state)
 
     def score(self, x):
+        if self.alpha is None or self.beta is None:
+            raise ValueError("Both parameters need to be defined to be able to calculate the score")
         _alpha_grad = self._alpha_grad(x)
         _beta_grad = self._beta_grad(x)
         return np.array([_alpha_grad, _beta_grad]).T

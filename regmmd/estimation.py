@@ -109,7 +109,10 @@ class MMDEstimator(BaseEstimator):
         solver: Optional[Dict] = None,
     ):
         if isinstance(model, str):
-            self.model = DefinedModels(model.upper().replace("-", "_"))
+            try:
+                self.model = DefinedModels[model.upper().replace("-", "_")].value()
+            except KeyError:
+                raise ValueError("model string is not defined by the package.")
         elif isinstance(model, EstimationModel):
             self.model = model
         else:

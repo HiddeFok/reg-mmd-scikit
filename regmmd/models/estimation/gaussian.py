@@ -93,7 +93,10 @@ class GaussianScale(GaussianBase):
 
 class Gaussian(GaussianBase):
     def __init__(self, par_v=None, par_c=None, random_state=None):
-        super().__init__(loc=par_v[0], scale=par_v[1], random_state=random_state)
+        if par_v is None:
+            super().__init__(loc=None, scale=None, random_state=random_state)
+        else:
+            super().__init__(loc=par_v[0], scale=par_v[1], random_state=random_state)
 
     def score(self, x):
         if self.loc is None or self.scale is None:

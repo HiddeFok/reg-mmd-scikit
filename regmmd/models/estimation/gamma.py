@@ -65,6 +65,8 @@ class GammaShape(GammaBase):
         super().__init__(shape=par_v, rate=par_c, random_state=random_state)
 
     def score(self, x):
+        if self.shape is None or self.rate is None:
+            raise ValueError("Both parameters need to be defined to be calculate the score")
         return self._shape_grad(x)
 
     def update(self, par_v):
@@ -85,6 +87,8 @@ class GammaRate(GammaBase):
         super().__init__(shape=par_c, rate=par_v, random_state=random_state)
 
     def score(self, x):
+        if self.shape is None or self.rate is None:
+            raise ValueError("Both parameters need to be defined to be calculate the score")
         return self._rate_grad(x)
 
     def update(self, par_v):
@@ -103,9 +107,14 @@ class GammaRate(GammaBase):
 
 class Gamma(GammaBase):
     def __init__(self, par_v=None, par_c=None, random_state=None):
-        super().__init__(shape=par_v[0], rate=par_v[1], random_state=random_state)
+        if par_v is None:
+            super().__init__(shape=None, rate=None, random_state=random_state)
+        else:
+            super().__init__(shape=par_v[0], rate=par_v[1], random_state=random_state)
 
     def score(self, x):
+        if self.shape is None or self.rate is None:
+            raise ValueError("Both parameters need to be defined to be calculate the score")
         _shape_grad = self._shape_grad(x)
         _rate_grad = self._rate_grad(x)
         return np.array([_shape_grad, _rate_grad]).T

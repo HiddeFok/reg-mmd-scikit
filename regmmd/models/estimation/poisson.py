@@ -13,7 +13,7 @@ class PoissonBase(EstimationModel):
     def log_prob(self, x: int):
         if self.lam is None:
             raise ValueError(
-                "Labda needs to be defined" + "to be able to calculate the log_prob"
+                "Lam needs to be defined" + "to be able to calculate the log_prob"
             )
 
         log_Z = -np.log(factorial(x))
@@ -24,10 +24,10 @@ class PoissonBase(EstimationModel):
     def sample_n(self, n: int):
         if self.lam is None:
             raise ValueError(
-                "Labda needs to be defined" + "to be able to calculate the sample"
+                "Lam needs to be defined" + "to be able to calculate the sample"
             )
 
-        return self.rng.poisson(lam=self.labda, size=(n,))
+        return self.rng.poisson(lam=self.lam, size=(n,))
 
     def _init_params(self, X):
         if self.lam is None:
@@ -35,10 +35,11 @@ class PoissonBase(EstimationModel):
         return self._get_params()
 
     def _project_params(self, par_v):
-        pass
+        par_v = max(1e-6, par_v)
+        return par_v
 
     def score(self, x: int):
-        if self.p is None:
+        if self.lam is None:
             raise ValueError(
                 "Both parameters need to be defined to be able to calculate the score"
             )
@@ -49,7 +50,7 @@ class PoissonBase(EstimationModel):
         self.lam = par_v
 
     def _get_params(self):
-        par_v = self.p
+        par_v = self.lam
         par_c = None
         return par_v, par_c
 

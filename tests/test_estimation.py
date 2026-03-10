@@ -78,3 +78,17 @@ def test_gaussian_sgd_kernels(kernel):
     res = est.fit(X)
     assert "estimator" in res
     assert res["estimator"].shape == (2,)
+
+
+def test_mmd_estimator_model_str_inits():
+    reg = MMDEstimator(model="gaussian", solver=SOLVER)
+
+def test_mmd_estimator_wrong_model_str_raises():
+    par_v = np.zeros(3)
+    with pytest.raises(ValueError):
+        reg = MMDEstimator(model="not-defined", par_v=par_v, solver=SOLVER)
+
+def test_mmd_estimator_wrong_model_type_raises():
+    par_v = np.zeros(3)
+    with pytest.raises(TypeError):
+        reg = MMDEstimator(model=None, par_v=par_v, solver=SOLVER)
