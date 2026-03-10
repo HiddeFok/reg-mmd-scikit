@@ -3,7 +3,7 @@ from scipy.special import factorial
 from regmmd.models.base_model import EstimationModel
 
 
-class Poisson(EstimationModel):
+class PoissonBase(EstimationModel):
     def __init__(self, lam: float = None, random_state=None):
         self.lam = lam
 
@@ -52,3 +52,8 @@ class Poisson(EstimationModel):
         par_v = self.p
         par_c = None
         return par_v, par_c
+
+
+class Poisson(PoissonBase):
+    def __init__(self, par_v = None, par_c = None, random_state=None):
+        super().__init__(lam=par_v, random_state=random_state)

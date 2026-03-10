@@ -7,11 +7,6 @@ from scipy.spatial.distance import pdist
 from regmmd.kernels import K1d, K1d_dist
 from regmmd.models.base_model import EstimationModel, RegressionModel
 
-# NOTE:
-#   - The R implementation GD.MMD.loc also assumes the gaussian kernel and is
-#       implemented exactly
-#   -
-
 
 class MMDResult(TypedDict):
     par_v_init: NDArray
@@ -227,7 +222,7 @@ def _sgd_hat_regression(
     sorted_obs = sort_obs(X)
     K_X = K1d_dist(sorted_obs["DIST"], kernel=kernel_x, bandwidth=bandwidth_x)
     M_det = int(np.floor(n * C_DET))
-    M_rand = int(np.floor(n * C_RAND))
+    M_rand = max(int(np.floor(n * C_RAND)), 1)
     l_KX = K_X.shape[0]
     if n + M_det + M_rand > l_KX:
         M_det = l_KX - n - 2
@@ -269,7 +264,7 @@ def _sgd_hat_regression(
             bandwidth_y=bandwidth_y,
         )
 
-        use_X = rng.choice(np.arange(n + M_det, l_KX + 1), size=M_rand, replace=False)
+        use_X = rng.choice(np.arange(n + M_det, l_KX), size=M_rand, replace=False)
         set_1 = sorted_obs["IND"][use_X, 0]
         set_2 = sorted_obs["IND"][use_X, 1]
         grad_p3 = _get_grad_estimate(
@@ -329,7 +324,7 @@ def _sgd_hat_regression(
             bandwidth_y=bandwidth_y,
         )
 
-        use_X = rng.choice(np.arange(n + M_det, l_KX + 1), size=M_rand, replace=False)
+        use_X = rng.choice(np.arange(n + M_det, l_KX), size=M_rand, replace=False)
         set_1 = sorted_obs["IND"][use_X, 0]
         set_2 = sorted_obs["IND"][use_X, 1]
         grad_p3 = _get_grad_estimate(

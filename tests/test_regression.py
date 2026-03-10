@@ -117,3 +117,65 @@ def test_mmd_regressor_not_fitted_raises():
     X_test = RNG.normal(size=(5, 2))
     with pytest.raises(NotFittedError):
         reg.predict(X_test)
+
+def test_mmd_regressor_fitted_tilde_predicts():
+    X = RNG.normal(size=(50, 2))
+    noise = RNG.normal(size=(50,))
+    beta = np.array([1, 2])
+    y = X @ beta + 0.1 * noise
+
+    par_v = np.array([1.2, 2.1])
+    model = LinearGaussianLoc(par_v=par_v, par_c=0.1)
+    reg = MMDRegressor(model=model, par_v=par_v, solver=SOLVER, fit_intercept=False)
+    reg.fit(X, y)
+    y_hat = reg.predict(X)
+    mse = np.mean((y - y_hat) ** 2)
+    assert mse < 0.5
+
+def test_mmd_regressor_fitted_hat_predicts():
+    X = RNG.normal(size=(50, 2))
+    noise = RNG.normal(size=(50,))
+    beta = np.array([1, 2])
+    y = X @ beta + 0.1 * noise
+
+    par_v = np.array([1.2, 2.1])
+    model = LinearGaussianLoc(par_v=par_v, par_c=0.1)
+    reg = MMDRegressor(model=model, par_v=par_v, solver=SOLVER, fit_intercept=False, bandwidth_X=1)
+    reg.fit(X, y)
+    y_hat = reg.predict(X)
+    mse = np.mean((y - y_hat) ** 2)
+    assert mse < 0.5
+
+def test_mmd_regressor_model_str_inits():
+    reg = MMDRegressor(model="linear-gaussian", solver=SOLVER)
+
+def test_mmd_regressor_wrong_model_str_raises():
+    par_v = np.zeros(3)
+    with pytest.raises(ValueError):
+        reg = MMDRegressor(model="not-defined", par_v=par_v, solver=SOLVER)
+
+def test_mmd_regressor_wrong_model_type_raises():
+    par_v = np.zeros(3)
+    with pytest.raises(TypeError):
+        reg = MMDRegressor(model=None, par_v=par_v, solver=SOLVER)
+
+
+def test_mmd_regressor_inits_params():
+    reg = MMDRegressor(model="linear-gaussian-loc", solver=SOLVER, fit_intercept=True)
+    par_v_before = reg.par_v
+    par_c_before = reg.par_c
+
+    X = np.array([[1], [3], [1.5], [2]], dtype=float)
+    y = np.array([5.0, 6.0, 5.25, 5.5])
+
+    reg.fit(X, y)
+    par_v_after = reg.par_v
+    par_c_after = reg.par_c
+
+    assert par_v_before is None
+    assert par_c_before is None
+    assert par_v_after.shape == (2,)
+    assert isinstance(par_c_after, float)
+
+
+

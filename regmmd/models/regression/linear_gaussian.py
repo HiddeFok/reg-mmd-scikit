@@ -1,6 +1,7 @@
 import numpy as np
 
 from regmmd.models.base_model import RegressionModel
+from sklearn.linear_model import LinearRegression
 
 
 class LinearGaussianBase(RegressionModel):
@@ -43,12 +44,20 @@ class LinearGaussianBase(RegressionModel):
         return score_phi
 
     def _init_params(self, X, y):
-        pass
+        init_model = LinearRegression(fit_intercept=False).fit(X, y)
+        y_hat = init_model.predict(X)
+        phi_estimate = max(np.var(y_hat - y), 1e-6)
+        self.beta = init_model.coef_
+        self.phi = phi_estimate
+        return self._get_params()
 
 
 class LinearGaussian(LinearGaussianBase):
     def __init__(self, par_v=None, par_c=None, random_state=None):
-        super().__init__(beta=par_v[:-1], phi=par_v[-1], random_state=random_state)
+        if par_v is None:
+            super().__init__(beta=None, phi=None, random_state=random_state)
+        else:
+            super().__init__(beta=par_v[:-1], phi=par_v[-1], random_state=random_state)
 
     def score(self, X, y):
         """gradient of the log-likelihood for each individual data point"""
@@ -65,6 +74,11 @@ class LinearGaussian(LinearGaussianBase):
         par_v[-1] = max(1e-6, par_v[-1])
         return par_v
 
+    def _get_params(self):
+        par_v = np.concatenate((self.beta, np.array([self.phi])))
+        par_c = None
+        return par_v, par_c
+
 
 class LinearGaussianLoc(LinearGaussianBase):
     def __init__(self, par_v=None, par_c=None, random_state=None):
@@ -80,3 +94,8 @@ class LinearGaussianLoc(LinearGaussianBase):
 
     def _project_params(self, par_v):
         return par_v
+
+    def _get_params(self):
+        par_v = self.beta
+        par_c = self.phi
+        return par_v, par_c

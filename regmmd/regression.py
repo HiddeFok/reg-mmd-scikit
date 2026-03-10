@@ -177,7 +177,10 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
     ):
         self.fit_intercept = fit_intercept
         if isinstance(model, str):
-            self.model = DefinedModels(model.upper().replace("-", "_"))
+            try:
+                self.model = DefinedModels[model.upper().replace("-", "_")].value()
+            except KeyError:
+                raise ValueError("model string is not defined by the package.")
         elif isinstance(model, RegressionModel):
             self.model = model
         else:
@@ -215,9 +218,6 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         X, y = self._validate_data(X, y)
         n_features = X.shape[1]
 
-        if self.par_v is None or self.par_c is None:
-            self.model._init_params(X=X, y=y)
-
         if not isinstance(self.model, Logistic):
             X, y, X_offset, X_scale = _preprocess_data(
                 X,
@@ -226,6 +226,9 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
             )
             self.X_offset = X_offset
             self.X_scale = X_scale
+
+        if self.par_v is None or self.par_c is None:
+            self.par_v, self.par_c = self.model._init_params(X=X, y=y)
 
         if self.bandwidth_X == 0:
             if self.solver["type"] == "SGD":
@@ -274,7 +277,6 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                 res["estimator"][n_features] = self.intercept_[0]
             else:
                 self.intercept_ = 0.0
-
             self.par_v = res["estimator"]
 
         self.model.update(par_v=self.par_v)
@@ -293,6 +295,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         y_pred : np.ndarray, shape (n_samples,)
             The predicted target values.
         """
+        # TODO: with intercept it does not work now
         X = self._validate_data(X)
         self._check_is_fitted()
 
@@ -333,8 +336,6 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
             If the model is not fitted yet.
         """
         if not hasattr(self, 'beta_'):
-            raise NotFittedError("This MMDRegressor instance is not fitted yet. Call 'fit' with appropriate arguments before using this method.")
-        if not hasattr(self, 'X_scale') and self.fit_intercept:
             raise NotFittedError("This MMDRegressor instance is not fitted yet. Call 'fit' with appropriate arguments before using this method.")
 
 

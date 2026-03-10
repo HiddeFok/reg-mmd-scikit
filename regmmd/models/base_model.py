@@ -45,6 +45,16 @@ class EstimationModel(ABC):
         """
         raise NotImplementedError
 
+    def _get_params(self):
+        """After named parameters are initialized, this function gets
+        them in the order of par_v, par_c
+
+        Parameters
+        ----------
+        """
+        raise NotImplementedError
+
+
     @abstractmethod
     def _project_params(self, par_v) -> np.array:
         """Projection of potentially infeasible variable parameters to the
