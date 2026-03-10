@@ -118,7 +118,7 @@ def test_mmd_regressor_not_fitted_raises():
     with pytest.raises(NotFittedError):
         reg.predict(X_test)
 
-def test_mmd_regressor_fitted_tilde_predicts():
+def test_mmd_regressor_fitted_hat_predicts():
     X = RNG.normal(size=(50, 2))
     noise = RNG.normal(size=(50,))
     beta = np.array([1, 2])
@@ -132,7 +132,7 @@ def test_mmd_regressor_fitted_tilde_predicts():
     mse = np.mean((y - y_hat) ** 2)
     assert mse < 0.5
 
-def test_mmd_regressor_fitted_hat_predicts():
+def test_mmd_regressor_fitted_tilde_predicts():
     X = RNG.normal(size=(50, 2))
     noise = RNG.normal(size=(50,))
     beta = np.array([1, 2])
@@ -140,7 +140,7 @@ def test_mmd_regressor_fitted_hat_predicts():
 
     par_v = np.array([1.2, 2.1])
     model = LinearGaussianLoc(par_v=par_v, par_c=0.1)
-    reg = MMDRegressor(model=model, par_v=par_v, solver=SOLVER, fit_intercept=False, bandwidth_X=1)
+    reg = MMDRegressor(model=model, par_v=par_v, solver=SOLVER, fit_intercept=False, bandwidth_X=0)
     reg.fit(X, y)
     y_hat = reg.predict(X)
     mse = np.mean((y - y_hat) ** 2)

@@ -450,7 +450,6 @@ def _sgd_tilde_regression(
         if np.log(g_1) < log_eps:
             break
 
-    # NOTE: in R there is a double transpose and scaling with standard deviation X
     n_step_done = int(i + 1)
     trajectory = trajectory[:, :n_step_done]
     trajectory = np.cumsum(trajectory, axis=1) / np.arange(1, n_step_done + 1)
