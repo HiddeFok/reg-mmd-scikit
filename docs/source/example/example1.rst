@@ -14,7 +14,7 @@ Here is an example of how to use the ``regmmd.estimation`` module:
    model.fit(X, y)
 
 
-.. literalinclude:: ../examples/estimation/gaussian.py
+.. literalinclude:: ../../examples/estimation/gaussian.py
     :language: python
     :linenos:
     :caption: Another estimation example.

@@ -1,5 +1,3 @@
-.. _estimation-api:
-
 regmmd.estimation
 =================
 
@@ -7,4 +5,4 @@ regmmd.estimation
    :members:
    :undoc-members:
    :show-inheritance:
-   :exclude-members: set_score_request
+   :exclude-members: set_score_request, DefinedModels

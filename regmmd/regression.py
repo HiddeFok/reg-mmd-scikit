@@ -102,7 +102,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         The statistical model used for regression, provided as an instance of a
         `RegressionModel` class with initialized parameters. This model defines the
         relationship between the input features and the target variable.
-
+        
     fit_intercept : bool, default=True
         Specifies whether to calculate the intercept for the model. If set to `False`,
         the model assumes that the data is already centered, and no intercept will be

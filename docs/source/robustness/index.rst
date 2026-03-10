@@ -1,5 +1,3 @@
-.. _robustness:
-
 Robustness Properties
 =====================
 
