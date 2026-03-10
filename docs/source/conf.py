@@ -56,4 +56,4 @@ rng = np.random.default_rng(0)
 
 
 # GH Pages
-html_baseurl = "https://<username>.github.io/<repository>/"
+html_baseurl = "https://HiddeFok.github.io/reg-mmd-scikit/"
