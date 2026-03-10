@@ -120,7 +120,8 @@ class Gamma(GammaBase):
         return np.array([_shape_grad, _rate_grad]).T
 
     def update(self, par_v):
-        self.rate = par_v
+        self.shape = par_v[0]
+        self.rate = par_v[1]
 
     def _get_params(self):
         par_c = self.shape

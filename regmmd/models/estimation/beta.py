@@ -28,7 +28,7 @@ class BetaBase(EstimationModel):
                 + "to be able to calculate the log_prob"
             )
 
-        log_Z = -np.log(beta(a=self.alpha, b=self.beta))
+        log_Z = -np.log(beta(self.alpha, self.beta))
         log_alpha = (self.alpha - 1) * np.log(x)
         log_beta = (self.beta - 1) * np.log(1 - x)
         return log_Z + log_alpha + log_beta
@@ -122,11 +122,12 @@ class Beta(BetaBase):
         return np.array([_alpha_grad, _beta_grad]).T
 
     def update(self, par_v):
-        self.beta = par_v
+        self.alpha = par_v[0]
+        self.beta = par_v[1]
 
     def _get_params(self):
-        par_c = self.alpha
-        par_v = self.beta
+        par_v = np.array([self.alpha, self.beta])
+        par_c = None
         return par_v, par_c
 
     def _project_params(self, par_v):

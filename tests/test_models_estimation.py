@@ -98,6 +98,36 @@ def test_gaussian_score_shape():
     score = model.score(X_GAUSS)
     assert score.shape == (len(X_GAUSS), 2)
 
+# --- Beta ---
+
+def test_beta_log_prob():
+    model = Beta(par_v=np.array([1.5, 2.5]))
+    result = model.log_prob(X_BETA)
+    assert result.shape == X_BETA.shape
+
+def test_beta_both_score():
+    model = Beta(par_v=np.array([2.0, 5.0]))
+    score = model.score(X_BETA)
+    assert score.shape == (len(X_BETA), 2)
+
+def test_beta_inits():
+    model = Beta(par_v=None, par_c=None)
+    par_v, par_c = model._init_params(X_BETA)
+    assert isinstance(par_v[0], float)
+    assert isinstance(par_v[1], float)
+    assert par_c is None
+
+def test_beta_updates():
+    model = Beta(par_v=np.array([2.0, 1.5]))
+    model.update(par_v=np.array([3.0, 2.5]))
+    assert model.alpha == 3.0
+    assert model.beta == 2.5
+
+def test_beta_projects():
+    model = Beta(par_v=np.array([2.0, 1.5]))
+    par_v = model._project_params(par_v=np.array([0.0, 0.0]))
+    assert np.all(par_v > 0)
+
 
 # --- BetaA ---
 
@@ -119,11 +149,88 @@ def test_betaA_score():
     score = model.score(X_BETA)
     assert score.shape == X_BETA.shape
 
+def test_betaA_projects():
+    model = BetaA(par_v=2.0, par_c=5.0)
+    par_v = model._project_params(par_v=0)
+    assert par_v > 0
 
-def test_beta_both_score():
-    model = Beta(par_v=np.array([2.0, 5.0]))
+# --- BetaB ---
+
+def test_betaB_init_params():
+    model = BetaA(par_c=5.0, random_state=0)
+    model._init_params(X_BETA)
+    assert model.alpha is not None
+
+
+def test_betaB_score():
+    model = BetaB(par_v=2.0, par_c=5.0)
     score = model.score(X_BETA)
-    assert score.shape == (len(X_BETA), 2)
+    assert score.shape == X_BETA.shape
+
+def test_betaB_projects():
+    model = BetaB(par_v=2.0, par_c=5.0)
+    par_v = model._project_params(par_v=0)
+    assert par_v > 0
+
+# --- Gamma---
+
+def test_gamma_log_prob():
+    model = Gamma(par_v=np.array([2.0, 1.0]), par_c=None)
+    result = model.log_prob(X_GAMMA)
+    assert result.shape == X_GAUSS.shape
+
+
+def test_gamma_init():
+    model = Gamma(par_v=None, par_c=None)
+    model._init_params(X_GAMMA)
+    assert model.rate is not None
+    assert model.shape is not None
+
+def test_gamma_both_score():
+    model = Gamma(par_v=np.array([2.0, 1.5]))
+    score = model.score(X_GAMMA)
+    assert score.shape == (len(X_GAMMA), 2)
+
+def test_gamma_updates():
+    model = Gamma(par_v=np.array([2.0, 1.5]), par_c=None)
+    model.update(par_v=np.array([3.0, 2.5]))
+    assert model.shape == 3.0
+    assert model.rate == 2.5
+
+def test_gamma_projects():
+    model = Gamma(par_v=np.array([2.0, 1.5]), par_c=None)
+    par_v = model._project_params(par_v=np.array([0.0, 0.0]))
+    assert np.all(par_v > 0)
+
+# --- GammaShape ---
+
+def test_gamma_shape_init_params():
+    model = GammaShape(par_c=2.0, random_state=0)
+    model._init_params(X_GAMMA)
+    assert model.shape is not None
+
+
+def test_gamma_shape_sample_n():
+    model = GammaShape(par_v=1.5, par_c=2.0, random_state=0)
+    samples = model.sample_n(20)
+    assert samples.shape == (20,)
+    assert np.all(samples > 0)
+
+
+def test_gamma_shape_score():
+    model = GammaShape(par_v=1.5, par_c=2.0)
+    score = model.score(X_GAMMA)
+    assert score.shape == X_GAMMA.shape
+
+def test_gamma_shape_updates():
+    model = GammaShape(par_v=1.5, par_c=2.0)
+    model.update(par_v=2)
+    assert model.shape == 2
+
+def test_gamma_shape_projects():
+    model = GammaShape(par_v=1.5, par_c=2.)
+    par_v = model._project_params(par_v=0)
+    assert par_v > 0 
 
 
 # --- GammaRate ---
@@ -146,14 +253,24 @@ def test_gamma_rate_score():
     score = model.score(X_GAMMA)
     assert score.shape == X_GAMMA.shape
 
+def test_gamma_rate_updates():
+    model = GammaRate(par_v=1.5, par_c=2.0)
+    model.update(par_v=2)
+    assert model.rate == 2
 
-def test_gamma_both_score():
-    model = Gamma(par_v=np.array([2.0, 1.5]))
-    score = model.score(X_GAMMA)
-    assert score.shape == (len(X_GAMMA), 2)
+
+def test_gamma_rate_projects():
+    model = GammaRate(par_v=1.5, par_c=2.)
+    par_v = model._project_params(par_v=0)
+    assert par_v > 0
 
 
 # --- Binomial ---
+
+def test_binomial_log_prob():
+    model = Binomial(par_v=0.6, par_c=10)
+    result = model.log_prob(X_BIN)
+    assert result.shape == X_BIN.shape
 
 def test_binomial_sample_n():
     model = Binomial(par_v=0.3, par_c=10, random_state=0)
@@ -173,6 +290,17 @@ def test_binomial_score():
     x = np.array([2, 5, 8], dtype=float)
     score = model.score(x)
     assert score.shape == x.shape
+
+def test_binomial_init():
+    model = Binomial(par_v=None, par_c=10)
+    model._init_params(X_BIN)
+    assert model.p is not None
+
+def test_binomial_updates():
+    model = Binomial(par_v=0.5, par_c=10)
+    model.update(par_v=0.6)
+    assert model.p == 0.6
+
 
 # --- Poisson ---
 
