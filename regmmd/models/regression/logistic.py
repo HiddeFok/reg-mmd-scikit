@@ -1,7 +1,7 @@
 import numpy as np
 
 from regmmd.models.base_model import RegressionModel
-
+from sklearn.linear_model import LogisticRegression
 
 class LogisticBase(RegressionModel):
     def __init__(self, beta=None, random_state=None):
@@ -30,13 +30,16 @@ class LogisticBase(RegressionModel):
     def _link_func(self, mu):
         return 1 / (1 + np.exp(-mu))
 
-    # TODO: write these
-
     def _project_params(self, par_v):
-        pass
+        return par_v
 
     def _init_params(self, X, y):
-        pass
+        init_model = LogisticRegression(fit_intercept=False).fit(X, y)
+        y_hat = init_model.predict(X)
+        phi_estimate = max(np.var(y_hat - y), 1e-6)
+        self.beta = init_model.coef_
+        self.phi = phi_estimate
+        return self._get_params()
 
 
 class Logistic(LogisticBase):
@@ -54,3 +57,8 @@ class Logistic(LogisticBase):
 
     def update(self, par_v):
         self.beta = par_v
+
+    def _get_params(self):
+        par_v = self.beta
+        par_c = None
+        return par_v, par_c

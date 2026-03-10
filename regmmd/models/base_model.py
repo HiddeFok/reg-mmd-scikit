@@ -13,7 +13,6 @@ class EstimationModel(ABC):
         ----------
         n : int, How many samples to generate
         """
-        raise NotImplementedError
 
     @abstractmethod
     def log_prob(self, x: np.array) -> np.array:
@@ -23,7 +22,6 @@ class EstimationModel(ABC):
         ----------
         x : ndarray of shape (n_samples, n_features), the points to be evaluated
         """
-        raise NotImplementedError
 
     @abstractmethod
     def score(self, x) -> np.array:
@@ -34,7 +32,6 @@ class EstimationModel(ABC):
         ----------
         x : ndarray of shape (n_samples, n_features), the points to be evaluated
         """
-        raise NotImplementedError
 
     @abstractmethod
     def _init_params(self, X) -> None:
@@ -43,8 +40,8 @@ class EstimationModel(ABC):
         Parameters
         ----------
         """
-        raise NotImplementedError
 
+    @abstractmethod
     def _get_params(self):
         """After named parameters are initialized, this function gets
         them in the order of par_v, par_c
@@ -52,8 +49,6 @@ class EstimationModel(ABC):
         Parameters
         ----------
         """
-        raise NotImplementedError
-
 
     @abstractmethod
     def _project_params(self, par_v) -> np.array:
@@ -64,8 +59,6 @@ class EstimationModel(ABC):
         ----------
         par_v : float, variable parameters
         """
-        # TODO: Write this in the models
-        pass
 
     @abstractmethod
     def update(self, par_v) -> None:
@@ -75,7 +68,6 @@ class EstimationModel(ABC):
         ----------
         par_v : float, variable parameters
         """
-        raise NotImplementedError
 
 
 class RegressionModel(EstimationModel):
@@ -91,7 +83,6 @@ class RegressionModel(EstimationModel):
 
         mu_given_x: np.array, the covariates
         """
-        raise NotImplementedError
 
     @abstractmethod
     def predict(self, X: np.array) -> np.array:
@@ -101,7 +92,6 @@ class RegressionModel(EstimationModel):
         ----------
         X : np.array
         """
-        raise NotImplementedError
 
     @abstractmethod
     def _init_params(self, X, y) -> None:
@@ -110,4 +100,3 @@ class RegressionModel(EstimationModel):
         Parameters
         ----------
         """
-        raise NotImplementedError

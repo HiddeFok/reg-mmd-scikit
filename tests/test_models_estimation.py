@@ -14,6 +14,7 @@ from regmmd.models import (
     Binomial,
     Poisson,
 )
+from regmmd.models.base_model import EstimationModel
 
 RNG = np.random.default_rng(42)
 X_GAUSS = RNG.normal(2.0, 1.0, size=(50,))
@@ -35,6 +36,18 @@ MODELS = [
     Binomial,
     Poisson
 ]
+
+# --- BaseModel ---
+
+def test_base_model_raises_error():
+    class NewModel(EstimationModel):
+        def __init__(self, par_v=None, par_c=None, random_state=None):
+            self.par_v = par_v
+            self.par_c = par_c
+            self.random_state = random_state
+
+    with pytest.raises(TypeError):
+        model = NewModel()
 
 # --- GaussianLoc ---
 
