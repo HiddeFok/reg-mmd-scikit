@@ -1,4 +1,4 @@
-![code coverage](https://gist.github.com/HiddeFok/73b75fdbeb1fba4b08092b0af7b746f3/raw/coverage_badge.svg)
+![code coverage](https://gist.githubusercontent.com/HiddeFok/73b75fdbeb1fba4b08092b0af7b746f3/raw/coverage_badge.svg)
 ![License](https://img.shields.io/badge/license-GPLv3-green.svg?style=flat)
 ![python](https://img.shields.io/badge/python-3.12-blue?style=flat&logo=python)
 
