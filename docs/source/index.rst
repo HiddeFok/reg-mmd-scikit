@@ -13,7 +13,7 @@ and the statistical model. These procedures are provable universally consistent 
 extremely robust to outliers. For more information about the theoretical side, the relevant papers
 are:
 
-#. `Universal robust regression via maximum mean discrepancy1 <https://academic.oup.com/biomet/article/111/1/71/7159184>`_, 
+#. `Universal robust regression via maximum mean discrepancy <https://academic.oup.com/biomet/article/111/1/71/7159184>`_, 
     Badr-Eddine Chérief-Abdellatif, Pierre Alquier, 2022
 #. `Finite sample properties of parametric MMD estimation: Robustness to misspecification and dependence <https://projecteuclid.org/journals/bernoulli/volume-28/issue-1/Finite-sample-properties-of-parametric-MMD-estimation--Robustness-to/10.3150/21-BEJ1338.full>`_,
     Badr-Eddine Chérief-Abdellatif, Pierre Alquier, 2022

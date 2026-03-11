@@ -32,6 +32,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.mathjax",
     "sphinx.ext.doctest",
+    "sphinx.ext.linkcode"
 ]
 
 templates_path = ["_templates"]
@@ -55,4 +56,10 @@ rng = np.random.default_rng(0)
 '''
 
 # GH Pages
-html_baseurl = "https://HiddeFok.github.io/reg-mmd-scikit/"
+html_baseurl = "https://hiddefok.github.io/reg-mmd-scikit/"
+
+def linkcode_resolve(domain, info):
+    if domain != "py" or not info["module"]:
+        return None
+    filename = info["module"].replace(".", "/")
+    return f"https://github.com/hiddefok/reg-mmd-scikit/blob/main/{filename}.py"
