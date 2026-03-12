@@ -45,14 +45,6 @@ def _sgd_estimation(
     if bandwidth == "auto":
         bandwidth = _median_heuristic(X)
 
-    # NOTE: SGD.MMD.Gaussian assumes that par1 par2 are mean and var, but in
-    # general these parameters might be different things. Do automatic_parameter
-    # start setting in the fit function dependent on the model, make this as
-    # general possible
-
-    # TODO: Write this
-    # _validate(par)
-
     norm_grad = epsilon
     res = {
         "par_v_init": np.copy(par_v),
@@ -356,7 +348,6 @@ def _sgd_hat_regression(
         if np.log(g_1) < log_eps:
             break
 
-    # NOTE: in R there is a double transpose and scaling with standard deviation X
     n_step_done = int(i + 1)
     trajectory = trajectory[:, :n_step_done]
     trajectory = np.cumsum(trajectory, axis=1) / np.arange(1, n_step_done + 1)
@@ -384,11 +375,6 @@ def _sgd_tilde_regression(
 
     if bandwidth == "auto":
         bandwidth = _median_heuristic(X)
-
-    # NOTE: SGD.MMD.Gaussian assumes that par1 par2 are mean and var, but in
-    # general these parameters might be different things. Do automatic_parameter
-    # start setting in the fit function dependent on the model, make this as
-    # general possible
 
     norm_grad = epsilon
     res = {

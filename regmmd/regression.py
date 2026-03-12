@@ -223,6 +223,9 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         X, y = self._validate_data(X, y)
         n_features = X.shape[1]
 
+        # TODO: fit_intercept=True will throw an error, should be fixed
+
+        # TODO: should be a more general check for integer valued outcomes
         if not isinstance(self.model, Logistic):
             X, y, X_offset, X_scale = _preprocess_data(
                 X,

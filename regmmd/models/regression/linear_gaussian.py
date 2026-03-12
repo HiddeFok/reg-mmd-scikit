@@ -13,7 +13,6 @@ class LinearGaussianBase(RegressionModel):
         self.rng = np.random.default_rng(seed=self.random_state)
 
     def log_prob(self, X, y):
-        # TODO: write validation checks
         if self.beta is None or self.phi is None:
             raise ValueError(
                 "Both parameters need to be defined to calculate the log_prob"
