@@ -11,9 +11,18 @@ extremely robust to outliers. For more information about the theoretical side, t
 are:
 
 1. [Universal robust regression via maximum mean discrepancy](https://academic.oup.com/biomet/article/111/1/71/7159184), 
-    Badr-Eddine Chérief-Abdellatif, Pierre Alquier, 2022
+    Pierre Alquier, Mathieu Gerber, 2024
 2. [Finite sample properties of parametric MMD estimation: Robustness to misspecification and dependence](https://projecteuclid.org/journals/bernoulli/volume-28/issue-1/Finite-sample-properties-of-parametric-MMD-estimation--Robustness-to/10.3150/21-BEJ1338.full),
     Badr-Eddine Chérief-Abdellatif, Pierre Alquier, 2022
+
+## Existing R package
+
+One top of this implementation, there exists an implementation in the R language
+by the original authors of the papers, 
+[R package link](https://cran.r-project.org/web/packages/regMMD/). 
+Most functions in this package are derived from the R implementation. However,
+the way the statistical models are implemented are different in this version to
+allow users to quickly implement their own custom model.
 
 
 ## Installation
@@ -22,7 +31,7 @@ This package is developed for Python 3.12+ and can be installed by cloning this 
 
 ```bash
 git clone git@github.com:HiddeFok/reg-mmd-scikit.git
-pip install -e .
+pip install .
 ```
 
 ## Examples
@@ -33,11 +42,14 @@ a scikit-learn style implementation
 
 ### Estimation
 ```python
-from regmmd import MMDestimator
 import numpy as np
 
+from regmmd import MMDEstimator
+from regmmd.utils import print_summary
+
+
 rng = np.random.default_rng(seed=123)
-x = rng.normal(loc=0, scale=1.5, size=500)
+X = rng.normal(loc=0, scale=1.5, size=500)
 
 mmd_estim = MMDEstimator(
     model="gaussian-loc",
@@ -46,23 +58,27 @@ mmd_estim = MMDEstimator(
     kernel="Gaussian",
     solver={
         "type": "GD",
-        "burnin": 5000,
-        "n_step": 10000,
+        "burnin": 500,
+        "n_step": 1000,
         "stepsize": 1,
         "epsilon": 1e-4,
     }
 )
-res = mmd_estim.fit(X=x)
+res = mmd_estim.fit(X=X)
+print_summary(res)
 ```
 
 ### Regression
 ```python
 from regmmd import MMDRegressor
+from regmmd.models import GammaRegressionLoc
+from regmmd.utils import print_summary
+
 import numpy as np
 
 rng = np.random.default_rng(seed=123)
 
-n = 10000
+n = 1000
 p = 4
 beta = np.arange(1, 5)
 model_true = GammaRegressionLoc(par_v=beta, par_c=1, random_state=12)
@@ -76,20 +92,22 @@ beta_init = np.array([0.5, 1.5, 2.5, 3.2])
 mmd_reg = MMDRegressor(
     model="gamma-regression-loc",
     par_v=beta_init,
-    par_c=None,
+    par_c=1.5,
     fit_intercept=False,
-    bandwidth_X=1,
-    bandwidth_y=1,
-    kernel_y="Laplace",
+    bandwidth_X=0,
+    bandwidth_y=5,
+    kernel_y="Gaussian",
     solver={
         "type": "SGD",
-        "burnin": 500,
+        "burnin": 5000,
         "n_step": 10000,
         "stepsize": 1,
         "epsilon": 1e-8,
     },
 )
 
-res = mmd_reg.fit(X, y)
+res = mmd_reg.fit(X=X, y=y)
+print_summary(res)
+
 ```
 
