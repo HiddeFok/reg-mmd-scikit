@@ -331,93 +331,8 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="module-regmmd.models.base_model">
-<span id="base-model-class"></span><h1>Base Model Class<a class="headerlink" href="#module-regmmd.models.base_model" title="Link to this heading">#</a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="regmmd.models.base_model.EstimationModel">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">regmmd.models.base_model.</span></span><span class="sig-name descname"><span class="pre">EstimationModel</span></span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/base_model.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.base_model.EstimationModel" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.base_model.EstimationModel.log_prob">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">log_prob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/base_model.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.base_model.EstimationModel.log_prob" title="Link to this definition">#</a></dt>
-<dd><p>Evaluates to the log likelihood at the values x.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em><em>, </em><em>the points to be evaluated</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.base_model.EstimationModel.sample_n">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">sample_n</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/base_model.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.base_model.EstimationModel.sample_n" title="Link to this definition">#</a></dt>
-<dd><p>Generate n samples of the distribution with the initialized
-parameters of the distribution.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>n</strong> (<em>int</em><em>, </em><em>How many samples to generate</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.base_model.EstimationModel.score">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/base_model.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.base_model.EstimationModel.score" title="Link to this definition">#</a></dt>
-<dd><p>Evaluates to the gradient of the log likelihood with respect to the
-parameters at the values x.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em><em>, </em><em>the points to be evaluated</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.base_model.EstimationModel.update">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/base_model.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.base_model.EstimationModel.update" title="Link to this definition">#</a></dt>
-<dd><p>Update the model with new parameters</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>par_v</strong> (<em>float</em><em>, </em><em>variable parameters</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="regmmd.models.base_model.RegressionModel">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">regmmd.models.base_model.</span></span><span class="sig-name descname"><span class="pre">RegressionModel</span></span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/base_model.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.base_model.RegressionModel" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#regmmd.models.base_model.EstimationModel" title="regmmd.models.base_model.EstimationModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">EstimationModel</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.base_model.RegressionModel.predict">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/base_model.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.base_model.RegressionModel.predict" title="Link to this definition">#</a></dt>
-<dd><p>Computes the mean of Y given X and the current parameters of the model</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>X</strong> (<em>np.array</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.base_model.RegressionModel.sample_n">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">sample_n</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu_given_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/base_model.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.base_model.RegressionModel.sample_n" title="Link to this definition">#</a></dt>
-<dd><p>Generate n samples of the distribution with the initialized
-parameters of the distribution and the conditional mean
-of the covariates</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>n</strong> (<em>int</em><em>, </em><em>How many samples to generate</em>)</p></li>
-<li><p><strong>mu_given_x</strong> (<em>np.array</em><em>, </em><em>the covariates</em>)</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+  <section id="base-model-class">
+<h1>Base Model Class<a class="headerlink" href="#base-model-class" title="Link to this heading">#</a></h1>
 </section>
 
 
@@ -449,29 +364,6 @@ of the covariates</p>
                 <dialog id="pst-secondary-sidebar-modal"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
-
-  <div class="sidebar-secondary-item">
-<div
-    id="pst-page-navigation-heading-2"
-    class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-  </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.base_model.EstimationModel"><code class="docutils literal notranslate"><span class="pre">EstimationModel</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.base_model.EstimationModel.log_prob"><code class="docutils literal notranslate"><span class="pre">EstimationModel.log_prob()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.base_model.EstimationModel.sample_n"><code class="docutils literal notranslate"><span class="pre">EstimationModel.sample_n()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.base_model.EstimationModel.score"><code class="docutils literal notranslate"><span class="pre">EstimationModel.score()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.base_model.EstimationModel.update"><code class="docutils literal notranslate"><span class="pre">EstimationModel.update()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.base_model.RegressionModel"><code class="docutils literal notranslate"><span class="pre">RegressionModel</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.base_model.RegressionModel.predict"><code class="docutils literal notranslate"><span class="pre">RegressionModel.predict()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.base_model.RegressionModel.sample_n"><code class="docutils literal notranslate"><span class="pre">RegressionModel.sample_n()</span></code></a></li>
-</ul>
-</li>
-</ul>
-  </nav></div>
 
   <div class="sidebar-secondary-item">
   <div role="note" aria-label="source link">
