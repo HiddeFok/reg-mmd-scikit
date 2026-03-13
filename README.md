@@ -27,12 +27,34 @@ allow users to quickly implement their own custom model.
 
 ## Installation
 
-This package is developed for Python 3.12+ and can be installed by cloning this repository and installing through `pip`.
+This package is developed for Python 3.12+ and can be installed by cloning this repository and installing through `pip` or `uv`. The package will be released
+as an official PyPI package, when it is finished.
 
+### Using pip
 ```bash
 git clone git@github.com:HiddeFok/reg-mmd-scikit.git
+cd reg-mmd-scikit
 pip install .
 ```
+
+Alternatively, The following command clones the package and install it in one go
+```bash
+pip install git+https://github.com/HiddeFok/reg-mmd-scikit
+```
+
+
+### Using uv
+Assuming that you are in a directory where a `uv` project is initialised. 
+```bash
+git clone git@github.com:HiddeFok/reg-mmd-scikit.git
+uv add ./reg-mmd-scikit/
+```
+
+Alternatively, The following command clones the package and install it in one go
+```bash
+uv add git+https://github.com/HiddeFok/reg-mmd-scikit
+```
+
 
 ## Examples
 

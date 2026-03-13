@@ -34,7 +34,7 @@ In short, the estimator is based on the minimum distance estimator :math:`\hat{\
 is defined as 
 
 .. math::
-   \hat{\theta} \in \underset{\theta \in \Theta}{\text{argmin}}
+   \hat{\theta} \in \underset{\theta \in \Theta}{\text{argmin}}\;
    d(P_\theta, \hat{P}_n),
 
 for some statistical model :math:`\left\{P_\theta \mid \theta \in \Theta\right\}` and the empirical distrbution
