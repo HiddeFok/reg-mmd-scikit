@@ -210,10 +210,9 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         """
         X, y = self._validate_data(X, y)
         n_features = X.shape[1]
-        offset = 1 if self.fit_intercept else 0
 
-        # TODO: should be a more general check for integer valued outcomes
-        if not isinstance(self.model, Logistic):
+        y_int = y.astype(int)
+        if (y_int - y).sum() != 0:
             X, y, X_offset, X_scale = _preprocess_data(
                 X,
                 y,
@@ -300,7 +299,6 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         y_pred : np.ndarray, shape (n_samples,)
             The predicted target values.
         """
-        # TODO: with intercept it does not work now
         X = self._validate_data(X)
         self._check_is_fitted()
 

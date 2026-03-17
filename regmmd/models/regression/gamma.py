@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.typing import NDArray
 from scipy.special import gamma, digamma
 
 from regmmd.models.base_model import RegressionModel
@@ -19,7 +20,7 @@ class GammaRegressionBase(RegressionModel):
         self.random_state = random_state
         self.rng = np.random.default_rng(seed=random_state)
 
-    def log_prob(self, X: np.array, y: np.array) -> np.array:
+    def log_prob(self, X: NDArray, y: NDArray) -> NDArray:
         if self.shape is None or self.beta is None:
             raise ValueError(
                 "Both parameters need to be defined"
@@ -33,7 +34,7 @@ class GammaRegressionBase(RegressionModel):
         log_exp = -self.shape * y / mu_given_x
         return log_Z + log_y + log_shape + log_mu + log_exp
 
-    def sample_n(self, n: int, mu_given_x: np.array):
+    def sample_n(self, n: int, mu_given_x: NDArray):
         if self.shape is None or self.beta is None:
             raise ValueError("Both parameters need to be defined to be able to sample")
 
@@ -58,7 +59,7 @@ class GammaRegressionBase(RegressionModel):
 
         return self._get_params()
 
-    def _shape_grad(self, X: np.array, y: np.array) -> np.array:
+    def _shape_grad(self, X: NDArray, y: NDArray) -> NDArray:
         mu_given_x = self.predict(X)
 
         log_gamma = -digamma(self.shape)
@@ -68,7 +69,7 @@ class GammaRegressionBase(RegressionModel):
         log_exp = -y / mu_given_x
         return (log_gamma + log_y + log_shape + log_mu + log_exp)[:, np.newaxis]
 
-    def _beta_grad(self, X: np.array, y: np.array) -> np.array:
+    def _beta_grad(self, X: NDArray, y: NDArray) -> NDArray:
         mu_given_x = self.predict(X)
 
         residuals = (-self.shape + self.shape * y / mu_given_x) / mu_given_x

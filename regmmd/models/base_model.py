@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
 
 import numpy as np
+from numpy.typing import NDArray
 
 
 class EstimationModel(ABC):
     @abstractmethod
-    def sample_n(self, n: int) -> np.array:
+    def sample_n(self, n: int) -> NDArray:
         """Generate n samples of the distribution with the initialized
         parameters of the distribution.
 
@@ -15,7 +16,7 @@ class EstimationModel(ABC):
         """
 
     @abstractmethod
-    def log_prob(self, x: np.array) -> np.array:
+    def log_prob(self, x: NotADirectoryError) -> NDArray:
         """Evaluates to the log likelihood at the values x.
 
         Parameters
@@ -24,7 +25,7 @@ class EstimationModel(ABC):
         """
 
     @abstractmethod
-    def score(self, x) -> np.array:
+    def score(self, x) -> NDArray:
         """Evaluates to the gradient of the log likelihood with respect to the
         parameters at the values x.
 
@@ -51,7 +52,7 @@ class EstimationModel(ABC):
         """
 
     @abstractmethod
-    def _project_params(self, par_v) -> np.array:
+    def _project_params(self, par_v) -> NDArray:
         """Projection of potentially infeasible variable parameters to the
         feasible set
 
@@ -72,7 +73,7 @@ class EstimationModel(ABC):
 
 class RegressionModel(EstimationModel):
     @abstractmethod
-    def sample_n(self, n: int, mu_given_x: np.array) -> np.array:
+    def sample_n(self, n: int, mu_given_x: NDArray) -> NDArray:
         """Generate n samples of the distribution with the initialized
         parameters of the distribution and the conditional mean
         of the covariates
@@ -85,7 +86,7 @@ class RegressionModel(EstimationModel):
         """
 
     @abstractmethod
-    def predict(self, X: np.array) -> np.array:
+    def predict(self, X: NDArray) -> NDArray:
         """Computes the mean of Y given X and the current parameters of the model
 
         Parameters

@@ -55,12 +55,12 @@ Alternatively, The following command clones the package and install it in one go
 uv add git+https://github.com/HiddeFok/reg-mmd-scikit
 ```
 
-
 ## Examples
 
 The package has 2 main classes, `MMDEstimator` and `MMDRegressor` that
 implement the estimation and regression procedures respectively. They follow
-a scikit-learn style implementation
+a scikit-learn style implementation. A list of all available models and a description of how to implement your own model, can be found on the [documentation
+site](https://hiddefok.github.io/reg-mmd-scikit/).
 
 ### Estimation
 ```python
@@ -132,4 +132,3 @@ res = mmd_reg.fit(X=X, y=y)
 print_summary(res)
 
 ```
-

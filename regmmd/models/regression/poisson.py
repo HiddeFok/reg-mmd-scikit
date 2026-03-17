@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.typing import NDArray
 from scipy.special import factorial
 
 from regmmd.models.base_model import RegressionModel
@@ -12,7 +13,7 @@ class PoissonRegressionBase(RegressionModel):
         self.random_state = random_state
         self.rng = np.random.default_rng(seed=self.random_state)
 
-    def log_prob(self, X: np.array, y: np.array) -> np.array:
+    def log_prob(self, X: NDArray, y: NDArray) -> NDArray:
         if self.beta is None:
             raise ValueError(
                 "Both parameters need to be defined to calculate the log_prob"
@@ -24,10 +25,10 @@ class PoissonRegressionBase(RegressionModel):
         log_Z = np.log(factorial(y))
         return np.sum(log_y + log_exp + log_Z)
 
-    def sample_n(self, n: int, mu_given_x: np.array) -> np.array:
+    def sample_n(self, n: int, mu_given_x: NDArray) -> NDArray:
         return self.rng.poisson(lam=1 / mu_given_x, size=(n,))
 
-    def predict(self, X: np.array) -> np.array:
+    def predict(self, X: NDArray) -> NDArray:
         """Outputs the mean given X, parameters need to be initialized for this"""
         if self.beta is None:
             raise ValueError(
@@ -36,7 +37,7 @@ class PoissonRegressionBase(RegressionModel):
 
         return np.exp(X @ self.beta)
 
-    def score(self, X: np.array, y: np.array) -> np.array:
+    def score(self, X: NDArray, y: NDArray) -> NDArray:
         if self.beta is None:
             raise ValueError(
                 "Both parameters need to be defined to calculate the score"

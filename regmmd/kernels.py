@@ -1,8 +1,9 @@
 import numpy as np
 from scipy.spatial import distance_matrix
+from numpy.typing import NDArray
 
 
-def K1d_dist(u: np.array, kernel: str, bandwidth: float = 1) -> np.array:
+def K1d_dist(u: NDArray, kernel: str, bandwidth: float = 1) -> NDArray:
     """1-Dimensional Kernel evaluation function
 
     Parameters
@@ -27,7 +28,7 @@ def K1d_dist(u: np.array, kernel: str, bandwidth: float = 1) -> np.array:
         raise ValueError
 
 
-def K1d(x: np.array, y: np.array, kernel: str, bandwidth: float = 1) -> np.array:
+def K1d(x: NDArray, y: NDArray, kernel: str, bandwidth: float = 1) -> NDArray:
     """1-Dimensional Kernel difference evaluation function (K(x-y))
 
     Parameters
@@ -48,7 +49,7 @@ def K1d(x: np.array, y: np.array, kernel: str, bandwidth: float = 1) -> np.array
     return K1d_dist(u, kernel, bandwidth)
 
 
-def Kmd_dist(u: np.array, kernel: str, bandwidth: float = 1) -> np.array:
+def Kmd_dist(u: NDArray, kernel: str, bandwidth: float = 1) -> NDArray:
     """m-Dimensional Kernel evaluation function
 
     Parameters
@@ -74,7 +75,7 @@ def Kmd_dist(u: np.array, kernel: str, bandwidth: float = 1) -> np.array:
         raise ValueError
 
 
-def Kmd(x: np.array, y: np.array, kernel: str, bandwidth: float = 1) -> np.array:
+def Kmd(x: NDArray, y: NDArray, kernel: str, bandwidth: float = 1) -> NDArray:
     """Multi-Dimensional Kernel evaluation function
 
     Parameters

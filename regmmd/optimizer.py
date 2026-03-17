@@ -15,9 +15,11 @@ class MMDResult(TypedDict):
     estimator: NDArray
     trajectory: NDArray
     bandwidth: Optional[float]  # Optional if not always present
+    bandwidth_x: Optional[float]  # Optional if not always present
+    bandwidth_y: Optional[float]  # Optional if not always present
 
 
-def _median_heuristic(X: np.array):
+def _median_heuristic(X: NDArray) -> float:
     if len(X.shape) == 1:
         X = X[:, np.newaxis]
     pairwise_dists = pdist(X, metric="euclidean")
@@ -29,9 +31,9 @@ def _median_heuristic(X: np.array):
 
 
 def _sgd_estimation(
-    X: np.array,
-    par_v: np.array,
-    par_c: np.array,
+    X: NDArray,
+    par_v: NDArray,
+    par_c: NDArray,
     model: EstimationModel,
     kernel: str,
     burn_in: int = 500,
@@ -113,7 +115,7 @@ def _sgd_estimation(
 
 
 def _gd_gaussian_loc_exact_estimation(
-    X: np.array,
+    X: NDArray,
     par_v: float,
     par_c: float,
     burn_in: int = 500,
@@ -167,10 +169,10 @@ def _gd_gaussian_loc_exact_estimation(
 
 
 def _sgd_hat_regression(
-    X: np.array,
-    y: np.array,
-    par_v: np.array,
-    par_c: np.array,
+    X: NDArray,
+    y: NDArray,
+    par_v: NDArray,
+    par_c: NDArray,
     model: RegressionModel,
     kernel_y: str,
     kernel_x: str = "Laplace",
@@ -358,10 +360,10 @@ def _sgd_hat_regression(
 
 
 def _sgd_tilde_regression(
-    X: np.array,
-    y: np.array,
-    par_v: np.array,
-    par_c: np.array,
+    X: NDArray,
+    y: NDArray,
+    par_v: NDArray,
+    par_c: NDArray,
     model: RegressionModel,
     kernel: str,
     burn_in: int = 500,
@@ -449,7 +451,7 @@ def _sgd_tilde_regression(
     return res
 
 
-def sort_obs(X: np.array) -> np.array:
+def sort_obs(X: NDArray) -> NDArray:
     n = X.shape[0]
     dists = pdist(X, metric="euclidean")
     indices = np.triu_indices(n, k=1)
@@ -461,15 +463,15 @@ def sort_obs(X: np.array) -> np.array:
 def _get_grad_estimate(
     set_1: NDArray[np.int32],
     set_2: NDArray[np.int32],
-    X: np.array,
-    K_X: np.array,
-    y_sampled_1: np.array,
-    y_sampled_2: np.array,
-    y: np.array,
+    X: NDArray,
+    K_X: NDArray,
+    y_sampled_1: NDArray,
+    y_sampled_2: NDArray,
+    y: NDArray,
     model,
     kernel_y,
     bandwidth_y,
-) -> np.array:
+) -> NDArray:
     if set_1 is not None and set_2 is not None:
         ker_sampled_1 = K1d_dist(
             y_sampled_1[set_1] - y_sampled_2[set_2],

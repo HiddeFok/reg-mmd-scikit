@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.typing import NDArray
 
 from regmmd.models.base_model import RegressionModel
 from sklearn.linear_model import LogisticRegression
@@ -23,7 +24,7 @@ class LogisticBase(RegressionModel):
         log_p_2 = np.log(1 - p)
         return np.sum(y * log_p_1 + (1 - y) * log_p_2)
 
-    def sample_n(self, n: int, mu_given_x: np.array) -> np.array:
+    def sample_n(self, n: int, mu_given_x: NDArray) -> NDArray:
         if self.beta is None:
             raise ValueError("Both parameters need to be defined to sample")
 

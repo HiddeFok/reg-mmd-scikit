@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.typing import NDArray
 
 from regmmd.models.base_model import RegressionModel
 from sklearn.linear_model import LinearRegression
@@ -25,7 +26,7 @@ class LinearGaussianBase(RegressionModel):
         log_exp = -np.sum(np.square(y - X @ self.beta)) / (2 * (self.phi))
         return log_Z + log_sigma + log_exp
 
-    def sample_n(self, n: int, mu_given_x: np.array) -> np.array:
+    def sample_n(self, n: int, mu_given_x: NDArray) -> NDArray:
         if self.beta is None or self.phi is None:
             raise ValueError(
                 "Both parameters need to be defined to calculate the log_prob"

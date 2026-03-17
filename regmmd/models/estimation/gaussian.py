@@ -87,7 +87,6 @@ class GaussianScale(GaussianBase):
         return par_v, par_c
 
     def _project_params(self, par_v):
-        # TODO: Make this data-dependent maybe
         return max(1e-6, par_v)
 
 
