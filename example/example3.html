@@ -42,6 +42,7 @@
     <script src="../_static/documentation_options.js?v=01f34227"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'example/example3';</script>
     <link rel="canonical" href="https://hiddefok.github.io/reg-mmd-scikit/example/example3.html" />
     <link rel="index" title="Index" href="../genindex.html" />
@@ -333,6 +334,193 @@
                   
   <section id="example-3-writing-your-own-estimationmodel-or-regressionmodel">
 <span id="example3"></span><h1>Example 3: Writing your own EstimationModel or RegressionModel<a class="headerlink" href="#example-3-writing-your-own-estimationmodel-or-regressionmodel" title="Link to this heading">#</a></h1>
+<p>The package provides two abstract base classes that can be subclassed to define
+custom statistical models:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">regmmd.models.base_model.EstimationModel</span></code> — for unconditional parameter</dt><dd><p>estimation (used with <code class="xref py py-class docutils literal notranslate"><span class="pre">regmmd.MMDEstimator</span></code>).</p>
+</dd>
+</dl>
+</li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">regmmd.models.base_model.RegressionModel</span></code> — for conditional
+regression (used with <code class="xref py py-class docutils literal notranslate"><span class="pre">regmmd.MMDRegressor</span></code>). Extends
+<code class="docutils literal notranslate"><span class="pre">EstimationModel</span></code> with prediction support.</p></li>
+</ul>
+<p>Both classes follow a <code class="docutils literal notranslate"><span class="pre">par_v</span></code> / <code class="docutils literal notranslate"><span class="pre">par_c</span></code> convention:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">par_v</span></code> — <em>variable</em> parameters that are optimized by the solver.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">par_c</span></code> — <em>constant</em> parameters that are held fixed during optimization.</p></li>
+</ul>
+<section id="required-methods">
+<h2>Required Methods<a class="headerlink" href="#required-methods" title="Link to this heading">#</a></h2>
+<section id="estimationmodel">
+<h3>EstimationModel<a class="headerlink" href="#estimationmodel" title="Link to this heading">#</a></h3>
+<p>Subclasses of <code class="docutils literal notranslate"><span class="pre">EstimationModel</span></code> must implement the following methods:</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">sample_n(self,</span> <span class="pre">n)</span></code></dt><dd><p>Draw <code class="docutils literal notranslate"><span class="pre">n</span></code> i.i.d. samples from the distribution under the current
+parameters. Used internally by the MMD objective to simulate from the
+model.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">log_prob(self,</span> <span class="pre">x)</span></code></dt><dd><p>Return the log-likelihood evaluated at each point in <code class="docutils literal notranslate"><span class="pre">x</span></code>, an array of
+shape <code class="docutils literal notranslate"><span class="pre">(n_samples,)</span></code> or <code class="docutils literal notranslate"><span class="pre">(n_samples,</span> <span class="pre">n_features)</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">score(self,</span> <span class="pre">x)</span></code></dt><dd><p>Return the gradient of the log-likelihood with respect to <code class="docutils literal notranslate"><span class="pre">par_v</span></code> at
+each point in <code class="docutils literal notranslate"><span class="pre">x</span></code>. The output shape must be compatible with <code class="docutils literal notranslate"><span class="pre">par_v</span></code>:
+a scalar gradient per sample when <code class="docutils literal notranslate"><span class="pre">par_v</span></code> is a scalar, or an array of
+shape <code class="docutils literal notranslate"><span class="pre">(n_samples,</span> <span class="pre">len(par_v))</span></code> when <code class="docutils literal notranslate"><span class="pre">par_v</span></code> is a vector.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">_init_params(self,</span> <span class="pre">X)</span></code></dt><dd><p>Initialize the model parameters from the data <code class="docutils literal notranslate"><span class="pre">X</span></code> when <code class="docutils literal notranslate"><span class="pre">par_v</span></code> or
+<code class="docutils literal notranslate"><span class="pre">par_c</span></code> are <code class="docutils literal notranslate"><span class="pre">None</span></code>. Should call and return <code class="docutils literal notranslate"><span class="pre">_get_params()</span></code> at the end.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">_get_params(self)</span></code></dt><dd><p>Return the current <code class="docutils literal notranslate"><span class="pre">(par_v,</span> <span class="pre">par_c)</span></code> tuple so that the optimizer can
+read the parameter state.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">_project_params(self,</span> <span class="pre">par_v)</span></code></dt><dd><p>Project <code class="docutils literal notranslate"><span class="pre">par_v</span></code> onto the feasible set after each optimizer step. Use
+this to enforce constraints (e.g. positivity of a scale parameter). Return
+<code class="docutils literal notranslate"><span class="pre">par_v</span></code> unchanged if no constraints are required.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">update(self,</span> <span class="pre">par_v)</span></code></dt><dd><p>Write a new value of <code class="docutils literal notranslate"><span class="pre">par_v</span></code> back into the model’s attributes (e.g.
+<code class="docutils literal notranslate"><span class="pre">self.loc</span> <span class="pre">=</span> <span class="pre">par_v</span></code>). Called by the optimizer after each gradient step.</p>
+</dd>
+</dl>
+</section>
+<section id="regressionmodel">
+<h3>RegressionModel<a class="headerlink" href="#regressionmodel" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">RegressionModel</span></code> extends <code class="docutils literal notranslate"><span class="pre">EstimationModel</span></code>. In addition to all methods
+listed above (with signatures adapted for the joint input <span class="math notranslate nohighlight">\((X, y)\)</span>), the
+following extra method is required:</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">sample_n(self,</span> <span class="pre">n,</span> <span class="pre">mu_given_x)</span></code></dt><dd><p>Draw <code class="docutils literal notranslate"><span class="pre">n</span></code> samples from the conditional distribution
+<span class="math notranslate nohighlight">\(p(y \mid X, \text{par\_v}, \text{par\_c})\)</span>, given the predicted mean <code class="docutils literal notranslate"><span class="pre">mu_given_x</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">predict(self,</span> <span class="pre">X)</span></code></dt><dd><p>Return the predicted conditional mean <span class="math notranslate nohighlight">\(\mathbb{E}[Y | X]\)</span> under the current
+parameters.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">_init_params(self,</span> <span class="pre">X,</span> <span class="pre">y)</span></code></dt><dd><p>Same role as in <code class="docutils literal notranslate"><span class="pre">EstimationModel</span></code>, but receives both <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code>.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="implementing-a-custom-estimationmodel">
+<h2>Implementing a Custom EstimationModel<a class="headerlink" href="#implementing-a-custom-estimationmodel" title="Link to this heading">#</a></h2>
+<p>The example below implements a simple Poisson estimation model where the rate
+parameter <code class="docutils literal notranslate"><span class="pre">lam</span></code> is the only variable parameter.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">regmmd.models.base_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">EstimationModel</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">PoissonEstimation</span><span class="p">(</span><span class="n">EstimationModel</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">par_v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">par_c</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># par_v: lambda (rate), par_c: unused</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">par_v</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">sample_n</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="n">lam</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c1"># d/d(lam) log p(x | lam) = x / lam - 1</span>
+        <span class="k">return</span> <span class="n">x</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_params</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lam</span><span class="p">,</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_project_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">par_v</span><span class="p">):</span>
+        <span class="c1"># Rate must be strictly positive</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">par_v</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">par_v</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lam</span> <span class="o">=</span> <span class="n">par_v</span>
+</pre></div>
+</div>
+<p>This model can then be passed directly to <code class="xref py py-class docutils literal notranslate"><span class="pre">regmmd.MMDEstimator</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">regmmd</span><span class="w"> </span><span class="kn">import</span> <span class="n">MMDEstimator</span>
+
+<span class="n">mmd_estim</span> <span class="o">=</span> <span class="n">MMDEstimator</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">PoissonEstimation</span><span class="p">(),</span>
+    <span class="n">par_v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">par_c</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;Gaussian&quot;</span><span class="p">,</span>
+    <span class="n">solver</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;GD&quot;</span><span class="p">,</span> <span class="s2">&quot;burnin&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s2">&quot;n_step&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
+            <span class="s2">&quot;stepsize&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span> <span class="s2">&quot;epsilon&quot;</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">},</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">mmd_estim</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="implementing-a-custom-regressionmodel">
+<h2>Implementing a Custom RegressionModel<a class="headerlink" href="#implementing-a-custom-regressionmodel" title="Link to this heading">#</a></h2>
+<p>The example below implements a Poisson regression model where
+<span class="math notranslate nohighlight">\(\mathrm{log}(\mathbb{E}[Y \mid X]) = X^T \beta\)</span>, with <span class="math notranslate nohighlight">\(\beta\)</span> as the only variable parameter.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">regmmd.models.base_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegressionModel</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">PoissonRegression</span><span class="p">(</span><span class="n">RegressionModel</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">par_v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">par_c</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># par_v: beta coefficients, par_c: unused</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">par_v</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="c1"># Conditional mean: E[Y | X] = exp(X @ beta)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">X</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">sample_n</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">mu_given_x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="n">lam</span><span class="o">=</span><span class="n">mu_given_x</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_prob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">y</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span> <span class="o">-</span> <span class="n">mu</span>  <span class="c1"># ignoring log(y!) constant</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="c1"># d/d(beta) log p(y | X, beta) = X^T (y - mu)</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_params</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">,</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_project_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">par_v</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">par_v</span>  <span class="c1"># no constraints on beta</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">par_v</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">par_v</span>
+</pre></div>
+</div>
+<p>This model can then be passed directly to <code class="xref py py-class docutils literal notranslate"><span class="pre">regmmd.MMDRegressor</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">regmmd</span><span class="w"> </span><span class="kn">import</span> <span class="n">MMDRegressor</span>
+
+<span class="n">mmd_reg</span> <span class="o">=</span> <span class="n">MMDRegressor</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">PoissonRegression</span><span class="p">(),</span>
+    <span class="n">par_v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">par_c</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">fit_intercept</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">bandwidth_X</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">bandwidth_y</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">kernel_y</span><span class="o">=</span><span class="s2">&quot;Gaussian&quot;</span><span class="p">,</span>
+    <span class="n">solver</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;SGD&quot;</span><span class="p">,</span> <span class="s2">&quot;burnin&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s2">&quot;n_step&quot;</span><span class="p">:</span> <span class="mi">2000</span><span class="p">,</span>
+            <span class="s2">&quot;stepsize&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span> <span class="s2">&quot;epsilon&quot;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">},</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">mmd_reg</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
@@ -373,6 +561,24 @@
                 <dialog id="pst-secondary-sidebar-modal"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#required-methods">Required Methods</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#estimationmodel">EstimationModel</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regressionmodel">RegressionModel</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementing-a-custom-estimationmodel">Implementing a Custom EstimationModel</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementing-a-custom-regressionmodel">Implementing a Custom RegressionModel</a></li>
+</ul>
+  </nav></div>
 
   <div class="sidebar-secondary-item">
   <div role="note" aria-label="source link">
