@@ -30,10 +30,10 @@ def test_median_heuristic_2d():
     assert result >= 0
 
 
-def test_median_heuristic_single_point_is_zero():
+def test_median_heuristic_single_point_is_one():
     X = np.array([[1.0, 2.0]])
     result = _median_heuristic(X)
-    assert result == 0.0
+    assert result == 1
 
 
 # --- sort_obs ---
