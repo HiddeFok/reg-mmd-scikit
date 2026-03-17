@@ -87,7 +87,7 @@ def test_preprocess_data_no_intercept():
 
 # --- MMDRegressor ---
 
-SOLVER = {"type": "SGD", "burnin": 5, "n_step": 10, "stepsize": 0.1}
+SOLVER = {"type": "SGD", "burnin": 50, "n_step": 100, "stepsize": 0.1}
 
 
 def _make_regressor():
@@ -123,31 +123,39 @@ def test_mmd_regressor_not_fitted_raises():
         reg.predict(X_test)
 
 
-def test_mmd_regressor_fitted_hat_predicts():
-    X = RNG.normal(size=(50, 2))
-    noise = RNG.normal(size=(50,))
+@pytest.mark.parametrize("fit_intercept", [False, True])
+def test_mmd_regressor_fitted_hat_predicts(fit_intercept):
+    X = RNG.normal(size=(100, 2))
+    noise = RNG.normal(size=(100,))
     beta = np.array([1, 2])
-    y = X @ beta + 0.1 * noise
+    if fit_intercept:
+        y = X @ beta + 0.1 * noise + 1
+    else:
+        y = X @ beta + 0.1 * noise
 
     par_v = np.array([1.2, 2.1])
     model = LinearGaussianLoc(par_v=par_v, par_c=0.1)
-    reg = MMDRegressor(model=model, par_v=par_v, solver=SOLVER, fit_intercept=False)
+    reg = MMDRegressor(model=model, par_v=par_v, solver=SOLVER, fit_intercept=fit_intercept)
     reg.fit(X, y)
     y_hat = reg.predict(X)
     mse = np.mean((y - y_hat) ** 2)
     assert mse < 0.5
 
 
-def test_mmd_regressor_fitted_tilde_predicts():
-    X = RNG.normal(size=(50, 2))
-    noise = RNG.normal(size=(50,))
+@pytest.mark.parametrize("fit_intercept", [False, True])
+def test_mmd_regressor_fitted_tilde_predicts(fit_intercept):
+    X = RNG.normal(size=(100, 2))
+    noise = RNG.normal(size=(100,))
     beta = np.array([1, 2])
-    y = X @ beta + 0.1 * noise
+    if fit_intercept:
+        y = X @ beta + 0.1 * noise + 1
+    else:
+        y = X @ beta + 0.1 * noise
 
     par_v = np.array([1.2, 2.1])
     model = LinearGaussianLoc(par_v=par_v, par_c=0.1)
     reg = MMDRegressor(
-        model=model, par_v=par_v, solver=SOLVER, fit_intercept=False, bandwidth_X=0
+        model=model, par_v=par_v, solver=SOLVER, fit_intercept=fit_intercept, bandwidth_X=0
     )
     reg.fit(X, y)
     y_hat = reg.predict(X)

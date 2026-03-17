@@ -46,13 +46,15 @@ class GammaRegressionBase(RegressionModel):
 
     def _init_params(self, X, y):
         init_model = GammaRegressor(fit_intercept=False).fit(X, y)
-        self.beta = init_model.coef_
+        if self.beta is None:
+            self.beta = init_model.coef_
 
         # Var(Y) = mu^2 / shape, -> shape =mu^2 / var(Y)
-        y_hat = init_model.predict(X)
-        mu_2 = np.mean(y_hat) ** 2
-        var_y = np.var(y)
-        self.shape = mu_2 / var_y
+        if self.shape is None:
+            y_hat = init_model.predict(X)
+            mu_2 = np.mean(y_hat) ** 2
+            var_y = np.var(y)
+            self.shape = mu_2 / var_y
 
         return self._get_params()
 

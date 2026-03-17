@@ -222,8 +222,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         """
         X, y = self._validate_data(X, y)
         n_features = X.shape[1]
-
-        # TODO: fit_intercept=True will throw an error, should be fixed
+        offset = 1 if self.fit_intercept else 0
 
         # TODO: should be a more general check for integer valued outcomes
         if not isinstance(self.model, Logistic):
@@ -234,6 +233,10 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
             )
             self.X_offset = X_offset
             self.X_scale = X_scale
+        
+        if self.fit_intercept and self.model.beta is not None and len(self.model.beta) == n_features:
+            par_v = np.insert(self.par_v, n_features, 1)
+            self.model.update(par_v)
 
         if self.par_v is None or self.par_c is None:
             self.par_v, self.par_c = self.model._init_params(X=X, y=y)
@@ -286,6 +289,12 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
             else:
                 self.intercept_ = 0.0
             self.par_v = res["estimator"]
+        else:
+            self.beta_ = res["estimator"][:n_features]
+            if self.fit_intercept:
+                self.intercept_ = res["estimator"][n_features]
+            else:
+                self.intercept_ = 0.0
 
         self.model.update(par_v=self.par_v)
         return res
@@ -306,6 +315,9 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         # TODO: with intercept it does not work now
         X = self._validate_data(X)
         self._check_is_fitted()
+
+        if self.fit_intercept:
+            X = np.hstack((X, np.ones(shape=(X.shape[0], 1))))
 
         return self.model.predict(X)
 

@@ -54,8 +54,9 @@ class PoissonRegressionBase(RegressionModel):
         return par_v
 
     def _init_params(self, X, y):
-        init_model = PoissonRegressor(fit_intercept=False).fit(X, y)
-        self.beta = init_model.coef_
+        if self.beta is None:
+            init_model = PoissonRegressor(fit_intercept=False).fit(X, y)
+            self.beta = init_model.coef_
         return self._get_params()
 
 

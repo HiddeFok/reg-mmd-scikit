@@ -38,7 +38,7 @@ class LinearGaussianBase(RegressionModel):
         """Outputs the mean given X, parameters need to be initialized for this"""
         if self.beta is None or self.phi is None:
             raise ValueError(
-                "Both parameters need to be defined to calculate the log_prob"
+                "Both parameters need to be defined to predict"
             )
 
         return X @ self.beta
@@ -59,10 +59,13 @@ class LinearGaussianBase(RegressionModel):
 
     def _init_params(self, X, y):
         init_model = LinearRegression(fit_intercept=False).fit(X, y)
-        y_hat = init_model.predict(X)
-        phi_estimate = max(np.var(y_hat - y), 1e-6)
-        self.beta = init_model.coef_
-        self.phi = phi_estimate
+        if self.beta is None:
+            self.beta = init_model.coef_
+
+        if self.phi is None:
+            y_hat = init_model.predict(X)
+            phi_estimate = max(np.var(y_hat - y), 1e-6)
+            self.phi = phi_estimate
         return self._get_params()
 
 

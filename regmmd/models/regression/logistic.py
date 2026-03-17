@@ -44,8 +44,9 @@ class LogisticBase(RegressionModel):
         return par_v
 
     def _init_params(self, X, y):
-        init_model = LogisticRegression(fit_intercept=False).fit(X, y)
-        self.beta = init_model.coef_[0, :]
+        if self.beta is None:
+            init_model = LogisticRegression(fit_intercept=False).fit(X, y)
+            self.beta = init_model.coef_[0, :]
         return self._get_params()
 
 
