@@ -19,7 +19,7 @@ class GaussianBase(EstimationModel):
             )
         log_Z = -0.5 * np.log(2 * np.pi)
         log_sigma = -np.log(self.scale)
-        log_exp = -((x - self.loc) ** 2 / 2 * (self.scale**2))
+        log_exp = -((x - self.loc) ** 2 / (2 * self.scale**2))
         return log_Z + log_sigma + log_exp
 
     def sample_n(self, n):
@@ -68,7 +68,7 @@ class GaussianLoc(GaussianBase):
 
 class GaussianScale(GaussianBase):
     def __init__(self, par_v=None, par_c=None, random_state=None):
-        super().__init__(loc=par_c, scale=par_v, random_state=None)
+        super().__init__(loc=par_c, scale=par_v, random_state=random_state)
 
     def score(self, x):
         if self.loc is None or self.scale is None:

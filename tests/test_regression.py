@@ -13,7 +13,7 @@ def test_log_prob():
     beta = np.array([0.5, 0.5])
     phi = 1.0
 
-    par_v_init = np.concat((beta, np.array([phi])))
+    par_v_init = np.concatenate((beta, np.array([phi])))
     model = LinearGaussian(par_v=par_v_init)
 
     log_prob = model.log_prob(X, y)
@@ -25,7 +25,7 @@ def test_predict():
     beta = np.array([0.5, 0.5])
     phi = 1.0
 
-    par_v_init = np.concat((beta, np.array([phi])))
+    par_v_init = np.concatenate((beta, np.array([phi])))
     model = LinearGaussian(par_v=par_v_init)
 
     predictions = model.predict(X)
@@ -38,7 +38,7 @@ def test_sample_n():
     beta = np.array([0.5, 0.5])
     phi = 1.0
 
-    par_v_init = np.concat((beta, np.array([phi])))
+    par_v_init = np.concatenate((beta, np.array([phi])))
     model = LinearGaussian(par_v=par_v_init, random_state=0)
     samples = model.sample_n(2, X @ model.beta)
     assert samples.shape == (2,)
@@ -50,7 +50,7 @@ def test_score():
     beta = np.array([0.5, 0.5])
     phi = 1.0
 
-    par_v_init = np.concat((beta, np.array([phi])))
+    par_v_init = np.concatenate((beta, np.array([phi])))
     model = LinearGaussian(par_v=par_v_init)
     score = model.score(X, y)
     assert score.shape == (2, 3)

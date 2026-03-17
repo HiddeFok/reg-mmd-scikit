@@ -1,7 +1,4 @@
 import numpy as np
-
-from regmmd.models.base_model import EstimationModel
-import numpy as np
 from scipy.special import beta, digamma
 
 from regmmd.models.base_model import EstimationModel

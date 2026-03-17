@@ -31,43 +31,31 @@ def _preprocess_data(
     X,
     y,
     fit_intercept=True,
-    copy=True,
-    copy_y=True,
-    check_input=True,
 ):
     """Common data preprocessing for fitting linear model, adapted
     to a condensed version from sklearn.linear_models.base
 
-    - If `check_input=True`, perform standard input validation of `X`, `y`.
-    - Perform copies if requested to avoid side-effects in case of inplace
-      modifications of the input.
-
-    Then, if `fit_intercept=True` this preprocessing centers both `X` and `y` as
-    follows:
-    - if `X` is dense, center the data and
+    If `fit_intercept=True` this preprocessing centers `X` and
     store the mean vector in `X_offset`.
-    - in either case, always center `y` and store the mean in `y_offset`.
-    - both `X_offset` and `y_offset` are always weighted by `sample_weight`
-    if not set to `None`.
 
-    If `fit_intercept=False`, no centering is performed and `X_offset`, `y_offset`
-    are set to zero.
+    If `fit_intercept=False`, no centering is performed and `X_offset` is
+    set to zero.
 
     Returns
     -------
-    X_out : {ndarray, sparse matrix} of shape (n_samples, n_features)
+    X_out : ndarray of shape (n_samples, n_features)
         If copy=True a copy of the input X is triggered, otherwise operations are
         inplace.
         If input X is dense, then X_out is centered.
 
-    y_out : {ndarray, sparse matrix} of shape (n_samples,) or (n_samples, n_targets)
+    y_out : ndarray of shape (n_samples,) or (n_samples, n_targets)
         Centered version of y. Possibly performed inplace on input y depending
         on the copy_y parameter.
 
     X_offset : ndarray of shape (n_features,)
         The mean per column of input X.
 
-    y_offset : float or ndarray of shape (n_features,)
+    X_scale: float or ndarray of shape (n_features,)
 
     """
     n_samples, _ = X.shape

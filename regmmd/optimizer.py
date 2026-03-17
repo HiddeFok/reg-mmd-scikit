@@ -22,7 +22,7 @@ def _median_heuristic(X: np.array):
         X = X[:, np.newaxis]
     pairwise_dists = pdist(X, metric="euclidean")
     if len(pairwise_dists) > 0:
-        median_dist = np.median(pairwise_dists)
+        median_dist = np.median(pairwise_dists) / np.sqrt(2)
     else:
         median_dist = 0
     return median_dist
@@ -74,6 +74,8 @@ def _sgd_estimation(
 
         norm_grad += np.sum(np.square(grad))
         par_v -= stepsize * grad / np.sqrt(norm_grad)
+        par_v = model._project_params(par_v=par_v)
+
         model.update(par_v=par_v)
 
         # only for gaussian par[1] = max(par[1], 1 / (n ** 2))
@@ -97,9 +99,8 @@ def _sgd_estimation(
 
         norm_grad += np.sum(np.square(grad))
         par_v -= stepsize * grad / np.sqrt(norm_grad)
+        par_v = model._project_params(par_v=par_v)
 
-        # only for gaussian par[1] = max(par[1], 1 / (n ** 2))
-        # par[1] = max(par[1], 1 / n **2)
         par_mean = (par_mean * (i + 1) + par_v) / (i + 2)
 
         model.update(par_v=par_mean)
@@ -123,9 +124,6 @@ def _gd_gaussian_loc_exact_estimation(
 ) -> MMDResult:
     if bandwidth == "auto":
         bandwidth = _median_heuristic(X)
-
-    # NOTE: parameters will be assumed to be initialised in the
-    # fit function
 
     norm_grad = epsilon
 
@@ -181,6 +179,8 @@ def _sgd_hat_regression(
     stepsize: float = 1,
     bandwidth_y: Union[float, str] = "auto",
     bandwidth_x: Union[float, str] = "auto",
+    c_det: float = 0.2,
+    c_rand: float = 0.1,
     epsilon: float = 1e-4,
     eps_sq: float = 1e-5,
     rng: np.random.Generator = np.random.default_rng(10),
@@ -206,15 +206,11 @@ def _sgd_hat_regression(
     grad_all = np.zeros(shape=par_v.shape)
     log_eps = np.log(eps_sq)
 
-    # TODO: change to arguments
-    C_DET = 0.2
-    C_RAND = 0.1
-
     # Precomputation stat
     sorted_obs = sort_obs(X)
     K_X = K1d_dist(sorted_obs["DIST"], kernel=kernel_x, bandwidth=bandwidth_x)
-    M_det = int(np.floor(n * C_DET))
-    M_rand = max(int(np.floor(n * C_RAND)), 1)
+    M_det = int(np.floor(n * c_det))
+    M_rand = max(int(np.floor(n * c_rand)), 1)
     l_KX = K_X.shape[0]
     if n + M_det + M_rand > l_KX:
         M_det = l_KX - n - 2
@@ -280,6 +276,8 @@ def _sgd_hat_regression(
         norm_grad += np.sum(np.square(grad))
 
         par_v -= stepsize * grad / np.sqrt(norm_grad)
+        par_v = model._project_params(par_v=par_v)
+
         model.update(par_v=par_v)
 
     for i in range(n_step):
@@ -340,6 +338,8 @@ def _sgd_hat_regression(
         norm_grad += np.sum(np.square(grad))
 
         par_v -= stepsize * grad / np.sqrt(norm_grad)
+        par_v = model._project_params(par_v=par_v)
+
         model.update(par_v=par_v)
         # only for gaussian par[1] = max(par[1], 1 / (n ** 2))
         trajectory[:, i + 1] = par_v
@@ -407,6 +407,8 @@ def _sgd_tilde_regression(
         norm_grad += np.sum(np.square(grad))
 
         par_v -= stepsize * grad / np.sqrt(norm_grad)
+        par_v = model._project_params(par_v=par_v)
+
         model.update(par_v=par_v)
 
     for i in range(n_step):
@@ -428,6 +430,8 @@ def _sgd_tilde_regression(
         norm_grad += np.sum(np.square(grad))
 
         par_v -= stepsize * grad / np.sqrt(norm_grad)
+        par_v = model._project_params(par_v=par_v)
+
         model.update(par_v=par_v)
         # only for gaussian par[1] = max(par[1], 1 / (n ** 2))
         trajectory[:, i + 1] = par_v

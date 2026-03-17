@@ -113,7 +113,7 @@ class GammaRegression(GammaRegressionBase):
         self.shape = par_v[-1]
 
     def _get_params(self):
-        par_v = np.concat((self.beta, np.array([self.shape])))
+        par_v = np.concatenate((self.beta, np.array([self.shape])))
         par_c = None
         return par_v, par_c
 
