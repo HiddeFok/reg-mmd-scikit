@@ -9,3 +9,4 @@ API Reference
    estimation_models
    regression_models
    model_base
+   optimizer

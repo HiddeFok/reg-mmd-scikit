@@ -307,10 +307,10 @@ def _sgd_hat_regression(
     as described in `Universal Robust Regression via Maximum Mean Discrepancy`, Alquier, 
     Gerber (2024).
 
-    Minimizes the MMD objective using the product kernel $k = k_X \otimes k_Y$.
+    Minimizes the MMD objective using the product kernel :math:`k = k_X \\otimes k_Y`.
     The gradient is
-    approximated efficiently by splitting pairs $(X_i, X_j)$ into three groups: all
-    diagonal pairs, the M_det closest off-diagonal pairs (deterministic), and
+    approximated efficiently by splitting pairs :math:`(X_i, X_j)` into three groups: all
+    diagonal pairs, the `M_det` closest off-diagonal pairs (deterministic), and
     M_rand randomly selected distant pairs (stochastic). This yields a gradient
     estimator with cost linear in n per iteration.
 
@@ -330,7 +330,7 @@ def _sgd_hat_regression(
     par_v : np.array
         Initial values of the variable (optimized) model parameters.
 
-    par_c : NDArray
+    par_c : np.array
         Constant model parameters that are not optimized.
 
     model : RegressionModel
@@ -588,27 +588,27 @@ def _sgd_tilde_regression(
     as described in `Universal Robust Regression via Maximum Mean Discrepancy`, Alquier and 
     Gerber (2024).
 
-    Minimizes the MMD objective using only the kernel $k_Y$ on the target
+    Minimizes the MMD objective using only the kernel :math:`k_Y` on the target
     variable. The gradient is
     computed using pairs of samples drawn from the model's conditional distribution
-    at the observed X values, giving a cost linear in $n$ per iteration.
+    at the observed :math:`X` values, giving a cost linear in :math:`n` per iteration.
 
     Compared to the hat estimator, this estimator is computationally cheaper as it
-    avoids the $O(n^2)$ preprocessing of pairwise covariate distances, but enjoys
+    avoids the :math:`O(n^2)` preprocessing of pairwise covariate distances, but enjoys
     slightly weaker robustness guarantees, see Section 4, Alquier, Gerber (2024)
 
     Parameters
     ----------
-    X : NDArray, shape (n_samples, n_features)
+    X : np.array, shape (n_samples, n_features)
         Training input samples.
 
-    y : NDArray, shape (n_samples,)
+    y : np.array, shape (n_samples,)
         Target values.
 
-    par_v : NDArray
+    par_v : np.array
         Initial values of the variable (optimized) model parameters.
 
-    par_c : NDArray
+    par_c : np.array
         Constant model parameters that are not optimized.
 
     model : RegressionModel
@@ -737,14 +737,14 @@ def _sgd_tilde_regression(
 def sort_obs(X: NDArray) -> NDArray:
     """Sort all pairs of observations by their pairwise Euclidean distance.
 
-    Computes pairwise distances between all rows of ``X`` and returns the
+    Computes pairwise distances between all rows of :math:`X` and returns the
     upper-triangular index pairs and corresponding distances, sorted from
     closest to most distant. Used to efficiently select the nearest pairs
     in the hat estimator gradient computation.
 
     Parameters
     ----------
-    X : NDArray, shape (n_samples, n_features)
+    X : np.array, shape (n_samples, n_features)
         Input data whose rows are the observations to be paired.
 
     Returns
@@ -752,9 +752,9 @@ def sort_obs(X: NDArray) -> NDArray:
     result : dict
         Dictionary with two keys:
 
-        - ``"DIST"`` : NDArray of shape ``(n*(n-1)//2,)``, pairwise distances
+        - ``"DIST"`` : np.array of shape ``(n*(n-1)//2,)``, pairwise distances
           sorted in ascending order.
-        - ``"IND"`` : NDArray of shape ``(n*(n-1)//2, 2)``, row index pairs
+        - ``"IND"`` : np.array of shape ``(n*(n-1)//2, 2)``, row index pairs
           ``(i, j)`` with ``i < j`` corresponding to each distance in ``"DIST"``.
     """
     n = X.shape[0]
@@ -780,35 +780,35 @@ def _get_grad_estimate(
     """Compute a partial gradient estimate for the hat estimator objective.
 
     Evaluates the gradient contribution from a specified subset of observation
-    pairs $(i, j)$. When ``set_1`` and ``set_2`` are provided, the gradient is
-    weighted by the covariate kernel K_X evaluated at those pairs. When both
-    are ``None``, the diagonal term $(i = j)$ is computed without covariate
+    pairs :math:`(i, j)`. When ``set_1`` and ``set_2`` are provided, the gradient is
+    weighted by the covariate kernel :math:`k_X` evaluated at those pairs. When both
+    are ``None``, the diagonal term :math:`(i = j)` is computed without covariate
     kernel weighting.
 
     Parameters
     ----------
-    set_1 : NDArray[np.int32] or None
+    set_1 : np.array[np.int32] or None
         Row indices of the first element of each pair. If ``None``, the
-        diagonal (i = j) contribution is computed.
+        diagonal :math:`(i = j)` contribution is computed.
 
-    set_2 : NDArray[np.int32] or None
+    set_2 : np.array[np.int32] or None
         Row indices of the second element of each pair. If ``None``, the
-        diagonal (i = j) contribution is computed.
+        diagonal :math:`(i = j)` contribution is computed.
 
-    X : NDArray, shape (n_samples, n_features)
+    X : np.array, shape (n_samples, n_features)
         Training input samples.
 
-    K_X : NDArray or None
+    K_X : np.array or None
         Precomputed covariate kernel values for the pairs defined by
         ``set_1`` and ``set_2``. Ignored when ``set_1`` is ``None``.
 
-    y_sampled_1 : NDArray, shape (n_samples,)
+    y_sampled_1 : np.array, shape (n_samples,)
         First set of samples drawn from the model's conditional distribution.
 
-    y_sampled_2 : NDArray, shape (n_samples,)
+    y_sampled_2 : np.array, shape (n_samples,)
         Second set of samples drawn from the model's conditional distribution.
 
-    y : NDArray, shape (n_samples,)
+    y : np.array, shape (n_samples,)
         Observed target values.
 
     model : RegressionModel
@@ -822,7 +822,7 @@ def _get_grad_estimate(
 
     Returns
     -------
-    grad_estimate : NDArray
+    grad_estimate : np.array
         Gradient estimate contributions from the specified pairs. Shape is
         ``(n_params,)`` when ``set_1`` is ``None`` (diagonal term), or
         ``(len(set_1), n_params)`` for off-diagonal pairs.

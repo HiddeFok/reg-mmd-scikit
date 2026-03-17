@@ -63,3 +63,11 @@ def linkcode_resolve(domain, info):
         return None
     filename = info["module"].replace(".", "/")
     return f"https://github.com/hiddefok/reg-mmd-scikit/blob/main/{filename}.py"
+
+
+autodoc_type_aliases = {
+    "NDArray": "NDArray",
+    "ndarray[tuple[Any, ...], dtype[_ScalarT]]": "NDArray",
+}
+autodoc_typehints = "description" 
+
