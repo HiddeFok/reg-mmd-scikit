@@ -42,6 +42,7 @@
     <script src="../_static/documentation_options.js?v=01f34227"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/optimizer';</script>
     <link rel="canonical" href="https://hiddefok.github.io/reg-mmd-scikit/api/optimizer.html" />
     <link rel="index" title="Index" href="../genindex.html" />
@@ -332,8 +333,309 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="optimizer-functions">
-<h1>Optimizer functions<a class="headerlink" href="#optimizer-functions" title="Link to this heading">#</a></h1>
+  <section id="module-regmmd.optimizer">
+<span id="optimizer-functions"></span><h1>Optimizer functions<a class="headerlink" href="#module-regmmd.optimizer" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="regmmd.optimizer._gd_gaussian_loc_exact_estimation">
+<span class="sig-prename descclassname"><span class="pre">regmmd.optimizer.</span></span><span class="sig-name descname"><span class="pre">_gd_gaussian_loc_exact_estimation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">burn_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizer.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizer._gd_gaussian_loc_exact_estimation" title="Link to this definition">#</a></dt>
+<dd><p>Estimate the location parameter of a Gaussian model with Gaussian kernel
+using exact MMD gradient descent.</p>
+<p>Computes the exact MMD gradient analytically for a Gaussian location model
+with known scale parameter <code class="docutils literal notranslate"><span class="pre">par_c</span></code> and a Gaussian Kernel, avoiding Monte
+Carlo sampling. Uses AdaGrad updates with a burn-in phase followed by
+Polyak-Ruppert averaging.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>,</em><em>)</em>) – Univariate observed data.</p></li>
+<li><p><strong>par_v</strong> (<em>float</em>) – Initial value of the location parameter (mean) to be estimated.</p></li>
+<li><p><strong>par_c</strong> (<em>float</em>) – Known scale parameter (standard deviation) of the Gaussian model.</p></li>
+<li><p><strong>burn_in</strong> (<em>int</em><em>, </em><em>default=500</em>) – Number of burn-in iterations during which parameter iterates are not
+averaged.</p></li>
+<li><p><strong>n_step</strong> (<em>int</em><em>, </em><em>default=1000</em>) – Number of averaging iterations following the burn-in phase.</p></li>
+<li><p><strong>stepsize</strong> (<em>float</em><em>, </em><em>default=1.0</em>) – Initial step size for the AdaGrad update.</p></li>
+<li><p><strong>bandwidth</strong> (<em>float</em><em> or </em><em>str</em><em>, </em><em>default=1.0</em>) – Bandwidth parameter for the Gaussian kernel. If <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, the
+bandwidth is selected using the median heuristic.</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>default=1e-4</em>) – Initial accumulated squared gradient norm, used to stabilize the
+AdaGrad step size at the start of optimization.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p><strong>res</strong> – Dictionary containing:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">par_v_init</span></code> : initial location parameter.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">par_c_init</span></code> : initial scale parameter.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stepsize</span></code> : step size used.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bandwidth</span></code> : bandwidth used (resolved if <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">estimator</span></code> : Polyak-Ruppert average of location parameter iterates.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trajectory</span></code> : parameter trajectory of shape <code class="docutils literal notranslate"><span class="pre">(burn_in</span> <span class="pre">+</span> <span class="pre">n_step</span> <span class="pre">+</span> <span class="pre">1,)</span></code>.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MMDResult</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="regmmd.optimizer._get_grad_estimate">
+<span class="sig-prename descclassname"><span class="pre">regmmd.optimizer.</span></span><span class="sig-name descname"><span class="pre">_get_grad_estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">set_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K_X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_sampled_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_sampled_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth_y</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizer.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizer._get_grad_estimate" title="Link to this definition">#</a></dt>
+<dd><p>Compute a partial gradient estimate for the hat estimator objective.</p>
+<p>Evaluates the gradient contribution from a specified subset of observation
+pairs <span class="math notranslate nohighlight">\((i, j)\)</span>. When <code class="docutils literal notranslate"><span class="pre">set_1</span></code> and <code class="docutils literal notranslate"><span class="pre">set_2</span></code> are provided, the gradient is
+weighted by the covariate kernel <span class="math notranslate nohighlight">\(k_X\)</span> evaluated at those pairs. When both
+are <code class="docutils literal notranslate"><span class="pre">None</span></code>, the diagonal term <span class="math notranslate nohighlight">\((i = j)\)</span> is computed without covariate
+kernel weighting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>set_1</strong> (<em>np.array</em><em>[</em><em>np.int32</em><em>] or </em><em>None</em>) – Row indices of the first element of each pair. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the
+diagonal <span class="math notranslate nohighlight">\((i = j)\)</span> contribution is computed.</p></li>
+<li><p><strong>set_2</strong> (<em>np.array</em><em>[</em><em>np.int32</em><em>] or </em><em>None</em>) – Row indices of the second element of each pair. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the
+diagonal <span class="math notranslate nohighlight">\((i = j)\)</span> contribution is computed.</p></li>
+<li><p><strong>X</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em>) – Training input samples.</p></li>
+<li><p><strong>K_X</strong> (<em>np.array</em><em> or </em><em>None</em>) – Precomputed covariate kernel values for the pairs defined by
+<code class="docutils literal notranslate"><span class="pre">set_1</span></code> and <code class="docutils literal notranslate"><span class="pre">set_2</span></code>. Ignored when <code class="docutils literal notranslate"><span class="pre">set_1</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>y_sampled_1</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>,</em><em>)</em>) – First set of samples drawn from the model’s conditional distribution.</p></li>
+<li><p><strong>y_sampled_2</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>,</em><em>)</em>) – Second set of samples drawn from the model’s conditional distribution.</p></li>
+<li><p><strong>y</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>,</em><em>)</em>) – Observed target values.</p></li>
+<li><p><strong>model</strong> (<a class="reference internal" href="model_base.html#regmmd.models.base_model.RegressionModel" title="regmmd.models.base_model.RegressionModel"><em>RegressionModel</em></a>) – The regression model. Must implement <code class="docutils literal notranslate"><span class="pre">score</span></code>.</p></li>
+<li><p><strong>kernel_y</strong> (<em>str</em>) – Kernel type applied to the target variable <code class="docutils literal notranslate"><span class="pre">y</span></code>.</p></li>
+<li><p><strong>bandwidth_y</strong> (<em>float</em>) – Bandwidth for the kernel applied to <code class="docutils literal notranslate"><span class="pre">y</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>grad_estimate</strong> – Gradient estimate contributions from the specified pairs. Shape is
+<code class="docutils literal notranslate"><span class="pre">(n_params,)</span></code> when <code class="docutils literal notranslate"><span class="pre">set_1</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code> (diagonal term), or
+<code class="docutils literal notranslate"><span class="pre">(len(set_1),</span> <span class="pre">n_params)</span></code> for off-diagonal pairs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="regmmd.optimizer._median_heuristic">
+<span class="sig-prename descclassname"><span class="pre">regmmd.optimizer.</span></span><span class="sig-name descname"><span class="pre">_median_heuristic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizer.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizer._median_heuristic" title="Link to this definition">#</a></dt>
+<dd><p>Compute the median heuristic for kernel bandwidth selection.</p>
+<p>Estimates the bandwidth as the median of pairwise Euclidean distances divided
+by sqrt(2), a common data-driven heuristic for kernel methods.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>,</em><em>) or </em><em>(</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em>) – Input data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>median_dist</strong> – Estimated bandwidth. Returns 1 if fewer than two samples are provided.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="regmmd.optimizer._sgd_estimation">
+<span class="sig-prename descclassname"><span class="pre">regmmd.optimizer.</span></span><span class="sig-name descname"><span class="pre">_sgd_estimation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">burn_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizer.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizer._sgd_estimation" title="Link to this definition">#</a></dt>
+<dd><p>Estimate model parameters via AdaGrad stochastic gradient descent on the MMD criterion.</p>
+<p>Minimizes the MMD between the empirical distribution of <code class="docutils literal notranslate"><span class="pre">X</span></code> and the model’s
+distribution using a stochastic gradient algorithm. The optimization runs a
+burn-in phase (without averaging) followed by a main phase with Polyak-Ruppert
+averaging of the iterates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>,</em><em>) or </em><em>(</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em>) – Observed data used to fit the model.</p></li>
+<li><p><strong>par_v</strong> (<em>np.array</em>) – Initial values of the variable (optimized) model parameters.</p></li>
+<li><p><strong>par_c</strong> (<em>np.array</em>) – Constant model parameters that are not optimized.</p></li>
+<li><p><strong>model</strong> (<a class="reference internal" href="model_base.html#regmmd.models.base_model.EstimationModel" title="regmmd.models.base_model.EstimationModel"><em>EstimationModel</em></a>) – The statistical model to fit. Must implement <code class="docutils literal notranslate"><span class="pre">sample_n</span></code>, <code class="docutils literal notranslate"><span class="pre">score</span></code>,
+<code class="docutils literal notranslate"><span class="pre">update</span></code>, and <code class="docutils literal notranslate"><span class="pre">_project_params</span></code>.</p></li>
+<li><p><strong>kernel</strong> (<em>str</em>) – Kernel type used for the MMD computation. Supported options are
+<code class="docutils literal notranslate"><span class="pre">&quot;Gaussian&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;Laplace&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&quot;Cauchy&quot;</span></code>.</p></li>
+<li><p><strong>burn_in</strong> (<em>int</em><em>, </em><em>default=500</em>) – Number of burn-in iterations during which parameter iterates are not
+averaged.</p></li>
+<li><p><strong>n_step</strong> (<em>int</em><em>, </em><em>default=1000</em>) – Number of averaging iterations following the burn-in phase.</p></li>
+<li><p><strong>stepsize</strong> (<em>float</em><em>, </em><em>default=1</em>) – Initial step size for the AdaGrad update.</p></li>
+<li><p><strong>bandwidth</strong> (<em>float</em><em> or </em><em>str</em><em>, </em><em>default=1.0</em>) – Bandwidth parameter for the kernel. If <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, the bandwidth is
+selected using the median heuristic.</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>default=1e-4</em>) – Initial accumulated squared gradient norm, used to stabilize the
+AdaGrad step size at the start of optimization.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p><strong>res</strong> – Dictionary containing:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">par_v_init</span></code> : initial variable parameters.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">par_c_init</span></code> : initial constant parameters.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stepsize</span></code> : step size used.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bandwidth</span></code> : bandwidth used (resolved if <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">estimator</span></code> : Polyak-Ruppert average of parameter iterates.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trajectory</span></code> : parameter trajectory of shape <code class="docutils literal notranslate"><span class="pre">(n_params,</span> <span class="pre">burn_in</span> <span class="pre">+</span> <span class="pre">n_step</span> <span class="pre">+</span> <span class="pre">1)</span></code>.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MMDResult</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="regmmd.optimizer._sgd_hat_regression">
+<span class="sig-prename descclassname"><span class="pre">regmmd.optimizer.</span></span><span class="sig-name descname"><span class="pre">_sgd_hat_regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Laplace'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">burn_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_det</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_rand</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps_sq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Generator(PCG64)</span> <span class="pre">at</span> <span class="pre">0x7F6E31C6BD80</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizer.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizer._sgd_hat_regression" title="Link to this definition">#</a></dt>
+<dd><p>Fit a regression model using the hat estimator via stochastic gradient descent,
+as described in <cite>Universal Robust Regression via Maximum Mean Discrepancy</cite>, Alquier,
+Gerber (2024).</p>
+<p>Minimizes the MMD objective using the product kernel <span class="math notranslate nohighlight">\(k = k_X \otimes k_Y\)</span>.
+The gradient is
+approximated efficiently by splitting pairs <span class="math notranslate nohighlight">\((X_i, X_j)\)</span> into three groups: all
+diagonal pairs, the <cite>M_det</cite> closest off-diagonal pairs (deterministic), and
+M_rand randomly selected distant pairs (stochastic). This yields a gradient
+estimator with cost linear in n per iteration.</p>
+<p>Compared to the tilde estimator, this estimator is robust to adversarial
+contamination of the training data, but is computationally more expensive due
+to the preprocessing of pairwise distances. See Alquier and Gerber (2024),
+Section 4.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.arrau</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em>) – Training input samples.</p></li>
+<li><p><strong>y</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>,</em><em>)</em>) – Target values.</p></li>
+<li><p><strong>par_v</strong> (<em>np.array</em>) – Initial values of the variable (optimized) model parameters.</p></li>
+<li><p><strong>par_c</strong> (<em>np.array</em>) – Constant model parameters that are not optimized.</p></li>
+<li><p><strong>model</strong> (<a class="reference internal" href="model_base.html#regmmd.models.base_model.RegressionModel" title="regmmd.models.base_model.RegressionModel"><em>RegressionModel</em></a>) – The regression model to fit. Must implement <code class="docutils literal notranslate"><span class="pre">predict</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_n</span></code>,
+<code class="docutils literal notranslate"><span class="pre">score</span></code>, <code class="docutils literal notranslate"><span class="pre">update</span></code>, and <code class="docutils literal notranslate"><span class="pre">_project_params</span></code>.</p></li>
+<li><p><strong>kernel_y</strong> (<em>str</em>) – Kernel type applied to the target variable <code class="docutils literal notranslate"><span class="pre">y</span></code>. Supported options are
+<code class="docutils literal notranslate"><span class="pre">&quot;Gaussian&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;Laplace&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&quot;Cauchy&quot;</span></code>.</p></li>
+<li><p><strong>kernel_x</strong> (<em>str</em><em>, </em><em>default=&quot;Laplace&quot;</em>) – Kernel type applied to the covariates <code class="docutils literal notranslate"><span class="pre">X</span></code>. Supported options are
+<code class="docutils literal notranslate"><span class="pre">&quot;Gaussian&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;Laplace&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&quot;Cauchy&quot;</span></code>.</p></li>
+<li><p><strong>burn_in</strong> (<em>int</em><em>, </em><em>default=500</em>) – Number of burn-in iterations during which parameter iterates are not
+included in the running average.</p></li>
+<li><p><strong>n_step</strong> (<em>int</em><em>, </em><em>default=1000</em>) – Maximum number of averaging iterations following the burn-in phase.
+Early stopping is applied if the average gradient norm falls below
+<code class="docutils literal notranslate"><span class="pre">eps_sq</span></code>.</p></li>
+<li><p><strong>stepsize</strong> (<em>float</em><em>, </em><em>default=1</em>) – Initial step size for the AdaGrad update.</p></li>
+<li><p><strong>bandwidth_y</strong> (<em>float</em><em> or </em><em>str</em><em>, </em><em>default=&quot;auto&quot;</em>) – Bandwidth for the kernel applied to <code class="docutils literal notranslate"><span class="pre">y</span></code>. If <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, selected
+using the median heuristic.</p></li>
+<li><p><strong>bandwidth_x</strong> (<em>float</em><em> or </em><em>str</em><em>, </em><em>default=&quot;auto&quot;</em>) – Bandwidth for the kernel applied to <code class="docutils literal notranslate"><span class="pre">X</span></code>. If <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, selected
+using the median heuristic.</p></li>
+<li><p><strong>c_det</strong> (<em>float</em><em>, </em><em>default=0.2</em>) – Fraction of n used to determine the number of deterministic
+(closest) off-diagonal pairs included per iteration.</p></li>
+<li><p><strong>c_rand</strong> (<em>float</em><em>, </em><em>default=0.1</em>) – Fraction of n used to determine the number of randomly selected
+distant pairs included per iteration.</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>default=1e-4</em>) – Initial accumulated squared gradient norm, used to stabilize the
+AdaGrad step size at the start of optimization.</p></li>
+<li><p><strong>eps_sq</strong> (<em>float</em><em>, </em><em>default=1e-5</em>) – Convergence threshold for early stopping. Optimization stops when the
+log of the average gradient norm falls below <code class="docutils literal notranslate"><span class="pre">log(eps_sq)</span></code>.</p></li>
+<li><p><strong>rng</strong> (<em>np.random.Generator</em><em>, </em><em>default=np.random.default_rng</em><em>(</em><em>10</em><em>)</em>) – Random number generator used for sampling distant pairs.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p><strong>res</strong> – Dictionary containing:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">par_v_init</span></code> : initial variable parameters.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">par_c_init</span></code> : initial constant parameters.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stepsize</span></code> : step size used.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bandwidth_y</span></code> : bandwidth used for <code class="docutils literal notranslate"><span class="pre">y</span></code> (resolved if <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bandwidth_x</span></code> : bandwidth used for <code class="docutils literal notranslate"><span class="pre">X</span></code> (resolved if <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">estimator</span></code> : Polyak-Ruppert average of parameter iterates.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trajectory</span></code> : cumulative-average parameter trajectory of shape
+<code class="docutils literal notranslate"><span class="pre">(n_params,</span> <span class="pre">n_step_done)</span></code>.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MMDResult</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="regmmd.optimizer._sgd_tilde_regression">
+<span class="sig-prename descclassname"><span class="pre">regmmd.optimizer.</span></span><span class="sig-name descname"><span class="pre">_sgd_tilde_regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">burn_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps_sq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizer.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizer._sgd_tilde_regression" title="Link to this definition">#</a></dt>
+<dd><p>Fit a regression model using the tilde estimator via stochastic gradient descent,
+as described in <cite>Universal Robust Regression via Maximum Mean Discrepancy</cite>, Alquier and
+Gerber (2024).</p>
+<p>Minimizes the MMD objective using only the kernel <span class="math notranslate nohighlight">\(k_Y\)</span> on the target
+variable. The gradient is
+computed using pairs of samples drawn from the model’s conditional distribution
+at the observed <span class="math notranslate nohighlight">\(X\)</span> values, giving a cost linear in <span class="math notranslate nohighlight">\(n\)</span> per iteration.</p>
+<p>Compared to the hat estimator, this estimator is computationally cheaper as it
+avoids the <span class="math notranslate nohighlight">\(O(n^2)\)</span> preprocessing of pairwise covariate distances, but enjoys
+slightly weaker robustness guarantees, see Section 4, Alquier, Gerber (2024)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em>) – Training input samples.</p></li>
+<li><p><strong>y</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>,</em><em>)</em>) – Target values.</p></li>
+<li><p><strong>par_v</strong> (<em>np.array</em>) – Initial values of the variable (optimized) model parameters.</p></li>
+<li><p><strong>par_c</strong> (<em>np.array</em>) – Constant model parameters that are not optimized.</p></li>
+<li><p><strong>model</strong> (<a class="reference internal" href="model_base.html#regmmd.models.base_model.RegressionModel" title="regmmd.models.base_model.RegressionModel"><em>RegressionModel</em></a>) – The regression model to fit. Must implement <code class="docutils literal notranslate"><span class="pre">predict</span></code>, <code class="docutils literal notranslate"><span class="pre">sample_n</span></code>,
+<code class="docutils literal notranslate"><span class="pre">score</span></code>, <code class="docutils literal notranslate"><span class="pre">update</span></code>, and <code class="docutils literal notranslate"><span class="pre">_project_params</span></code>.</p></li>
+<li><p><strong>kernel</strong> (<em>str</em>) – Kernel type applied to the target variable <code class="docutils literal notranslate"><span class="pre">y</span></code>. Supported options are
+<code class="docutils literal notranslate"><span class="pre">&quot;Gaussian&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;Laplace&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&quot;Cauchy&quot;</span></code>.</p></li>
+<li><p><strong>burn_in</strong> (<em>int</em><em>, </em><em>default=500</em>) – Number of burn-in iterations during which parameter iterates are not
+included in the running average.</p></li>
+<li><p><strong>n_step</strong> (<em>int</em><em>, </em><em>default=1000</em>) – Maximum number of averaging iterations following the burn-in phase.
+Early stopping is applied if the average gradient norm falls below
+<code class="docutils literal notranslate"><span class="pre">eps_sq</span></code>.</p></li>
+<li><p><strong>stepsize</strong> (<em>float</em><em>, </em><em>default=1</em>) – Initial step size for the AdaGrad update.</p></li>
+<li><p><strong>bandwidth</strong> (<em>float</em><em> or </em><em>str</em><em>, </em><em>default=1.0</em>) – Bandwidth for the kernel applied to <code class="docutils literal notranslate"><span class="pre">y</span></code>. If <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, selected
+using the median heuristic on <code class="docutils literal notranslate"><span class="pre">X</span></code>.</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>default=1e-4</em>) – Initial accumulated squared gradient norm, used to stabilize the
+AdaGrad step size at the start of optimization.</p></li>
+<li><p><strong>eps_sq</strong> (<em>float</em><em>, </em><em>default=1e-5</em>) – Convergence threshold for early stopping. Optimization stops when the
+log of the average gradient norm falls below <code class="docutils literal notranslate"><span class="pre">log(eps_sq)</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p><strong>res</strong> – Dictionary containing:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">par_v_init</span></code> : initial variable parameters.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">par_c_init</span></code> : initial constant parameters.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stepsize</span></code> : step size used.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bandwidth</span></code> : bandwidth used (resolved if <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">estimator</span></code> : Polyak-Ruppert average of parameter iterates.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trajectory</span></code> : cumulative-average parameter trajectory of shape
+<code class="docutils literal notranslate"><span class="pre">(n_params,</span> <span class="pre">n_step_done)</span></code>.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MMDResult</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="regmmd.optimizer.sort_obs">
+<span class="sig-prename descclassname"><span class="pre">regmmd.optimizer.</span></span><span class="sig-name descname"><span class="pre">sort_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizer.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizer.sort_obs" title="Link to this definition">#</a></dt>
+<dd><p>Sort all pairs of observations by their pairwise Euclidean distance.</p>
+<p>Computes pairwise distances between all rows of <span class="math notranslate nohighlight">\(X\)</span> and returns the
+upper-triangular index pairs and corresponding distances, sorted from
+closest to most distant. Used to efficiently select the nearest pairs
+in the hat estimator gradient computation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em>) – Input data whose rows are the observations to be paired.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p><strong>result</strong> – Dictionary with two keys:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;DIST&quot;</span></code> : np.array of shape <code class="docutils literal notranslate"><span class="pre">(n*(n-1)//2,)</span></code>, pairwise distances
+sorted in ascending order.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;IND&quot;</span></code> : np.array of shape <code class="docutils literal notranslate"><span class="pre">(n*(n-1)//2,</span> <span class="pre">2)</span></code>, row index pairs
+<code class="docutils literal notranslate"><span class="pre">(i,</span> <span class="pre">j)</span></code> with <code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">&lt;</span> <span class="pre">j</span></code> corresponding to each distance in <code class="docutils literal notranslate"><span class="pre">&quot;DIST&quot;</span></code>.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 
@@ -365,6 +667,24 @@
                 <dialog id="pst-secondary-sidebar-modal"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizer._gd_gaussian_loc_exact_estimation"><code class="docutils literal notranslate"><span class="pre">_gd_gaussian_loc_exact_estimation()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizer._get_grad_estimate"><code class="docutils literal notranslate"><span class="pre">_get_grad_estimate()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizer._median_heuristic"><code class="docutils literal notranslate"><span class="pre">_median_heuristic()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizer._sgd_estimation"><code class="docutils literal notranslate"><span class="pre">_sgd_estimation()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizer._sgd_hat_regression"><code class="docutils literal notranslate"><span class="pre">_sgd_hat_regression()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizer._sgd_tilde_regression"><code class="docutils literal notranslate"><span class="pre">_sgd_tilde_regression()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizer.sort_obs"><code class="docutils literal notranslate"><span class="pre">sort_obs()</span></code></a></li>
+</ul>
+  </nav></div>
 
   <div class="sidebar-secondary-item">
   <div role="note" aria-label="source link">
