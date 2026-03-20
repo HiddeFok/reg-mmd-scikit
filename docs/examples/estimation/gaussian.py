@@ -41,7 +41,6 @@ def main():
         par_c=None,
         kernel="Gaussian",
         solver={
-            "type": "SGD",
             "burnin": 500,
             "n_step": 1000,
             "stepsize": 1,

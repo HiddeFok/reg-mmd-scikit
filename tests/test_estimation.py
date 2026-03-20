@@ -99,7 +99,7 @@ def test_gaussian_sgd_kernels(kernel):
     assert res["estimator"].shape == (2,)
 
 
-# --- _exact_fit dispatch ---
+# --- _exact_fit ---
 
 
 def test_gaussian_loc_exact_fit_gaussian_kernel_returns_result():

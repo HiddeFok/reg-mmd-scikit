@@ -191,7 +191,7 @@ This model can then be passed directly to :py:class:`regmmd.MMDRegressor`::
         bandwidth_X=0,
         bandwidth_y=1,
         kernel_y="Gaussian",
-        solver={"type": "SGD", "burnin": 200, "n_step": 2000,
+        solver={"burnin": 200, "n_step": 2000,
                 "stepsize": 0.1, "epsilon": 1e-6},
         random_state=42,
     )

@@ -32,7 +32,6 @@ task.
    ...     bandwidth_y=1,
    ...     kernel_y="Gaussian",
    ...     solver={
-   ...         "type": "SGD",
    ...         "burnin": 500,
    ...         "n_step": 10000,
    ...         "stepsize": 1,

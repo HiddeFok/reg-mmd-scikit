@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from regmmd.models.regression.linear_gaussian import LinearGaussian, LinearGaussianLoc
+from regmmd.models.regression.gamma import GammaRegressionLoc
 from regmmd.regression import MMDRegressor, _preprocess_data, NotFittedError
 
 EXACT_SOLVER = {"n_step": 200, "stepsize": 0.5}
@@ -10,7 +11,7 @@ RNG = np.random.default_rng(42)
 
 
 def test_log_prob():
-    X = np.array([[1, 2], [3, 4]], dtype=float)
+    X = np.array([[1., 2.], [3., 4.]])
     y = np.array([5.0, 6.0])
     beta = np.array([0.5, 0.5])
     phi = 1.0
@@ -23,7 +24,7 @@ def test_log_prob():
 
 
 def test_predict():
-    X = np.array([[1, 2], [3, 4]], dtype=float)
+    X = np.array([[1., 2.], [3., 4.]])
     beta = np.array([0.5, 0.5])
     phi = 1.0
 
@@ -36,7 +37,7 @@ def test_predict():
 
 
 def test_sample_n():
-    X = np.array([[1, 2], [3, 4]], dtype=float)
+    X = np.array([[1., 2.], [3., 4.]])
     beta = np.array([0.5, 0.5])
     phi = 1.0
 
@@ -47,7 +48,7 @@ def test_sample_n():
 
 
 def test_score():
-    X = np.array([[1, 2], [3, 4]], dtype=float)
+    X = np.array([[1., 2.], [3., 4.]])
     y = np.array([5.0, 6.0])
     beta = np.array([0.5, 0.5])
     phi = 1.0
@@ -89,7 +90,7 @@ def test_preprocess_data_no_intercept():
 
 # --- MMDRegressor ---
 
-SOLVER = {"type": "SGD", "burnin": 50, "n_step": 100, "stepsize": 0.1}
+SOLVER = {"burnin": 50, "n_step": 100, "stepsize": 0.1}
 
 
 def _make_regressor():
@@ -148,19 +149,28 @@ def test_mmd_regressor_fitted_hat_predicts(fit_intercept):
 
 @pytest.mark.parametrize("fit_intercept", [False, True])
 def test_mmd_regressor_fitted_tilde_predicts(fit_intercept):
-    X = RNG.normal(size=(100, 2))
-    noise = RNG.normal(size=(100,))
-    beta = np.array([1, 2])
+    # Small beta keeps mu = exp(X * beta) close to 1 and Var(Y|X) = mu^2/shape ~ 1.
+    X = RNG.normal(size=(200, 2))
+    beta = np.array([0.1, 0.2])
+    shape = 20.0
     if fit_intercept:
-        y = X @ beta + 0.1 * noise + 1
+        X_intercept = np.hstack((X, np.ones((X.shape[0], 1))))
+        model = GammaRegressionLoc(
+            par_v=np.concatenate((beta, np.array([1]))), par_c=shape, random_state=123
+        )
+        mu_given_x = model.predict(X=X_intercept)
+        y = model.sample_n(n=200, mu_given_x=mu_given_x)
     else:
-        y = X @ beta + 0.1 * noise
+        model = GammaRegressionLoc(par_v=beta, par_c=shape, random_state=123)
+        mu_given_x = model.predict(X=X)
+        y = model.sample_n(n=200, mu_given_x=mu_given_x)
 
-    par_v = np.array([1.2, 2.1])
-    model = LinearGaussianLoc(par_v=par_v, par_c=0.1)
+    par_v = np.array([0.15, 0.25])
+    model = GammaRegressionLoc(par_v=par_v, par_c=shape, random_state=123)
     reg = MMDRegressor(
         model=model,
         par_v=par_v,
+        par_c=shape,
         solver=SOLVER,
         fit_intercept=fit_intercept,
         bandwidth_X=0,
@@ -171,7 +181,7 @@ def test_mmd_regressor_fitted_tilde_predicts(fit_intercept):
     assert mse < 0.5
 
 
-# --- _exact_fit dispatch ---
+# --- _exact_fit ---
 
 
 def test_linear_gaussian_loc_exact_fit_tilde_returns_result():

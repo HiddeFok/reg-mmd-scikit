@@ -120,7 +120,6 @@ mmd_reg = MMDRegressor(
     bandwidth_y=5,
     kernel_y="Gaussian",
     solver={
-        "type": "SGD",
         "burnin": 5000,
         "n_step": 10000,
         "stepsize": 1,
