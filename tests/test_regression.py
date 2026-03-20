@@ -215,7 +215,35 @@ def test_linear_gaussian_loc_exact_fit_hat_returns_none():
     assert res is None
 
 
-def test_linear_gaussian_exact_fit_returns_none():
+def test_linear_gaussian_exact_fit_tilde_returns_result():
+    X = RNG.normal(size=(50, 2))
+    y = RNG.normal(size=(50,))
+    par_v = np.array([0.0, 0.0, 1.0])  # [beta_0, beta_1, phi]
+    model = LinearGaussian(par_v=par_v)
+    res = model._exact_fit(
+        X=X, y=y, par_v=par_v, par_c=None,
+        solver=EXACT_SOLVER, kernel_y="Gaussian", bandwidth_y=1.0,
+        kernel_X="Laplace", bandwidth_X=0,
+    )
+    assert res is not None
+    assert "estimator" in res
+    assert res["estimator"].shape == (3,)
+
+
+def test_linear_gaussian_exact_fit_non_gaussian_kernel_returns_none():
+    X = RNG.normal(size=(50, 2))
+    y = RNG.normal(size=(50,))
+    par_v = np.array([0.0, 0.0, 1.0])
+    model = LinearGaussian(par_v=par_v)
+    res = model._exact_fit(
+        X=X, y=y, par_v=par_v, par_c=None,
+        solver=EXACT_SOLVER, kernel_y="Laplace", bandwidth_y=1.0,
+        kernel_X="Laplace", bandwidth_X=0,
+    )
+    assert res is None
+
+
+def test_linear_gaussian_exact_fit_hat_returns_none():
     X = RNG.normal(size=(50, 2))
     y = RNG.normal(size=(50,))
     par_v = np.array([0.0, 0.0, 1.0])
@@ -223,7 +251,7 @@ def test_linear_gaussian_exact_fit_returns_none():
     res = model._exact_fit(
         X=X, y=y, par_v=par_v, par_c=None,
         solver=EXACT_SOLVER, kernel_y="Gaussian", bandwidth_y=1.0,
-        kernel_X="Laplace", bandwidth_X=0,
+        kernel_X="Laplace", bandwidth_X="auto",
     )
     assert res is None
 

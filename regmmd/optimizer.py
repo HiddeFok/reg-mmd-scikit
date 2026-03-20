@@ -175,250 +175,6 @@ def _sgd_estimation(
 
     return res
 
-
-def _gd_gaussian_loc_exact_estimation(
-    X: NDArray,
-    par_v: float,
-    par_c: float,
-    burn_in: int = 500,
-    n_step: int = 1000,
-    stepsize: float = 1.0,
-    bandwidth: float = 1.0,
-    epsilon: float = 1e-4,
-) -> MMDResult:
-    """Estimate the location parameter of a Gaussian model with Gaussian kernel
-    using exact MMD gradient descent.
-
-    Computes the exact MMD gradient analytically for a Gaussian location model
-    with known scale parameter ``par_c`` and a Gaussian Kernel, avoiding Monte
-    Carlo sampling. Uses AdaGrad updates with a burn-in phase followed by
-    Polyak-Ruppert averaging.
-
-    Parameters
-    ----------
-    X : np.array, shape (n_samples,)
-        Univariate observed data.
-
-    par_v : float
-        Initial value of the location parameter (mean) to be estimated.
-
-    par_c : float
-        Known scale parameter (standard deviation) of the Gaussian model.
-
-    burn_in : int, default=500
-        Number of burn-in iterations during which parameter iterates are not
-        averaged.
-
-    n_step : int, default=1000
-        Number of averaging iterations following the burn-in phase.
-
-    stepsize : float, default=1.0
-        Initial step size for the AdaGrad update.
-
-    bandwidth : float or str, default=1.0
-        Bandwidth parameter for the Gaussian kernel. If ``"auto"``, the
-        bandwidth is selected using the median heuristic.
-
-    epsilon : float, default=1e-4
-        Initial accumulated squared gradient norm, used to stabilize the
-        AdaGrad step size at the start of optimization.
-
-    Returns
-    -------
-    res : MMDResult
-        Dictionary containing:
-
-        - ``par_v_init`` : initial location parameter.
-        - ``par_c_init`` : initial scale parameter.
-        - ``stepsize`` : step size used.
-        - ``bandwidth`` : bandwidth used (resolved if ``"auto"``).
-        - ``estimator`` : Polyak-Ruppert average of location parameter iterates.
-        - ``trajectory`` : parameter trajectory of shape ``(burn_in + n_step + 1,)``.
-    """
-    if bandwidth == "auto":
-        bandwidth = _median_heuristic(X)
-
-    norm_grad = epsilon
-
-    res = {
-        "par_v_init": np.copy(par_v),
-        "par_c_init": np.copy(par_c),
-        "stepsize": stepsize,
-        "bandwidth": bandwidth,
-        "convergence": 1,
-    }
-
-    trajectory = np.zeros(shape=(burn_in + n_step + 1,))
-    trajectory[0] = par_v
-
-    Z = -4 / np.sqrt(1 + 2 * (par_c**2) / (bandwidth**2))
-    denom = 2 * (par_c**2) + bandwidth**2
-    for i in range(burn_in):
-        diff = X - par_v
-        grad = Z * np.mean(diff * np.exp(-np.square(diff) / denom))
-        norm_grad += grad**2
-        par_v -= stepsize * grad / np.sqrt(norm_grad)
-        trajectory[i + 1] = par_v
-
-    par_mean = par_v
-    Z = -4 / np.sqrt(1 + 2 * (par_c**2) / (bandwidth**2))
-    for i in range(n_step):
-        diff = X - par_v
-        grad = Z * np.mean(diff * np.exp(-np.square(diff) / denom))
-        norm_grad += grad**2
-        par_v -= stepsize * grad / np.sqrt(norm_grad)
-        par_mean = (par_mean * (i + 1) + par_v) / (i + 2)
-        trajectory[i + burn_in + 1] = par_mean
-
-    res["estimator"] = par_mean
-    res["trajectory"] = trajectory
-
-    return res
-
-
-def _gd_backtracking_lg_loc_tilde_regression(
-    X: NDArray,
-    y: NDArray,
-    par_v: NDArray,
-    par_c: float,
-    n_step: int = 1000,
-    stepsize: float = 1.0,
-    bandwidth: Union[float, str] = 1.0,
-    alpha: float = 0.8,
-    eps_gd: float = 1e-5,
-) -> MMDResult:
-    """Fit a LinearGaussianLoc regression model via exact gradient descent with
-    backtracking line search on the tilde MMD criterion with a Gaussian kernel.
-
-    Computes the exact tilde MMD gradient analytically for a linear Gaussian
-    location model with known variance ``par_c`` and a Gaussian kernel, avoiding
-    Monte Carlo sampling entirely. The expected kernel value between a model
-    sample and an observation integrates out analytically:
-
-    .. math::
-
-        \\mathbb{E}_{\\tilde{y} \\sim \\mathcal{N}(\\mu_i, \\phi)}
-        \\left[ e^{-(\\tilde{y} - y_i)^2 / h^2} \\right]
-        \\propto e^{-(\\mu_i - y_i)^2 / (2\\phi + h^2)}
-
-    The objective and gradient therefore reduce to closed-form expressions in
-    the residuals, enabling deterministic (non-stochastic) gradient descent with
-    backtracking.
-
-    Parameters
-    ----------
-    X : np.array, shape (n_samples, n_features)
-        Training input samples (design matrix, without intercept column).
-
-    y : np.array, shape (n_samples,)
-        Observed target values.
-
-    par_v : np.array, shape (n_features,)
-        Initial value of the regression coefficients (beta).
-
-    par_c : float
-        Known variance of the Gaussian noise (phi = sigma^2). Not optimized.
-
-    n_step : int, default=1000
-        Maximum number of gradient descent iterations.
-
-    stepsize : float, default=1.0
-        Initial step size. Shared across iterations: once reduced by
-        backtracking, the smaller value carries forward to the next step.
-
-    bandwidth : float or str, default=1.0
-        Bandwidth ``h`` for the Gaussian kernel applied to ``y``. If
-        ``"auto"``, selected using the median heuristic on ``y``.
-
-    alpha : float, default=0.8
-        Backtracking reduction factor. Must satisfy ``0 < alpha < 1``.
-
-    eps_gd : float, default=1e-5
-        Convergence tolerance on the relative change in the objective:
-        stops when ``log|f_new - f_old| - log|f_old| < log(eps_gd)``.
-
-    Returns
-    -------
-    res : MMDResult
-        Dictionary containing:
-
-        - ``par_v_init`` : initial regression coefficients.
-        - ``par_c_init`` : known variance.
-        - ``stepsize`` : initial step size.
-        - ``bandwidth`` : bandwidth used (resolved if ``"auto"``).
-        - ``estimator`` : last parameter iterate (point estimate).
-        - ``trajectory`` : parameter trajectory of shape
-          ``(n_features, n_step_done + 1)``.
-        - ``convergence`` : 0 if converged, 1 if max iterations reached.
-    """
-    n = X.shape[0]
-
-    if bandwidth == "auto":
-        bandwidth = _median_heuristic(y)
-
-    res = {
-        "par_v_init": np.copy(par_v),
-        "par_c_init": np.copy(par_c),
-        "stepsize": stepsize,
-        "bandwidth": bandwidth,
-        "convergence": 1,
-    }
-
-    trajectory = np.zeros(shape=(par_v.shape[0], n_step + 1))
-    trajectory[:, 0] = par_v
-
-    # cons = 2*sigma^2 + h^2 = 2*phi + h^2  (phi is variance in Python)
-    cons = 2 * par_c + bandwidth**2
-    log_eps = np.log(eps_gd)
-
-    # Initial objective and gradient using observed y (no sampling)
-    diff = y - X @ par_v
-    work = np.exp(-(diff**2) / cons)
-    f1 = -np.mean(work)
-    grad = -(2 / cons) * np.mean((diff * work)[:, np.newaxis] * X, axis=0)
-    grad_norm_sq = np.sum(np.square(grad))
-
-    # step_t carries across iterations (R behaviour): starts at stepsize and
-    # can only shrink via backtracking — never reset between iterations.
-    step_t = stepsize
-
-    for i in range(n_step):
-        if np.sqrt(grad_norm_sq) < eps_gd:
-            res["convergence"] = 0
-            break
-
-        par_v_trial = par_v - step_t * grad
-        diff_trial = y - X @ par_v_trial
-        work_trial = np.exp(-(diff_trial**2) / cons)
-        f2 = -np.mean(work_trial)
-
-        while f2 > f1 - 0.5 * step_t * grad_norm_sq:
-            step_t *= alpha
-            par_v_trial = par_v - step_t * grad
-            diff_trial = y - X @ par_v_trial
-            work_trial = np.exp(-(diff_trial**2) / cons)
-            f2 = -np.mean(work_trial)
-
-        par_v = par_v_trial
-        trajectory[:, i + 1] = par_v
-
-        if np.log(abs(f2 - f1)) - np.log(abs(f1)) < log_eps:
-            res["convergence"] = 0
-            break
-
-        f1 = f2
-        grad = -(2 / cons) * np.mean(
-            (diff_trial * work_trial)[:, np.newaxis] * X, axis=0
-        )
-        grad_norm_sq = np.sum(np.square(grad))
-
-    n_step_done = i + 1
-    res["estimator"] = par_v
-    res["trajectory"] = trajectory[:, : n_step_done + 1]
-
-    return res
-
-
 def _sgd_hat_regression(
     X: NDArray,
     y: NDArray,
@@ -1001,3 +757,410 @@ def _get_grad_estimate(
         grad_estimate = ker @ grad_ll
 
     return grad_estimate
+
+def _gd_gaussian_loc_exact_estimation(
+    X: NDArray,
+    par_v: float,
+    par_c: float,
+    burn_in: int = 500,
+    n_step: int = 1000,
+    stepsize: float = 1.0,
+    bandwidth: float = 1.0,
+    epsilon: float = 1e-4,
+) -> MMDResult:
+    """Estimate the location parameter of a Gaussian model with Gaussian kernel
+    using exact MMD gradient descent.
+
+    Computes the exact MMD gradient analytically for a Gaussian location model
+    with known scale parameter ``par_c`` and a Gaussian Kernel, avoiding Monte
+    Carlo sampling. Uses AdaGrad updates with a burn-in phase followed by
+    Polyak-Ruppert averaging.
+
+    Parameters
+    ----------
+    X : np.array, shape (n_samples,)
+        Univariate observed data.
+
+    par_v : float
+        Initial value of the location parameter (mean) to be estimated.
+
+    par_c : float
+        Known scale parameter (standard deviation) of the Gaussian model.
+
+    burn_in : int, default=500
+        Number of burn-in iterations during which parameter iterates are not
+        averaged.
+
+    n_step : int, default=1000
+        Number of averaging iterations following the burn-in phase.
+
+    stepsize : float, default=1.0
+        Initial step size for the AdaGrad update.
+
+    bandwidth : float or str, default=1.0
+        Bandwidth parameter for the Gaussian kernel. If ``"auto"``, the
+        bandwidth is selected using the median heuristic.
+
+    epsilon : float, default=1e-4
+        Initial accumulated squared gradient norm, used to stabilize the
+        AdaGrad step size at the start of optimization.
+
+    Returns
+    -------
+    res : MMDResult
+        Dictionary containing:
+
+        - ``par_v_init`` : initial location parameter.
+        - ``par_c_init`` : initial scale parameter.
+        - ``stepsize`` : step size used.
+        - ``bandwidth`` : bandwidth used (resolved if ``"auto"``).
+        - ``estimator`` : Polyak-Ruppert average of location parameter iterates.
+        - ``trajectory`` : parameter trajectory of shape ``(burn_in + n_step + 1,)``.
+    """
+    if bandwidth == "auto":
+        bandwidth = _median_heuristic(X)
+
+    norm_grad = epsilon
+
+    res = {
+        "par_v_init": np.copy(par_v),
+        "par_c_init": np.copy(par_c),
+        "stepsize": stepsize,
+        "bandwidth": bandwidth,
+        "convergence": 1,
+    }
+
+    trajectory = np.zeros(shape=(burn_in + n_step + 1,))
+    trajectory[0] = par_v
+
+    Z = -4 / np.sqrt(1 + 2 * (par_c**2) / (bandwidth**2))
+    denom = 2 * (par_c**2) + bandwidth**2
+    for i in range(burn_in):
+        diff = X - par_v
+        grad = Z * np.mean(diff * np.exp(-np.square(diff) / denom))
+        norm_grad += grad**2
+        par_v -= stepsize * grad / np.sqrt(norm_grad)
+        trajectory[i + 1] = par_v
+
+    par_mean = par_v
+    Z = -4 / np.sqrt(1 + 2 * (par_c**2) / (bandwidth**2))
+    for i in range(n_step):
+        diff = X - par_v
+        grad = Z * np.mean(diff * np.exp(-np.square(diff) / denom))
+        norm_grad += grad**2
+        par_v -= stepsize * grad / np.sqrt(norm_grad)
+        par_mean = (par_mean * (i + 1) + par_v) / (i + 2)
+        trajectory[i + burn_in + 1] = par_mean
+
+    res["estimator"] = par_mean
+    res["trajectory"] = trajectory
+
+    return res
+
+
+def _gd_backtracking_lg_loc_tilde_regression(
+    X: NDArray,
+    y: NDArray,
+    par_v: NDArray,
+    par_c: float,
+    n_step: int = 1000,
+    stepsize: float = 1.0,
+    bandwidth: Union[float, str] = 1.0,
+    alpha: float = 0.8,
+    eps_gd: float = 1e-5,
+) -> MMDResult:
+    """Fit a LinearGaussianLoc regression model via exact gradient descent with
+    backtracking line search on the tilde MMD criterion with a Gaussian kernel.
+
+    Computes the exact tilde MMD gradient analytically for a linear Gaussian
+    location model with known variance ``par_c`` and a Gaussian kernel, avoiding
+    Monte Carlo sampling entirely. In this case, the full expectation of the
+    ``kernel * score`` can be calculated explicitly.
+
+    The objective and gradient therefore reduce to closed-form expressions in
+    the residuals, enabling deterministic (non-stochastic) gradient descent with
+    backtracking.
+
+    Parameters
+    ----------
+    X : np.array, shape (n_samples, n_features)
+        Training input samples (design matrix, without intercept column).
+
+    y : np.array, shape (n_samples,)
+        Observed target values.
+
+    par_v : np.array, shape (n_features,)
+        Initial value of the regression coefficients (beta).
+
+    par_c : float
+        Known variance of the Gaussian noise (phi = sigma^2). Not optimized.
+
+    n_step : int, default=1000
+        Maximum number of gradient descent iterations.
+
+    stepsize : float, default=1.0
+        Initial step size. Shared across iterations: once reduced by
+        backtracking, the smaller value carries forward to the next step.
+
+    bandwidth : float or str, default=1.0
+        Bandwidth ``\\gamma`` for the Gaussian kernel applied to ``y``. If
+        ``"auto"``, selected using the median heuristic on ``y``.
+
+    alpha : float, default=0.8
+        Backtracking reduction factor. Must satisfy ``0 < alpha < 1``.
+
+    eps_gd : float, default=1e-5
+        Convergence tolerance on the relative change in the objective:
+        stops when ``log|f_new - f_old| - log|f_old| < log(eps_gd)``.
+
+    Returns
+    -------
+    res : MMDResult
+        Dictionary containing:
+
+        - ``par_v_init`` : initial regression coefficients.
+        - ``par_c_init`` : known variance.
+        - ``stepsize`` : initial step size.
+        - ``bandwidth`` : bandwidth used (resolved if ``"auto"``).
+        - ``estimator`` : last parameter iterate (point estimate).
+        - ``trajectory`` : parameter trajectory of shape
+          ``(n_features, n_step_done + 1)``.
+        - ``convergence`` : 0 if converged, 1 if max iterations reached.
+    """
+
+    if bandwidth == "auto":
+        bandwidth = _median_heuristic(y)
+
+    res = {
+        "par_v_init": np.copy(par_v),
+        "par_c_init": np.copy(par_c),
+        "stepsize": stepsize,
+        "bandwidth": bandwidth,
+        "convergence": 1,
+    }
+
+    trajectory = np.zeros(shape=(par_v.shape[0], n_step + 1))
+    trajectory[:, 0] = par_v
+
+    # cons = 2*phi + gamma^2  (phi is variance in Python)
+    cons = 2 * par_c + bandwidth**2
+    log_eps = np.log(eps_gd)
+
+    # Initial objective and gradient using observed y (no sampling)
+    diff = y - X @ par_v
+    work = np.exp(-(diff**2) / cons)
+    f1 = -np.mean(work)
+    grad = -(2 / cons) * np.mean((diff * work)[:, np.newaxis] * X, axis=0)
+    grad_norm_sq = np.sum(np.square(grad))
+
+    # step_t carries across iterations (R behaviour): starts at stepsize and
+    # can only shrink via backtracking — never reset between iterations.
+    step_t = stepsize
+
+    for i in range(n_step):
+        if np.sqrt(grad_norm_sq) < eps_gd:
+            res["convergence"] = 0
+            break
+
+        par_v_trial = par_v - step_t * grad
+        diff_trial = y - X @ par_v_trial
+        work_trial = np.exp(-(diff_trial**2) / cons)
+        f2 = -np.mean(work_trial)
+
+        while f2 > f1 - 0.5 * step_t * grad_norm_sq:
+            step_t *= alpha
+            par_v_trial = par_v - step_t * grad
+            diff_trial = y - X @ par_v_trial
+            work_trial = np.exp(-(diff_trial**2) / cons)
+            f2 = -np.mean(work_trial)
+
+        par_v = par_v_trial
+        trajectory[:, i + 1] = par_v
+
+        if np.log(abs(f2 - f1)) - np.log(abs(f1)) < log_eps:
+            res["convergence"] = 0
+            break
+
+        f1 = f2
+        grad = -(2 / cons) * np.mean(
+            (diff_trial * work_trial)[:, np.newaxis] * X, axis=0
+        )
+        grad_norm_sq = np.sum(np.square(grad))
+
+    n_step_done = i + 1
+    res["estimator"] = par_v
+    res["trajectory"] = trajectory[:, : n_step_done + 1]
+
+    return res
+
+
+def _gd_backtracking_lg_tilde_regression(
+    X: NDArray,
+    y: NDArray,
+    par_v: NDArray,
+    n_step: int = 1000,
+    stepsize: float = 1.0,
+    bandwidth: Union[float, str] = 1.0,
+    alpha: float = 0.8,
+    eps_gd: float = 1e-5,
+) -> MMDResult:
+    """Fit a LinearGaussian regression model via exact gradient descent with
+    backtracking line search on the tilde MMD criterion with a Gaussian kernel.
+
+    Extends :func:`_gd_backtracking_lg_loc_tilde_regression` to the full model
+    where both the regression coefficients ``beta`` and the noise variance ``phi``
+    are optimized jointly. The variance is reparametrized as ``log(phi)`` for
+    unconstrained optimization.
+
+    The tilde MMD objective with a Gaussian kernel and Y | X ~ N(X @ beta, phi):
+
+    .. math::
+        f(\\beta, \\phi) =
+            \\frac{1}{\\sqrt{h^2 + 4\\phi}}
+            - \\frac{2}{\\sqrt{2\\phi + h^2}}
+              \\frac{1}{n}\\sum_i \\exp\\!\\left(
+                -\\frac{(y_i - X_i^\\top\\beta)^2}{2\\phi + h^2}
+              \\right)
+
+    where the first term is :math:`E[k(Y_1,Y_2)]` and the second is
+    :math:`E[k(Y,y_i)]`, both evaluated analytically.
+
+    Parameters
+    ----------
+    X : np.array, shape (n_samples, n_features)
+        Training input samples (design matrix, without intercept column).
+
+    y : np.array, shape (n_samples,)
+        Observed target values.
+
+    par_v : np.array, shape (n_features + 1,)
+        Initial parameter vector ``[beta_0, ..., beta_p, phi]`` where
+        ``phi > 0`` is the noise variance.
+
+    n_step : int, default=1000
+        Maximum number of gradient descent iterations.
+
+    stepsize : float, default=1.0
+        Initial step size. Carried across iterations: once reduced by
+        backtracking, the smaller value persists to the next step.
+
+    bandwidth : float or str, default=1.0
+        Bandwidth ``h`` for the Gaussian kernel applied to ``y``. If
+        ``"auto"``, selected using the median heuristic on ``y``.
+
+    alpha : float, default=0.8
+        Backtracking reduction factor. Must satisfy ``0 < alpha < 1``.
+
+    eps_gd : float, default=1e-5
+        Convergence tolerance on the relative change in the objective:
+        stops when ``log|f_new - f_old| - log|f_old| < log(eps_gd)``.
+
+    Returns
+    -------
+    res : MMDResult
+        Dictionary containing:
+
+        - ``par_v_init`` : initial parameter vector ``[beta, phi]``.
+        - ``par_c_init`` : ``None`` (no fixed parameters).
+        - ``stepsize`` : initial step size.
+        - ``bandwidth`` : bandwidth used (resolved if ``"auto"``).
+        - ``estimator`` : last parameter iterate ``[beta, phi]``.
+        - ``trajectory`` : parameter trajectory of shape
+          ``(n_features + 1, n_step_done + 1)``, stored in the original
+          ``[beta, phi]`` space (not log-space).
+        - ``convergence`` : 0 if converged, 1 if max iterations reached.
+    """
+    if bandwidth == "auto":
+        bandwidth = _median_heuristic(y)
+
+    bdwth2 = bandwidth**2
+    d = par_v.shape[0] - 1  # number of beta coefficients
+
+    res = {
+        "par_v_init": np.copy(par_v),
+        "par_c_init": None,
+        "stepsize": stepsize,
+        "bandwidth": bandwidth,
+        "convergence": 1,
+    }
+
+    trajectory = np.zeros(shape=(par_v.shape[0], n_step + 1))
+    trajectory[:, 0] = par_v
+
+    # Reparametrize: optimize [beta, log(phi)] for unconstrained phi
+    par_log = np.concatenate([par_v[:d], [np.log(par_v[d])]])
+    log_eps = np.log(eps_gd)
+    step_t = stepsize
+
+    # Initial objective and gradient
+    diff = y - X @ par_log[:d]
+    sigma2 = np.exp(par_log[d])
+    new_var = 2 * sigma2 + bdwth2
+    work = np.exp(-(diff**2) / new_var)
+    f1 = 1.0 / np.sqrt(bdwth2 + 4 * sigma2) - 2 * np.mean(work) / np.sqrt(new_var)
+
+    grad_beta = -(4.0 / new_var**1.5) * np.mean((diff * work)[:, np.newaxis] * X, axis=0)
+    g_log_phi = sigma2 * (
+        -2.0 * (bdwth2 + 4 * sigma2) ** (-1.5)
+        + 2 * np.mean(work) * new_var ** (-1.5)
+        - 4 * np.mean(work * diff**2) * new_var ** (-2.5)
+    )
+    grad = np.concatenate([grad_beta, [g_log_phi]])
+    grad_norm_sq = np.sum(np.square(grad))
+
+    for i in range(n_step):
+        if np.sqrt(grad_norm_sq) < eps_gd:
+            res["convergence"] = 0
+            break
+
+        par_log_trial = par_log - step_t * grad
+        diff_trial = y - X @ par_log_trial[:d]
+        sigma2_trial = np.exp(par_log_trial[d])
+        new_var_trial = 2 * sigma2_trial + bdwth2
+        work_trial = np.exp(-(diff_trial**2) / new_var_trial)
+        f2 = (
+            1.0 / np.sqrt(bdwth2 + 4 * sigma2_trial)
+            - 2 * np.mean(work_trial) / np.sqrt(new_var_trial)
+        )
+
+        while f2 > f1 - 0.5 * step_t * grad_norm_sq:
+            step_t *= alpha
+            par_log_trial = par_log - step_t * grad
+            diff_trial = y - X @ par_log_trial[:d]
+            sigma2_trial = np.exp(par_log_trial[d])
+            new_var_trial = 2 * sigma2_trial + bdwth2
+            work_trial = np.exp(-(diff_trial**2) / new_var_trial)
+            f2 = (
+                1.0 / np.sqrt(bdwth2 + 4 * sigma2_trial)
+                - 2 * np.mean(work_trial) / np.sqrt(new_var_trial)
+            )
+
+        par_log = par_log_trial
+        trajectory[:, i + 1] = np.concatenate([par_log[:d], [sigma2_trial]])
+
+        if np.log(abs(f2 - f1)) - np.log(abs(f1)) < log_eps:
+            res["convergence"] = 0
+            break
+
+        f1 = f2
+        diff = diff_trial
+        sigma2 = sigma2_trial
+        new_var = new_var_trial
+        work = work_trial
+
+        grad_beta = -(4.0 / new_var**1.5) * np.mean(
+            (diff * work)[:, np.newaxis] * X, axis=0
+        )
+        g_log_phi = sigma2 * (
+            -2.0 * (bdwth2 + 4 * sigma2) ** (-1.5)
+            + 2 * np.mean(work) * new_var ** (-1.5)
+            - 4 * np.mean(work * diff**2) * new_var ** (-2.5)
+        )
+        grad = np.concatenate([grad_beta, [g_log_phi]])
+        grad_norm_sq = np.sum(np.square(grad))
+
+    n_step_done = i + 1
+    res["estimator"] = np.concatenate([par_log[:d], [np.exp(par_log[d])]])
+    res["trajectory"] = trajectory[:, : n_step_done + 1]
+
+    return res

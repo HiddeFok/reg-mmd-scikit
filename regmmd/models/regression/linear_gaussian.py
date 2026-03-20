@@ -100,6 +100,33 @@ class LinearGaussian(LinearGaussianBase):
         par_c = None
         return par_v, par_c
 
+    def _exact_fit(
+        self,
+        X,
+        y,
+        par_v,
+        par_c,
+        solver,
+        kernel_y,
+        bandwidth_y,
+        kernel_X=None,
+        bandwidth_X=None,
+    ):
+        if kernel_y == "Gaussian" and (bandwidth_X is None or bandwidth_X == 0):
+            from regmmd.optimizer import _gd_backtracking_lg_tilde_regression
+
+            return _gd_backtracking_lg_tilde_regression(
+                X=X,
+                y=y,
+                par_v=par_v,
+                n_step=solver["n_step"],
+                stepsize=solver["stepsize"],
+                bandwidth=bandwidth_y,
+                alpha=solver.get("alpha", 0.8),
+                eps_gd=solver.get("eps_gd", 1e-5),
+            )
+        return None
+
 
 class LinearGaussianLoc(LinearGaussianBase):
     def __init__(self, par_v=None, par_c=None, random_state=None):
