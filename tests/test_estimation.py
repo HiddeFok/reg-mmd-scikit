@@ -99,6 +99,36 @@ def test_gaussian_sgd_kernels(kernel):
     assert res["estimator"].shape == (2,)
 
 
+# --- _exact_fit dispatch ---
+
+
+def test_gaussian_loc_exact_fit_gaussian_kernel_returns_result():
+    X = RNG.normal(0.0, 1.0, size=(50,))
+    model = GaussianLoc(par_v=0.0, par_c=1.0)
+    res = model._exact_fit(X=X, par_v=0.0, par_c=1.0, solver=SOLVER, kernel="Gaussian", bandwidth=1.0)
+    assert res is not None
+    assert "estimator" in res
+
+
+@pytest.mark.parametrize("kernel", ["Laplace", "Cauchy"])
+def test_gaussian_loc_exact_fit_non_gaussian_kernel_returns_none(kernel):
+    X = RNG.normal(0.0, 1.0, size=(50,))
+    model = GaussianLoc(par_v=0.0, par_c=1.0)
+    res = model._exact_fit(X=X, par_v=0.0, par_c=1.0, solver=SOLVER, kernel=kernel, bandwidth=1.0)
+    assert res is None
+
+
+@pytest.mark.parametrize("model", [
+    GaussianScale(par_v=1.0, par_c=0.0),
+    Gaussian(par_v=np.array([0.0, 1.0])),
+])
+def test_other_estimation_models_exact_fit_returns_none(model):
+    X = RNG.normal(0.0, 1.0, size=(50,))
+    res = model._exact_fit(X=X, par_v=model._get_params()[0], par_c=model._get_params()[1],
+                           solver=SOLVER, kernel="Gaussian", bandwidth=1.0)
+    assert res is None
+
+
 def test_mmd_estimator_model_str_inits():
     reg = MMDEstimator(model="gaussian", solver=SOLVER)
 

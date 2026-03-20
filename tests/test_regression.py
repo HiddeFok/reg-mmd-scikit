@@ -4,6 +4,8 @@ import pytest
 from regmmd.models.regression.linear_gaussian import LinearGaussian, LinearGaussianLoc
 from regmmd.regression import MMDRegressor, _preprocess_data, NotFittedError
 
+EXACT_SOLVER = {"n_step": 200, "stepsize": 0.5}
+
 RNG = np.random.default_rng(42)
 
 
@@ -135,7 +137,9 @@ def test_mmd_regressor_fitted_hat_predicts(fit_intercept):
 
     par_v = np.array([1.2, 2.1])
     model = LinearGaussianLoc(par_v=par_v, par_c=0.1)
-    reg = MMDRegressor(model=model, par_v=par_v, solver=SOLVER, fit_intercept=fit_intercept)
+    reg = MMDRegressor(
+        model=model, par_v=par_v, solver=SOLVER, fit_intercept=fit_intercept
+    )
     reg.fit(X, y)
     y_hat = reg.predict(X)
     mse = np.mean((y - y_hat) ** 2)
@@ -155,12 +159,73 @@ def test_mmd_regressor_fitted_tilde_predicts(fit_intercept):
     par_v = np.array([1.2, 2.1])
     model = LinearGaussianLoc(par_v=par_v, par_c=0.1)
     reg = MMDRegressor(
-        model=model, par_v=par_v, solver=SOLVER, fit_intercept=fit_intercept, bandwidth_X=0
+        model=model,
+        par_v=par_v,
+        solver=SOLVER,
+        fit_intercept=fit_intercept,
+        bandwidth_X=0,
     )
     reg.fit(X, y)
     y_hat = reg.predict(X)
     mse = np.mean((y - y_hat) ** 2)
     assert mse < 0.5
+
+
+# --- _exact_fit dispatch ---
+
+
+def test_linear_gaussian_loc_exact_fit_tilde_returns_result():
+    X = RNG.normal(size=(50, 2))
+    y = RNG.normal(size=(50,))
+    par_v = np.zeros(2)
+    model = LinearGaussianLoc(par_v=par_v, par_c=1.0)
+    res = model._exact_fit(
+        X=X, y=y, par_v=par_v, par_c=1.0,
+        solver=EXACT_SOLVER, kernel_y="Gaussian", bandwidth_y=1.0,
+        kernel_X="Laplace", bandwidth_X=0,
+    )
+    assert res is not None
+    assert "estimator" in res
+
+
+@pytest.mark.parametrize("kernel_y", ["Laplace", "Cauchy"])
+def test_linear_gaussian_loc_exact_fit_non_gaussian_kernel_returns_none(kernel_y):
+    X = RNG.normal(size=(50, 2))
+    y = RNG.normal(size=(50,))
+    par_v = np.zeros(2)
+    model = LinearGaussianLoc(par_v=par_v, par_c=1.0)
+    res = model._exact_fit(
+        X=X, y=y, par_v=par_v, par_c=1.0,
+        solver=EXACT_SOLVER, kernel_y=kernel_y, bandwidth_y=1.0,
+        kernel_X="Laplace", bandwidth_X=0,
+    )
+    assert res is None
+
+
+def test_linear_gaussian_loc_exact_fit_hat_returns_none():
+    X = RNG.normal(size=(50, 2))
+    y = RNG.normal(size=(50,))
+    par_v = np.zeros(2)
+    model = LinearGaussianLoc(par_v=par_v, par_c=1.0)
+    res = model._exact_fit(
+        X=X, y=y, par_v=par_v, par_c=1.0,
+        solver=EXACT_SOLVER, kernel_y="Gaussian", bandwidth_y=1.0,
+        kernel_X="Laplace", bandwidth_X="auto",
+    )
+    assert res is None
+
+
+def test_linear_gaussian_exact_fit_returns_none():
+    X = RNG.normal(size=(50, 2))
+    y = RNG.normal(size=(50,))
+    par_v = np.array([0.0, 0.0, 1.0])
+    model = LinearGaussian(par_v=par_v)
+    res = model._exact_fit(
+        X=X, y=y, par_v=par_v, par_c=None,
+        solver=EXACT_SOLVER, kernel_y="Gaussian", bandwidth_y=1.0,
+        kernel_X="Laplace", bandwidth_X=0,
+    )
+    assert res is None
 
 
 def test_mmd_regressor_model_str_inits():

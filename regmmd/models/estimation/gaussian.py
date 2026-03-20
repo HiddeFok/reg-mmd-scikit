@@ -65,6 +65,22 @@ class GaussianLoc(GaussianBase):
     def _project_params(self, par_v):
         return par_v
 
+    def _exact_fit(self, X, par_v, par_c, solver, kernel, bandwidth):
+        if kernel == "Gaussian":
+            from regmmd.optimizer import _gd_gaussian_loc_exact_estimation
+
+            return _gd_gaussian_loc_exact_estimation(
+                X=X,
+                par_v=par_v,
+                par_c=par_c,
+                burn_in=solver["burnin"],
+                n_step=solver["n_step"],
+                stepsize=solver["stepsize"],
+                bandwidth=bandwidth,
+                epsilon=solver["epsilon"],
+            )
+        return None
+
 
 class GaussianScale(GaussianBase):
     def __init__(self, par_v=None, par_c=None, random_state=None):

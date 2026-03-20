@@ -13,7 +13,8 @@ from regmmd.models import (
     PoissonRegression,
 )
 from regmmd.models.base_model import RegressionModel
-from regmmd.optimizer import _sgd_hat_regression, _sgd_tilde_regression, MMDResult
+from regmmd.optimizer import _sgd_hat_regression, _sgd_tilde_regression
+from regmmd.utils import MMDResult
 
 from sklearn.utils.validation import check_X_y, check_array
 
@@ -220,44 +221,60 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
             )
             self.X_offset = X_offset
             self.X_scale = X_scale
-        
-        if self.fit_intercept and self.model.beta is not None and len(self.model.beta) == n_features:
+
+        if (
+            self.fit_intercept
+            and self.model.beta is not None
+            and len(self.model.beta) == n_features
+        ):
             par_v = np.insert(self.par_v, n_features, 1)
             self.model.update(par_v)
 
         if self.par_v is None or self.par_c is None:
             self.par_v, self.par_c = self.model._init_params(X=X, y=y)
 
-        if self.bandwidth_X == 0:
-            if self.solver["type"] == "SGD":
-                res = _sgd_tilde_regression(
-                    X=X,
-                    y=y,
-                    par_v=self.par_v,
-                    par_c=self.par_c,
-                    model=self.model,
-                    kernel=self.kernel_y,
-                    burn_in=self.solver["burnin"],
-                    n_step=self.solver["n_step"],
-                    stepsize=self.solver["stepsize"],
-                    bandwidth=self.bandwidth_y,
-                )
-        else:
-            if self.solver["type"] == "SGD":
-                res = _sgd_hat_regression(
-                    X=X,
-                    y=y,
-                    par_v=self.par_v,
-                    par_c=self.par_c,
-                    model=self.model,
-                    kernel_y=self.kernel_y,
-                    kernel_x=self.kernel_X,
-                    burn_in=self.solver["burnin"],
-                    n_step=self.solver["n_step"],
-                    stepsize=self.solver["stepsize"],
-                    bandwidth_y=self.bandwidth_y,
-                    bandwidth_x=self.bandwidth_X,
-                )
+        res = self.model._exact_fit(
+            X=X,
+            y=y,
+            par_v=self.par_v,
+            par_c=self.par_c,
+            solver=self.solver,
+            kernel_y=self.kernel_y,
+            bandwidth_y=self.bandwidth_y,
+            kernel_X=self.kernel_X,
+            bandwidth_X=self.bandwidth_X,
+        )
+        if res is None:
+            if self.bandwidth_X == 0:
+                if self.solver["type"] == "SGD":
+                    res = _sgd_tilde_regression(
+                        X=X,
+                        y=y,
+                        par_v=self.par_v,
+                        par_c=self.par_c,
+                        model=self.model,
+                        kernel=self.kernel_y,
+                        burn_in=self.solver["burnin"],
+                        n_step=self.solver["n_step"],
+                        stepsize=self.solver["stepsize"],
+                        bandwidth=self.bandwidth_y,
+                    )
+            else:
+                if self.solver["type"] == "SGD":
+                    res = _sgd_hat_regression(
+                        X=X,
+                        y=y,
+                        par_v=self.par_v,
+                        par_c=self.par_c,
+                        model=self.model,
+                        kernel_y=self.kernel_y,
+                        kernel_x=self.kernel_X,
+                        burn_in=self.solver["burnin"],
+                        n_step=self.solver["n_step"],
+                        stepsize=self.solver["stepsize"],
+                        bandwidth_y=self.bandwidth_y,
+                        bandwidth_x=self.bandwidth_X,
+                    )
 
         if not isinstance(self.model, Logistic):
             self.beta_ = res["estimator"][:n_features] / self.X_scale

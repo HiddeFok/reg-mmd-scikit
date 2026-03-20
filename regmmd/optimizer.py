@@ -6,18 +6,7 @@ from scipy.spatial.distance import pdist
 
 from regmmd.kernels import K1d, K1d_dist
 from regmmd.models.base_model import EstimationModel, RegressionModel
-
-
-class MMDResult(TypedDict):
-    par_v_init: NDArray
-    par_c_init: NDArray
-    stepsize: float
-    estimator: NDArray
-    trajectory: NDArray
-    bandwidth: Optional[float]  # Optional if not always present
-    bandwidth_x: Optional[float]  # Optional if not always present
-    bandwidth_y: Optional[float]  # Optional if not always present
-    convergence: int  # 0 = converged, 1 = max iterations reached, -1 = NaN/failure
+from regmmd.utils import MMDResult
 
 
 def _median_heuristic(X: NDArray) -> float:
@@ -379,12 +368,12 @@ def _gd_backtracking_lg_loc_tilde_regression(
     trajectory[:, 0] = par_v
 
     # cons = 2*sigma^2 + h^2 = 2*phi + h^2  (phi is variance in Python)
-    cons = 2 * par_c + bandwidth ** 2
+    cons = 2 * par_c + bandwidth**2
     log_eps = np.log(eps_gd)
 
     # Initial objective and gradient using observed y (no sampling)
     diff = y - X @ par_v
-    work = np.exp(-(diff ** 2) / cons)
+    work = np.exp(-(diff**2) / cons)
     f1 = -np.mean(work)
     grad = -(2 / cons) * np.mean((diff * work)[:, np.newaxis] * X, axis=0)
     grad_norm_sq = np.sum(np.square(grad))
@@ -400,14 +389,14 @@ def _gd_backtracking_lg_loc_tilde_regression(
 
         par_v_trial = par_v - step_t * grad
         diff_trial = y - X @ par_v_trial
-        work_trial = np.exp(-(diff_trial ** 2) / cons)
+        work_trial = np.exp(-(diff_trial**2) / cons)
         f2 = -np.mean(work_trial)
 
         while f2 > f1 - 0.5 * step_t * grad_norm_sq:
             step_t *= alpha
             par_v_trial = par_v - step_t * grad
             diff_trial = y - X @ par_v_trial
-            work_trial = np.exp(-(diff_trial ** 2) / cons)
+            work_trial = np.exp(-(diff_trial**2) / cons)
             f2 = -np.mean(work_trial)
 
         par_v = par_v_trial
@@ -418,7 +407,9 @@ def _gd_backtracking_lg_loc_tilde_regression(
             break
 
         f1 = f2
-        grad = -(2 / cons) * np.mean((diff_trial * work_trial)[:, np.newaxis] * X, axis=0)
+        grad = -(2 / cons) * np.mean(
+            (diff_trial * work_trial)[:, np.newaxis] * X, axis=0
+        )
         grad_norm_sq = np.sum(np.square(grad))
 
     n_step_done = i + 1
@@ -447,8 +438,8 @@ def _sgd_hat_regression(
     eps_sq: float = 1e-5,
     rng: np.random.Generator = np.random.default_rng(10),
 ) -> MMDResult:
-    """Fit a regression model using the hat estimator via stochastic gradient descent, 
-    as described in `Universal Robust Regression via Maximum Mean Discrepancy`, Alquier, 
+    """Fit a regression model using the hat estimator via stochastic gradient descent,
+    as described in `Universal Robust Regression via Maximum Mean Discrepancy`, Alquier,
     Gerber (2024).
 
     Minimizes the MMD objective using the product kernel :math:`k = k_X \\otimes k_Y`.
@@ -735,7 +726,7 @@ def _sgd_tilde_regression(
     eps_sq: float = 1e-5,
 ) -> MMDResult:
     """Fit a regression model using the tilde estimator via stochastic gradient descent,
-    as described in `Universal Robust Regression via Maximum Mean Discrepancy`, Alquier and 
+    as described in `Universal Robust Regression via Maximum Mean Discrepancy`, Alquier and
     Gerber (2024).
 
     Minimizes the MMD objective using only the kernel :math:`k_Y` on the target

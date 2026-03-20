@@ -36,7 +36,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.mathjax",
     "sphinx.ext.doctest",
-    "sphinx.ext.linkcode"
+    "sphinx.ext.linkcode",
 ]
 
 templates_path = ["_templates"]
@@ -54,13 +54,14 @@ html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 
-doctest_global_setup = '''
+doctest_global_setup = """
 import numpy as np
 rng = np.random.default_rng(0)
-'''
+"""
 
 # GH Pages
 html_baseurl = "https://hiddefok.github.io/reg-mmd-scikit/"
+
 
 def linkcode_resolve(domain, info):
     if domain != "py" or not info["module"]:
@@ -73,5 +74,4 @@ autodoc_type_aliases = {
     "NDArray": "NDArray",
     "ndarray[tuple[Any, ...], dtype[_ScalarT]]": "NDArray",
 }
-autodoc_typehints = "description" 
-
+autodoc_typehints = "description"
