@@ -134,6 +134,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="../optimization/index.html">
+    Optimization
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../robustness/index.html">
     Robustness Properties
   </a>
@@ -222,6 +229,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../example/index.html">
     Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../optimization/index.html">
+    Optimization
   </a>
 </li>
 
@@ -333,11 +347,210 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="module-regmmd.optimizer">
-<span id="optimizer-functions"></span><h1>Optimizer functions<a class="headerlink" href="#module-regmmd.optimizer" title="Link to this heading">#</a></h1>
+  <section id="module-regmmd.optimizers">
+<span id="optimizer-functions"></span><h1>Optimizer functions<a class="headerlink" href="#module-regmmd.optimizers" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="regmmd.optimizer._gd_gaussian_loc_exact_estimation">
-<span class="sig-prename descclassname"><span class="pre">regmmd.optimizer.</span></span><span class="sig-name descname"><span class="pre">_gd_gaussian_loc_exact_estimation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">burn_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizer.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizer._gd_gaussian_loc_exact_estimation" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="regmmd.optimizers._gd_backtracking_lg_loc_tilde_regression">
+<span class="sig-prename descclassname"><span class="pre">regmmd.optimizers.</span></span><span class="sig-name descname"><span class="pre">_gd_backtracking_lg_loc_tilde_regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps_gd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizers.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizers._gd_backtracking_lg_loc_tilde_regression" title="Link to this definition">#</a></dt>
+<dd><p>Fit a LinearGaussianLoc regression model via exact gradient descent with
+backtracking line search on the tilde MMD criterion with a Gaussian kernel.</p>
+<p>Computes the exact tilde MMD gradient analytically for a linear Gaussian
+location model with known variance <code class="docutils literal notranslate"><span class="pre">par_c</span></code> and a Gaussian kernel, avoiding
+Monte Carlo sampling entirely. In this case, the full expectation of the
+<code class="docutils literal notranslate"><span class="pre">kernel</span> <span class="pre">*</span> <span class="pre">score</span></code> can be calculated explicitly.</p>
+<p>The objective and gradient therefore reduce to closed-form expressions in
+the residuals, enabling deterministic (non-stochastic) gradient descent with
+backtracking.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em>) – Training input samples (design matrix, without intercept column).</p></li>
+<li><p><strong>y</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>,</em><em>)</em>) – Observed target values.</p></li>
+<li><p><strong>par_v</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_features</em><em>,</em><em>)</em>) – Initial value of the regression coefficients (beta).</p></li>
+<li><p><strong>par_c</strong> (<em>float</em>) – Known variance of the Gaussian noise (phi = sigma^2). Not optimized.</p></li>
+<li><p><strong>n_step</strong> (<em>int</em><em>, </em><em>default=1000</em>) – Maximum number of gradient descent iterations.</p></li>
+<li><p><strong>stepsize</strong> (<em>float</em><em>, </em><em>default=1.0</em>) – Initial step size. Shared across iterations: once reduced by
+backtracking, the smaller value carries forward to the next step.</p></li>
+<li><p><strong>bandwidth</strong> (<em>float</em><em> or </em><em>str</em><em>, </em><em>default=1.0</em>) – Bandwidth <code class="docutils literal notranslate"><span class="pre">\gamma</span></code> for the Gaussian kernel applied to <code class="docutils literal notranslate"><span class="pre">y</span></code>. If
+<code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, selected using the median heuristic on <code class="docutils literal notranslate"><span class="pre">y</span></code>.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>default=0.8</em>) – Backtracking reduction factor. Must satisfy <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">&lt;</span> <span class="pre">alpha</span> <span class="pre">&lt;</span> <span class="pre">1</span></code>.</p></li>
+<li><p><strong>eps_gd</strong> (<em>float</em><em>, </em><em>default=1e-5</em>) – Convergence tolerance on the relative change in the objective:
+stops when <code class="docutils literal notranslate"><span class="pre">log|f_new</span> <span class="pre">-</span> <span class="pre">f_old|</span> <span class="pre">-</span> <span class="pre">log|f_old|</span> <span class="pre">&lt;</span> <span class="pre">log(eps_gd)</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p><strong>res</strong> – Dictionary containing:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">par_v_init</span></code> : initial regression coefficients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">par_c_init</span></code> : known variance.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stepsize</span></code> : initial step size.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bandwidth</span></code> : bandwidth used (resolved if <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">estimator</span></code> : last parameter iterate (point estimate).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trajectory</span></code> : parameter trajectory of shape
+<code class="docutils literal notranslate"><span class="pre">(n_features,</span> <span class="pre">n_step_done</span> <span class="pre">+</span> <span class="pre">1)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">convergence</span></code> : 0 if converged, 1 if max iterations reached.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MMDResult</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="regmmd.optimizers._gd_backtracking_lg_tilde_regression">
+<span class="sig-prename descclassname"><span class="pre">regmmd.optimizers.</span></span><span class="sig-name descname"><span class="pre">_gd_backtracking_lg_tilde_regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps_gd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizers.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizers._gd_backtracking_lg_tilde_regression" title="Link to this definition">#</a></dt>
+<dd><p>Fit a LinearGaussian regression model via exact gradient descent with
+backtracking line search on the tilde MMD criterion with a Gaussian kernel.</p>
+<p>Extends <a class="reference internal" href="#regmmd.optimizers._gd_backtracking_lg_loc_tilde_regression" title="regmmd.optimizers._gd_backtracking_lg_loc_tilde_regression"><code class="xref py py-func docutils literal notranslate"><span class="pre">_gd_backtracking_lg_loc_tilde_regression()</span></code></a> to the full model
+where both the regression coefficients <code class="docutils literal notranslate"><span class="pre">beta</span></code> and the noise variance <code class="docutils literal notranslate"><span class="pre">phi</span></code>
+are optimized jointly. The variance is reparametrized as <code class="docutils literal notranslate"><span class="pre">log(phi)</span></code> for
+unconstrained optimization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em>) – Training input samples (design matrix, without intercept column).</p></li>
+<li><p><strong>y</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>,</em><em>)</em>) – Observed target values.</p></li>
+<li><p><strong>par_v</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_features + 1</em><em>,</em><em>)</em>) – Initial parameter vector <code class="docutils literal notranslate"><span class="pre">[beta_0,</span> <span class="pre">...,</span> <span class="pre">beta_p,</span> <span class="pre">phi]</span></code> where
+<code class="docutils literal notranslate"><span class="pre">phi</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> is the noise variance.</p></li>
+<li><p><strong>n_step</strong> (<em>int</em><em>, </em><em>default=1000</em>) – Maximum number of gradient descent iterations.</p></li>
+<li><p><strong>stepsize</strong> (<em>float</em><em>, </em><em>default=1.0</em>) – Initial step size. Carried across iterations: once reduced by
+backtracking, the smaller value persists to the next step.</p></li>
+<li><p><strong>bandwidth</strong> (<em>float</em><em> or </em><em>str</em><em>, </em><em>default=1.0</em>) – Bandwidth <code class="docutils literal notranslate"><span class="pre">h</span></code> for the Gaussian kernel applied to <code class="docutils literal notranslate"><span class="pre">y</span></code>. If
+<code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, selected using the median heuristic on <code class="docutils literal notranslate"><span class="pre">y</span></code>.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>default=0.8</em>) – Backtracking reduction factor. Must satisfy <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">&lt;</span> <span class="pre">alpha</span> <span class="pre">&lt;</span> <span class="pre">1</span></code>.</p></li>
+<li><p><strong>eps_gd</strong> (<em>float</em><em>, </em><em>default=1e-5</em>) – Convergence tolerance on the relative change in the objective:
+stops when <code class="docutils literal notranslate"><span class="pre">log|f_new</span> <span class="pre">-</span> <span class="pre">f_old|</span> <span class="pre">-</span> <span class="pre">log|f_old|</span> <span class="pre">&lt;</span> <span class="pre">log(eps_gd)</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p><strong>res</strong> – Dictionary containing:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">par_v_init</span></code> : initial parameter vector <code class="docutils literal notranslate"><span class="pre">[beta,</span> <span class="pre">phi]</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">par_c_init</span></code> : <code class="docutils literal notranslate"><span class="pre">None</span></code> (no fixed parameters).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stepsize</span></code> : initial step size.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bandwidth</span></code> : bandwidth used (resolved if <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">estimator</span></code> : last parameter iterate <code class="docutils literal notranslate"><span class="pre">[beta,</span> <span class="pre">phi]</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trajectory</span></code> : parameter trajectory of shape
+<code class="docutils literal notranslate"><span class="pre">(n_features</span> <span class="pre">+</span> <span class="pre">1,</span> <span class="pre">n_step_done</span> <span class="pre">+</span> <span class="pre">1)</span></code>, stored in the original
+<code class="docutils literal notranslate"><span class="pre">[beta,</span> <span class="pre">phi]</span></code> space (not log-space).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">convergence</span></code> : 0 if converged, 1 if max iterations reached.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MMDResult</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="regmmd.optimizers._gd_backtracking_logistic_tilde_regression">
+<span class="sig-prename descclassname"><span class="pre">regmmd.optimizers.</span></span><span class="sig-name descname"><span class="pre">_gd_backtracking_logistic_tilde_regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Gaussian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps_gd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizers.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizers._gd_backtracking_logistic_tilde_regression" title="Link to this definition">#</a></dt>
+<dd><p>Fit a Logistic regression model via exact gradient descent with
+backtracking line search on the tilde MMD criterion.</p>
+<p>Computes the exact tilde MMD gradient analytically for a logistic model,
+avoiding Monte Carlo sampling entirely. Since <span class="math notranslate nohighlight">\(Y | X \sim \text{Bernoulli}(p)\)</span> with
+<span class="math notranslate nohighlight">\(p = \text{sigmoid}(X^{\top}\beta)\)</span>, the expectations involving <span class="math notranslate nohighlight">\(Y\)</span>
+reduce to closed-form expressions in <span class="math notranslate nohighlight">\(p_i\)</span>, enabling deterministic gradient
+descent with backtracking.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em>) – Training input samples (design matrix, without intercept column).</p></li>
+<li><p><strong>y</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>,</em><em>)</em>) – Binary target values in {0, 1}.</p></li>
+<li><p><strong>par_v</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_features</em><em>,</em><em>)</em>) – Initial value of the regression coefficients (beta).</p></li>
+<li><p><strong>n_step</strong> (<em>int</em><em>, </em><em>default=1000</em>) – Maximum number of gradient descent iterations.</p></li>
+<li><p><strong>stepsize</strong> (<em>float</em><em>, </em><em>default=1.0</em>) – Initial step size. Carried across iterations: once reduced by
+backtracking, the smaller value persists to the next step.</p></li>
+<li><p><strong>bandwidth</strong> (<em>float</em><em> or </em><em>str</em><em>, </em><em>default=1.0</em>) – Bandwidth for the kernel applied to <code class="docutils literal notranslate"><span class="pre">y</span></code>. If <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, selected
+using the median heuristic on <code class="docutils literal notranslate"><span class="pre">y</span></code>.</p></li>
+<li><p><strong>kernel</strong> (<em>str</em><em>, </em><em>default=&quot;Gaussian&quot;</em>) – Kernel type. Supported options are <code class="docutils literal notranslate"><span class="pre">&quot;Gaussian&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;Laplace&quot;</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">&quot;Cauchy&quot;</span></code>.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>default=0.8</em>) – Backtracking reduction factor. Must satisfy <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">&lt;</span> <span class="pre">alpha</span> <span class="pre">&lt;</span> <span class="pre">1</span></code>.</p></li>
+<li><p><strong>eps_gd</strong> (<em>float</em><em>, </em><em>default=1e-5</em>) – Convergence tolerance on the relative change in the objective:
+stops when <code class="docutils literal notranslate"><span class="pre">log|f_new</span> <span class="pre">-</span> <span class="pre">f_old|</span> <span class="pre">-</span> <span class="pre">log|f_old|</span> <span class="pre">&lt;</span> <span class="pre">log(eps_gd)</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p><strong>res</strong> – Dictionary containing:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">par_v_init</span></code> : initial regression coefficients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">par_c_init</span></code> : <code class="docutils literal notranslate"><span class="pre">None</span></code> (no fixed parameters).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stepsize</span></code> : initial step size.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bandwidth</span></code> : bandwidth used (resolved if <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">estimator</span></code> : last parameter iterate (point estimate).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trajectory</span></code> : parameter trajectory of shape
+<code class="docutils literal notranslate"><span class="pre">(n_features,</span> <span class="pre">n_step_done</span> <span class="pre">+</span> <span class="pre">1)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">convergence</span></code> : 0 if converged, 1 if max iterations reached.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MMDResult</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="regmmd.optimizers._gd_exact_logistic_hat_regression">
+<span class="sig-prename descclassname"><span class="pre">regmmd.optimizers.</span></span><span class="sig-name descname"><span class="pre">_gd_exact_logistic_hat_regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Gaussian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Laplace'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">burn_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_det</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_rand</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps_sq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Generator(PCG64)</span> <span class="pre">at</span> <span class="pre">0x7F9B3BEE2880</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizers.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizers._gd_exact_logistic_hat_regression" title="Link to this definition">#</a></dt>
+<dd><p>Fit a Logistic regression model using the hat estimator via AdaGrad with
+exact (analytical) gradients, as described in <cite>Universal Robust Regression
+via Maximum Mean Discrepancy</cite>, Alquier, Gerber (2024).</p>
+<p>Replaces the Monte Carlo Y-sampling in <a class="reference internal" href="#regmmd.optimizers._sgd_hat_regression" title="regmmd.optimizers._sgd_hat_regression"><code class="xref py py-func docutils literal notranslate"><span class="pre">_sgd_hat_regression()</span></code></a> with
+closed-form gradient expressions for the logistic model. Since
+<span class="math notranslate nohighlight">\(Y | X \sim \text{Bernoulli}(p)\)</span> with <span class="math notranslate nohighlight">\(p = \text{sigmoid}(X^{\top} \beta)\)</span>, the expectations
+<span class="math notranslate nohighlight">\(\mathbb{E}[k_Y(Y_i, Y_j)]\)</span> and <span class="math notranslate nohighlight">\(\mathbb{E}[k_Y(Y_i, y_i)]\)</span> reduce to simple functions of <span class="math notranslate nohighlight">\(p_i\)</span>
+and <span class="math notranslate nohighlight">\(p_j\)</span>, so the gradient is computed analytically for each pair <span class="math notranslate nohighlight">\((i, j)\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em>) – Training input samples.</p></li>
+<li><p><strong>y</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>,</em><em>)</em>) – Binary target values in {0, 1}.</p></li>
+<li><p><strong>par_v</strong> (<em>np.array</em><em>, </em><em>shape</em><em> (</em><em>n_features</em><em>,</em><em>)</em>) – Initial regression coefficients (beta).</p></li>
+<li><p><strong>par_c</strong> (<em>array</em><em> or </em><em>None</em><em>, </em><em>default=None</em>) – Unused; included for API consistency.</p></li>
+<li><p><strong>kernel</strong> (<em>str</em><em>, </em><em>default=&quot;Gaussian&quot;</em>) – Kernel applied to y. Supported options are <code class="docutils literal notranslate"><span class="pre">&quot;Gaussian&quot;</span></code>,
+<code class="docutils literal notranslate"><span class="pre">&quot;Laplace&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&quot;Cauchy&quot;</span></code>.</p></li>
+<li><p><strong>kernel_x</strong> (<em>str</em><em>, </em><em>default=&quot;Laplace&quot;</em>) – Kernel applied to X. Supported options are <code class="docutils literal notranslate"><span class="pre">&quot;Gaussian&quot;</span></code>,
+<code class="docutils literal notranslate"><span class="pre">&quot;Laplace&quot;</span></code>, and <code class="docutils literal notranslate"><span class="pre">&quot;Cauchy&quot;</span></code>.</p></li>
+<li><p><strong>burn_in</strong> (<em>int</em><em>, </em><em>default=500</em>) – Number of burn-in AdaGrad iterations (parameters not averaged).</p></li>
+<li><p><strong>n_step</strong> (<em>int</em><em>, </em><em>default=1000</em>) – Maximum number of averaging iterations after burn-in.</p></li>
+<li><p><strong>stepsize</strong> (<em>float</em><em>, </em><em>default=1.0</em>) – Initial AdaGrad step size.</p></li>
+<li><p><strong>bandwidth_y</strong> (<em>float</em><em> or </em><em>str</em><em>, </em><em>default=&quot;auto&quot;</em>) – Bandwidth for the kernel on y. If <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, uses the median heuristic.</p></li>
+<li><p><strong>bandwidth_x</strong> (<em>float</em><em> or </em><em>str</em><em>, </em><em>default=&quot;auto&quot;</em>) – Bandwidth for the kernel on X. If <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, uses the median heuristic.</p></li>
+<li><p><strong>c_det</strong> (<em>float</em><em>, </em><em>default=0.2</em>) – Fraction of n determining the number of deterministic nearest pairs.</p></li>
+<li><p><strong>c_rand</strong> (<em>float</em><em>, </em><em>default=0.1</em>) – Fraction of n determining the number of randomly sampled distant pairs.</p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>default=1e-4</em>) – Initial accumulated squared gradient norm for AdaGrad stability.</p></li>
+<li><p><strong>eps_sq</strong> (<em>float</em><em>, </em><em>default=1e-5</em>) – Convergence threshold; stops when <code class="docutils literal notranslate"><span class="pre">log(avg_grad_norm)</span> <span class="pre">&lt;</span> <span class="pre">log(eps_sq)</span></code>.</p></li>
+<li><p><strong>rng</strong> (<em>np.random.Generator</em><em>, </em><em>default=np.random.default_rng</em><em>(</em><em>10</em><em>)</em>) – Random number generator for sampling distant pairs.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p><strong>res</strong> – Dictionary containing:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">par_v_init</span></code> : initial regression coefficients.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">par_c_init</span></code> : <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stepsize</span></code> : step size used.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bandwidth_y</span></code> : bandwidth used for y.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bandwidth_x</span></code> : bandwidth used for X.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">estimator</span></code> : Polyak-Ruppert cumulative average of iterates.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trajectory</span></code> : cumulative-average trajectory of shape
+<code class="docutils literal notranslate"><span class="pre">(n_features,</span> <span class="pre">n_step_done)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">convergence</span></code> : 0 if converged, 1 if max iterations reached, -1 if NaN.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>MMDResult</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="regmmd.optimizers._gd_gaussian_loc_exact_estimation">
+<span class="sig-prename descclassname"><span class="pre">regmmd.optimizers.</span></span><span class="sig-name descname"><span class="pre">_gd_gaussian_loc_exact_estimation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">burn_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizers.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizers._gd_gaussian_loc_exact_estimation" title="Link to this definition">#</a></dt>
 <dd><p>Estimate the location parameter of a Gaussian model with Gaussian kernel
 using exact MMD gradient descent.</p>
 <p>Computes the exact MMD gradient analytically for a Gaussian location model
@@ -379,8 +592,8 @@ AdaGrad step size at the start of optimization.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="regmmd.optimizer._get_grad_estimate">
-<span class="sig-prename descclassname"><span class="pre">regmmd.optimizer.</span></span><span class="sig-name descname"><span class="pre">_get_grad_estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">set_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K_X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_sampled_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_sampled_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth_y</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizer.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizer._get_grad_estimate" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="regmmd.optimizers._get_grad_estimate">
+<span class="sig-prename descclassname"><span class="pre">regmmd.optimizers.</span></span><span class="sig-name descname"><span class="pre">_get_grad_estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">set_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K_X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_sampled_1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_sampled_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth_y</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizers.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizers._get_grad_estimate" title="Link to this definition">#</a></dt>
 <dd><p>Compute a partial gradient estimate for the hat estimator objective.</p>
 <p>Evaluates the gradient contribution from a specified subset of observation
 pairs <span class="math notranslate nohighlight">\((i, j)\)</span>. When <code class="docutils literal notranslate"><span class="pre">set_1</span></code> and <code class="docutils literal notranslate"><span class="pre">set_2</span></code> are provided, the gradient is
@@ -417,8 +630,8 @@ diagonal <span class="math notranslate nohighlight">\((i = j)\)</span> contribut
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="regmmd.optimizer._median_heuristic">
-<span class="sig-prename descclassname"><span class="pre">regmmd.optimizer.</span></span><span class="sig-name descname"><span class="pre">_median_heuristic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizer.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizer._median_heuristic" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="regmmd.optimizers._median_heuristic">
+<span class="sig-prename descclassname"><span class="pre">regmmd.optimizers.</span></span><span class="sig-name descname"><span class="pre">_median_heuristic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizers.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizers._median_heuristic" title="Link to this definition">#</a></dt>
 <dd><p>Compute the median heuristic for kernel bandwidth selection.</p>
 <p>Estimates the bandwidth as the median of pairwise Euclidean distances divided
 by sqrt(2), a common data-driven heuristic for kernel methods.</p>
@@ -436,8 +649,8 @@ by sqrt(2), a common data-driven heuristic for kernel methods.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="regmmd.optimizer._sgd_estimation">
-<span class="sig-prename descclassname"><span class="pre">regmmd.optimizer.</span></span><span class="sig-name descname"><span class="pre">_sgd_estimation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">burn_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizer.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizer._sgd_estimation" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="regmmd.optimizers._sgd_estimation">
+<span class="sig-prename descclassname"><span class="pre">regmmd.optimizers.</span></span><span class="sig-name descname"><span class="pre">_sgd_estimation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">burn_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizers.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizers._sgd_estimation" title="Link to this definition">#</a></dt>
 <dd><p>Estimate model parameters via AdaGrad stochastic gradient descent on the MMD criterion.</p>
 <p>Minimizes the MMD between the empirical distribution of <code class="docutils literal notranslate"><span class="pre">X</span></code> and the model’s
 distribution using a stochastic gradient algorithm. The optimization runs a
@@ -482,8 +695,8 @@ AdaGrad step size at the start of optimization.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="regmmd.optimizer._sgd_hat_regression">
-<span class="sig-prename descclassname"><span class="pre">regmmd.optimizer.</span></span><span class="sig-name descname"><span class="pre">_sgd_hat_regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Laplace'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">burn_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_det</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_rand</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps_sq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Generator(PCG64)</span> <span class="pre">at</span> <span class="pre">0x7F6E31C6BD80</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizer.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizer._sgd_hat_regression" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="regmmd.optimizers._sgd_hat_regression">
+<span class="sig-prename descclassname"><span class="pre">regmmd.optimizers.</span></span><span class="sig-name descname"><span class="pre">_sgd_hat_regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Laplace'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">burn_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_det</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_rand</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps_sq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Generator(PCG64)</span> <span class="pre">at</span> <span class="pre">0x7F9B3BEE26C0</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizers.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizers._sgd_hat_regression" title="Link to this definition">#</a></dt>
 <dd><p>Fit a regression model using the hat estimator via stochastic gradient descent,
 as described in <cite>Universal Robust Regression via Maximum Mean Discrepancy</cite>, Alquier,
 Gerber (2024).</p>
@@ -552,8 +765,8 @@ log of the average gradient norm falls below <code class="docutils literal notra
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="regmmd.optimizer._sgd_tilde_regression">
-<span class="sig-prename descclassname"><span class="pre">regmmd.optimizer.</span></span><span class="sig-name descname"><span class="pre">_sgd_tilde_regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">burn_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps_sq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizer.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizer._sgd_tilde_regression" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="regmmd.optimizers._sgd_tilde_regression">
+<span class="sig-prename descclassname"><span class="pre">regmmd.optimizers.</span></span><span class="sig-name descname"><span class="pre">_sgd_tilde_regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">burn_in</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps_sq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizers.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizers._sgd_tilde_regression" title="Link to this definition">#</a></dt>
 <dd><p>Fit a regression model using the tilde estimator via stochastic gradient descent,
 as described in <cite>Universal Robust Regression via Maximum Mean Discrepancy</cite>, Alquier and
 Gerber (2024).</p>
@@ -609,8 +822,8 @@ log of the average gradient norm falls below <code class="docutils literal notra
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="regmmd.optimizer.sort_obs">
-<span class="sig-prename descclassname"><span class="pre">regmmd.optimizer.</span></span><span class="sig-name descname"><span class="pre">sort_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizer.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizer.sort_obs" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="regmmd.optimizers.sort_obs">
+<span class="sig-prename descclassname"><span class="pre">regmmd.optimizers.</span></span><span class="sig-name descname"><span class="pre">sort_obs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/optimizers.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.optimizers.sort_obs" title="Link to this definition">#</a></dt>
 <dd><p>Sort all pairs of observations by their pairwise Euclidean distance.</p>
 <p>Computes pairwise distances between all rows of <span class="math notranslate nohighlight">\(X\)</span> and returns the
 upper-triangular index pairs and corresponding distances, sorted from
@@ -676,13 +889,17 @@ sorted in ascending order.</p></li>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizer._gd_gaussian_loc_exact_estimation"><code class="docutils literal notranslate"><span class="pre">_gd_gaussian_loc_exact_estimation()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizer._get_grad_estimate"><code class="docutils literal notranslate"><span class="pre">_get_grad_estimate()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizer._median_heuristic"><code class="docutils literal notranslate"><span class="pre">_median_heuristic()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizer._sgd_estimation"><code class="docutils literal notranslate"><span class="pre">_sgd_estimation()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizer._sgd_hat_regression"><code class="docutils literal notranslate"><span class="pre">_sgd_hat_regression()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizer._sgd_tilde_regression"><code class="docutils literal notranslate"><span class="pre">_sgd_tilde_regression()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizer.sort_obs"><code class="docutils literal notranslate"><span class="pre">sort_obs()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizers._gd_backtracking_lg_loc_tilde_regression"><code class="docutils literal notranslate"><span class="pre">_gd_backtracking_lg_loc_tilde_regression()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizers._gd_backtracking_lg_tilde_regression"><code class="docutils literal notranslate"><span class="pre">_gd_backtracking_lg_tilde_regression()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizers._gd_backtracking_logistic_tilde_regression"><code class="docutils literal notranslate"><span class="pre">_gd_backtracking_logistic_tilde_regression()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizers._gd_exact_logistic_hat_regression"><code class="docutils literal notranslate"><span class="pre">_gd_exact_logistic_hat_regression()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizers._gd_gaussian_loc_exact_estimation"><code class="docutils literal notranslate"><span class="pre">_gd_gaussian_loc_exact_estimation()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizers._get_grad_estimate"><code class="docutils literal notranslate"><span class="pre">_get_grad_estimate()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizers._median_heuristic"><code class="docutils literal notranslate"><span class="pre">_median_heuristic()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizers._sgd_estimation"><code class="docutils literal notranslate"><span class="pre">_sgd_estimation()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizers._sgd_hat_regression"><code class="docutils literal notranslate"><span class="pre">_sgd_hat_regression()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizers._sgd_tilde_regression"><code class="docutils literal notranslate"><span class="pre">_sgd_tilde_regression()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.optimizers.sort_obs"><code class="docutils literal notranslate"><span class="pre">sort_obs()</span></code></a></li>
 </ul>
   </nav></div>
 

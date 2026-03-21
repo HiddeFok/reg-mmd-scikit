@@ -31,8 +31,7 @@ The robustness also translates to the regression procedure
    ...     bandwidth_y=0.5,
    ...     kernel_X="Laplace",
    ...     kernel_y="Laplace",
-   ...     solver={"type": "SGD",
-   ...             "burnin": 500,
+   ...     solver={"burnin": 500,
    ...             "n_step": 10000,
    ...             "stepsize": 1, 
    ...             "epsilon": 1e-8

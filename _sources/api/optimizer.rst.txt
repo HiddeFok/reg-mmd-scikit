@@ -1,7 +1,7 @@
 Optimizer functions
 ===================
 
-.. automodule:: regmmd.optimizer
+.. automodule:: regmmd.optimizers
    :members:
    :private-members:
    :undoc-members:
