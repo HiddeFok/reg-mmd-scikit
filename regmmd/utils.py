@@ -1,4 +1,17 @@
-from regmmd.optimizer import MMDResult
+from typing import TypedDict, Optional
+from numpy.typing import NDArray
+
+
+class MMDResult(TypedDict):
+    par_v_init: NDArray
+    par_c_init: NDArray
+    stepsize: float
+    estimator: NDArray
+    trajectory: NDArray
+    bandwidth: Optional[float]  # Optional if not always present
+    bandwidth_x: Optional[float]  # Optional if not always present
+    bandwidth_y: Optional[float]  # Optional if not always present
+    convergence: int  # 0 = converged, 1 = max iterations reached, -1 = NaN/failure
 
 
 def print_summary(res: MMDResult) -> None:

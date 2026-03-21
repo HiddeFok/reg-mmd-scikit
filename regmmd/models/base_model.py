@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
+from typing import Dict, Union
 
-import numpy as np
 from numpy.typing import NDArray
+from regmmd.utils import MMDResult
 
 
 class EstimationModel(ABC):
@@ -70,6 +71,23 @@ class EstimationModel(ABC):
         par_v : float, variable parameters
         """
 
+    def _exact_fit(
+        self,
+        X: NDArray,
+        par_v: float,
+        par_c: float,
+        solver: Dict,
+        kernel: str,
+        bandwidth: Union[float, str],
+    ) -> None | MMDResult:
+        """Possible exact gradient descent optimization.
+
+        Override in subclasses where a closed-form gradient exists for
+        a specific kernel. Returns an MMDResult dict when an exact method
+        is available, or None to fall back to SGD.
+        """
+        return None
+
 
 class RegressionModel(EstimationModel):
     @abstractmethod
@@ -101,3 +119,23 @@ class RegressionModel(EstimationModel):
         Parameters
         ----------
         """
+
+    def _exact_fit(
+        self,
+        X: NDArray,
+        y: NDArray,
+        par_v: NDArray,
+        par_c: Union[float, None],
+        solver: Dict,
+        kernel_y: str,
+        bandwidth_y: Union[float, str],
+        kernel_X: str,
+        bandwidth_X: Union[float, str],
+    ) -> None | MMDResult:
+        """Possible exact gradient descent optimization for regression.
+
+        Override in subclasses where a closed-form gradient exists for
+        a specific kernel. Returns an MMDResult dict when an exact method
+        is available, or None to fall back to SGD.
+        """
+        return None

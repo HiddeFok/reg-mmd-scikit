@@ -1,48 +1,13 @@
-from typing import Optional, TypedDict, Union
+from typing import Union
 
 import numpy as np
 from numpy.typing import NDArray
-from scipy.spatial.distance import pdist
 
 from regmmd.kernels import K1d, K1d_dist
 from regmmd.models.base_model import EstimationModel, RegressionModel
+from regmmd.utils import MMDResult
 
-
-class MMDResult(TypedDict):
-    par_v_init: NDArray
-    par_c_init: NDArray
-    stepsize: float
-    estimator: NDArray
-    trajectory: NDArray
-    bandwidth: Optional[float]  # Optional if not always present
-    bandwidth_x: Optional[float]  # Optional if not always present
-    bandwidth_y: Optional[float]  # Optional if not always present
-
-
-def _median_heuristic(X: NDArray) -> float:
-    """Compute the median heuristic for kernel bandwidth selection.
-
-    Estimates the bandwidth as the median of pairwise Euclidean distances divided
-    by sqrt(2), a common data-driven heuristic for kernel methods.
-
-    Parameters
-    ----------
-    X : np.array, shape (n_samples,) or (n_samples, n_features)
-        Input data.
-
-    Returns
-    -------
-    median_dist : float
-        Estimated bandwidth. Returns 1 if fewer than two samples are provided.
-    """
-    if len(X.shape) == 1:
-        X = X[:, np.newaxis]
-    pairwise_dists = pdist(X, metric="euclidean")
-    if len(pairwise_dists) > 0:
-        median_dist = np.median(pairwise_dists) / np.sqrt(2)
-    else:
-        median_dist = 1
-    return median_dist
+from regmmd.optimizers._common import _median_heuristic, sort_obs, _get_grad_estimate
 
 
 def _sgd_estimation(
@@ -124,6 +89,7 @@ def _sgd_estimation(
         "par_c_init": np.copy(par_c),
         "stepsize": stepsize,
         "bandwidth": bandwidth,
+        "convergence": 1,
     }
     if len(par_v.shape) == 0:
         trajectory = np.zeros(shape=(1, burn_in + n_step + 1))
@@ -184,106 +150,6 @@ def _sgd_estimation(
 
     return res
 
-
-def _gd_gaussian_loc_exact_estimation(
-    X: NDArray,
-    par_v: float,
-    par_c: float,
-    burn_in: int = 500,
-    n_step: int = 1000,
-    stepsize: float = 1.0,
-    bandwidth: float = 1.0,
-    epsilon: float = 1e-4,
-) -> MMDResult:
-    """Estimate the location parameter of a Gaussian model with Gaussian kernel
-    using exact MMD gradient descent.
-
-    Computes the exact MMD gradient analytically for a Gaussian location model
-    with known scale parameter ``par_c`` and a Gaussian Kernel, avoiding Monte
-    Carlo sampling. Uses AdaGrad updates with a burn-in phase followed by
-    Polyak-Ruppert averaging.
-
-    Parameters
-    ----------
-    X : np.array, shape (n_samples,)
-        Univariate observed data.
-
-    par_v : float
-        Initial value of the location parameter (mean) to be estimated.
-
-    par_c : float
-        Known scale parameter (standard deviation) of the Gaussian model.
-
-    burn_in : int, default=500
-        Number of burn-in iterations during which parameter iterates are not
-        averaged.
-
-    n_step : int, default=1000
-        Number of averaging iterations following the burn-in phase.
-
-    stepsize : float, default=1.0
-        Initial step size for the AdaGrad update.
-
-    bandwidth : float or str, default=1.0
-        Bandwidth parameter for the Gaussian kernel. If ``"auto"``, the
-        bandwidth is selected using the median heuristic.
-
-    epsilon : float, default=1e-4
-        Initial accumulated squared gradient norm, used to stabilize the
-        AdaGrad step size at the start of optimization.
-
-    Returns
-    -------
-    res : MMDResult
-        Dictionary containing:
-
-        - ``par_v_init`` : initial location parameter.
-        - ``par_c_init`` : initial scale parameter.
-        - ``stepsize`` : step size used.
-        - ``bandwidth`` : bandwidth used (resolved if ``"auto"``).
-        - ``estimator`` : Polyak-Ruppert average of location parameter iterates.
-        - ``trajectory`` : parameter trajectory of shape ``(burn_in + n_step + 1,)``.
-    """
-    if bandwidth == "auto":
-        bandwidth = _median_heuristic(X)
-
-    norm_grad = epsilon
-
-    res = {
-        "par_v_init": np.copy(par_v),
-        "par_c_init": np.copy(par_c),
-        "stepsize": stepsize,
-        "bandwidth": bandwidth,
-    }
-
-    trajectory = np.zeros(shape=(burn_in + n_step + 1,))
-    trajectory[0] = par_v
-
-    Z = -4 / np.sqrt(1 + 2 * (par_c**2) / (bandwidth**2))
-    denom = 2 * (par_c**2) + bandwidth**2
-    for i in range(burn_in):
-        diff = X - par_v
-        grad = Z * np.mean(diff * np.exp(-np.square(diff) / denom))
-        norm_grad += grad**2
-        par_v -= stepsize * grad / np.sqrt(norm_grad)
-        trajectory[i + 1] = par_v
-
-    par_mean = par_v
-    Z = -4 / np.sqrt(1 + 2 * (par_c**2) / (bandwidth**2))
-    for i in range(n_step):
-        diff = X - par_v
-        grad = Z * np.mean(diff * np.exp(-np.square(diff) / denom))
-        norm_grad += grad**2
-        par_v -= stepsize * grad / np.sqrt(norm_grad)
-        par_mean = (par_mean * (i + 1) + par_v) / (i + 2)
-        trajectory[i + burn_in + 1] = par_mean
-
-    res["estimator"] = par_mean
-    res["trajectory"] = trajectory
-
-    return res
-
-
 def _sgd_hat_regression(
     X: NDArray,
     y: NDArray,
@@ -303,8 +169,8 @@ def _sgd_hat_regression(
     eps_sq: float = 1e-5,
     rng: np.random.Generator = np.random.default_rng(10),
 ) -> MMDResult:
-    """Fit a regression model using the hat estimator via stochastic gradient descent, 
-    as described in `Universal Robust Regression via Maximum Mean Discrepancy`, Alquier, 
+    """Fit a regression model using the hat estimator via stochastic gradient descent,
+    as described in `Universal Robust Regression via Maximum Mean Discrepancy`, Alquier,
     Gerber (2024).
 
     Minimizes the MMD objective using the product kernel :math:`k = k_X \\otimes k_Y`.
@@ -413,6 +279,7 @@ def _sgd_hat_regression(
         "stepsize": stepsize,
         "bandwidth_y": bandwidth_y,
         "bandwidth_x": bandwidth_x,
+        "convergence": 1,
     }
     trajectory = np.zeros(shape=(*par_v.shape, n_step + 1))
     trajectory[:, 0] = par_v
@@ -557,8 +424,13 @@ def _sgd_hat_regression(
         # only for gaussian par[1] = max(par[1], 1 / (n ** 2))
         trajectory[:, i + 1] = par_v
 
+        if np.isnan(np.mean(grad_all)):
+            res["convergence"] = -1
+            break
+
         g_1 = np.sqrt(np.sum(np.square(grad_all / (burn_in + i + 1)))) / par_v.shape
         if np.log(g_1) < log_eps:
+            res["convergence"] = 0
             break
 
     n_step_done = int(i + 1)
@@ -585,7 +457,7 @@ def _sgd_tilde_regression(
     eps_sq: float = 1e-5,
 ) -> MMDResult:
     """Fit a regression model using the tilde estimator via stochastic gradient descent,
-    as described in `Universal Robust Regression via Maximum Mean Discrepancy`, Alquier and 
+    as described in `Universal Robust Regression via Maximum Mean Discrepancy`, Alquier and
     Gerber (2024).
 
     Minimizes the MMD objective using only the kernel :math:`k_Y` on the target
@@ -667,6 +539,7 @@ def _sgd_tilde_regression(
         "par_c_init": np.copy(par_c),
         "stepsize": stepsize,
         "bandwidth": bandwidth,
+        "convergence": 1,
     }
     trajectory = np.zeros(shape=(*par_v.shape, n_step + 1))
     trajectory[:, 0] = par_v
@@ -721,8 +594,13 @@ def _sgd_tilde_regression(
         # only for gaussian par[1] = max(par[1], 1 / (n ** 2))
         trajectory[:, i + 1] = par_v
 
+        if np.isnan(np.mean(grad_all)):
+            res["convergence"] = -1
+            break
+
         g_1 = np.sqrt(np.sum(np.square(grad_all / (burn_in + i + 1)))) / par_v.shape
         if np.log(g_1) < log_eps:
+            res["convergence"] = 0
             break
 
     n_step_done = int(i + 1)
@@ -732,125 +610,3 @@ def _sgd_tilde_regression(
     res["trajectory"] = trajectory
 
     return res
-
-
-def sort_obs(X: NDArray) -> NDArray:
-    """Sort all pairs of observations by their pairwise Euclidean distance.
-
-    Computes pairwise distances between all rows of :math:`X` and returns the
-    upper-triangular index pairs and corresponding distances, sorted from
-    closest to most distant. Used to efficiently select the nearest pairs
-    in the hat estimator gradient computation.
-
-    Parameters
-    ----------
-    X : np.array, shape (n_samples, n_features)
-        Input data whose rows are the observations to be paired.
-
-    Returns
-    -------
-    result : dict
-        Dictionary with two keys:
-
-        - ``"DIST"`` : np.array of shape ``(n*(n-1)//2,)``, pairwise distances
-          sorted in ascending order.
-        - ``"IND"`` : np.array of shape ``(n*(n-1)//2, 2)``, row index pairs
-          ``(i, j)`` with ``i < j`` corresponding to each distance in ``"DIST"``.
-    """
-    n = X.shape[0]
-    dists = pdist(X, metric="euclidean")
-    indices = np.triu_indices(n, k=1)
-    indices = np.column_stack(indices)
-    J = np.argsort(dists, axis=0)
-    return {"DIST": dists[J], "IND": indices[J, :]}
-
-
-def _get_grad_estimate(
-    set_1: NDArray[np.int32],
-    set_2: NDArray[np.int32],
-    X: NDArray,
-    K_X: NDArray,
-    y_sampled_1: NDArray,
-    y_sampled_2: NDArray,
-    y: NDArray,
-    model,
-    kernel_y,
-    bandwidth_y,
-) -> NDArray:
-    """Compute a partial gradient estimate for the hat estimator objective.
-
-    Evaluates the gradient contribution from a specified subset of observation
-    pairs :math:`(i, j)`. When ``set_1`` and ``set_2`` are provided, the gradient is
-    weighted by the covariate kernel :math:`k_X` evaluated at those pairs. When both
-    are ``None``, the diagonal term :math:`(i = j)` is computed without covariate
-    kernel weighting.
-
-    Parameters
-    ----------
-    set_1 : np.array[np.int32] or None
-        Row indices of the first element of each pair. If ``None``, the
-        diagonal :math:`(i = j)` contribution is computed.
-
-    set_2 : np.array[np.int32] or None
-        Row indices of the second element of each pair. If ``None``, the
-        diagonal :math:`(i = j)` contribution is computed.
-
-    X : np.array, shape (n_samples, n_features)
-        Training input samples.
-
-    K_X : np.array or None
-        Precomputed covariate kernel values for the pairs defined by
-        ``set_1`` and ``set_2``. Ignored when ``set_1`` is ``None``.
-
-    y_sampled_1 : np.array, shape (n_samples,)
-        First set of samples drawn from the model's conditional distribution.
-
-    y_sampled_2 : np.array, shape (n_samples,)
-        Second set of samples drawn from the model's conditional distribution.
-
-    y : np.array, shape (n_samples,)
-        Observed target values.
-
-    model : RegressionModel
-        The regression model. Must implement ``score``.
-
-    kernel_y : str
-        Kernel type applied to the target variable ``y``.
-
-    bandwidth_y : float
-        Bandwidth for the kernel applied to ``y``.
-
-    Returns
-    -------
-    grad_estimate : np.array
-        Gradient estimate contributions from the specified pairs. Shape is
-        ``(n_params,)`` when ``set_1`` is ``None`` (diagonal term), or
-        ``(len(set_1), n_params)`` for off-diagonal pairs.
-    """
-    if set_1 is not None and set_2 is not None:
-        ker_sampled_1 = K1d_dist(
-            y_sampled_1[set_1] - y_sampled_2[set_2],
-            kernel=kernel_y,
-            bandwidth=bandwidth_y,
-        )
-        ker_sampled_2 = K1d_dist(
-            y_sampled_1[set_1] - y[set_2], kernel=kernel_y, bandwidth=bandwidth_y
-        )
-        ker = ker_sampled_1 - ker_sampled_2
-        ker = K_X * ker
-
-        grad_ll = model.score(X[set_1, :], y_sampled_1[set_1])
-        grad_estimate = np.mean(ker @ grad_ll, axis=0)
-    else:
-        ker_sampled_1 = K1d_dist(
-            y_sampled_1 - y_sampled_2, kernel=kernel_y, bandwidth=bandwidth_y
-        )
-        ker_sampled_2 = K1d_dist(
-            y_sampled_1 - y, kernel=kernel_y, bandwidth=bandwidth_y
-        )
-        ker = ker_sampled_1 - ker_sampled_2
-
-        grad_ll = model.score(X, y_sampled_1)
-        grad_estimate = ker @ grad_ll
-
-    return grad_estimate

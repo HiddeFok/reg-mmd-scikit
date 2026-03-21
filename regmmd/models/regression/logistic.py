@@ -75,3 +75,49 @@ class Logistic(LogisticBase):
         par_v = self.beta
         par_c = None
         return par_v, par_c
+
+    def _exact_fit(
+        self,
+        X,
+        y,
+        par_v,
+        par_c,
+        solver,
+        kernel_y,
+        bandwidth_y,
+        kernel_X=None,
+        bandwidth_X=None,
+    ):
+        if bandwidth_X is None or bandwidth_X == 0:
+            from regmmd.optimizers import _gd_backtracking_logistic_tilde_regression
+
+            return _gd_backtracking_logistic_tilde_regression(
+                X=X,
+                y=y,
+                par_v=par_v,
+                n_step=solver["n_step"],
+                stepsize=solver["stepsize"],
+                bandwidth=bandwidth_y,
+                kernel=kernel_y,
+                alpha=solver.get("alpha", 0.8),
+                eps_gd=solver.get("eps_gd", 1e-5),
+            )
+        else:
+            from regmmd.optimizers import _gd_exact_logistic_hat_regression
+
+            return _gd_exact_logistic_hat_regression(
+                X=X,
+                y=y,
+                par_v=par_v,
+                kernel=kernel_y,
+                kernel_x=kernel_X,
+                burn_in=solver.get("burnin", 500),
+                n_step=solver["n_step"],
+                stepsize=solver["stepsize"],
+                bandwidth_y=bandwidth_y,
+                bandwidth_x=bandwidth_X,
+                c_det=solver.get("c_det", 0.2),
+                c_rand=solver.get("c_rand", 0.1),
+                epsilon=solver.get("epsilon", 1e-4),
+                eps_sq=solver.get("eps_sq", 1e-5),
+            )

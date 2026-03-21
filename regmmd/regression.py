@@ -13,7 +13,8 @@ from regmmd.models import (
     PoissonRegression,
 )
 from regmmd.models.base_model import RegressionModel
-from regmmd.optimizer import _sgd_hat_regression, _sgd_tilde_regression, MMDResult
+from regmmd.optimizers import _sgd_hat_regression, _sgd_tilde_regression
+from regmmd.utils import MMDResult
 
 from sklearn.utils.validation import check_X_y, check_array
 
@@ -123,8 +124,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
 
     solver : dict, optional
         A dictionary specifying the solver parameters for the optimization process.
-        It should include keys such as "type" (e.g., "SGD" for Stochastic Gradient
-        Descent), "burnin" (number of burn-in iterations), "n_step" (number of
+        It should include keys such as "burnin" (number of burn-in iterations), "n_step" (number of
         optimization steps), and "stepsize" (learning rate for the optimizer).
         If `None`, default solver settings are used.
 
@@ -220,16 +220,32 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
             )
             self.X_offset = X_offset
             self.X_scale = X_scale
-        
-        if self.fit_intercept and self.model.beta is not None and len(self.model.beta) == n_features:
-            par_v = np.insert(self.par_v, n_features, 1)
-            self.model.update(par_v)
+
+        if (
+            self.fit_intercept
+            and self.model.beta is not None
+            and len(self.model.beta) == n_features
+        ):
+            self.par_v = np.insert(self.par_v, n_features, 1)
+            self.model.update(self.par_v)
+            print("model.beta", self.model.beta)
 
         if self.par_v is None or self.par_c is None:
             self.par_v, self.par_c = self.model._init_params(X=X, y=y)
 
-        if self.bandwidth_X == 0:
-            if self.solver["type"] == "SGD":
+        res = self.model._exact_fit(
+            X=X,
+            y=y,
+            par_v=self.par_v,
+            par_c=self.par_c,
+            solver=self.solver,
+            kernel_y=self.kernel_y,
+            bandwidth_y=self.bandwidth_y,
+            kernel_X=self.kernel_X,
+            bandwidth_X=self.bandwidth_X,
+        )
+        if res is None:
+            if self.bandwidth_X == 0:
                 res = _sgd_tilde_regression(
                     X=X,
                     y=y,
@@ -242,8 +258,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                     stepsize=self.solver["stepsize"],
                     bandwidth=self.bandwidth_y,
                 )
-        else:
-            if self.solver["type"] == "SGD":
+            else:
                 res = _sgd_hat_regression(
                     X=X,
                     y=y,
@@ -258,6 +273,8 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                     bandwidth_y=self.bandwidth_y,
                     bandwidth_x=self.bandwidth_X,
                 )
+
+        print("after model", self.model.beta)
 
         if not isinstance(self.model, Logistic):
             self.beta_ = res["estimator"][:n_features] / self.X_scale

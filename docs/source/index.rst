@@ -67,6 +67,7 @@ the actual optimisation, which is done automatically by the package.
    :caption: Contents:
 
    example/index
+   optimization/index
    robustness/index
    api/index
 

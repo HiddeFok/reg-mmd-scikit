@@ -32,7 +32,6 @@ def main():
         bandwidth_y=1,
         kernel_y="Gaussian",
         solver={
-            "type": "SGD",
             "burnin": 500,
             "n_step": 1000,
             "stepsize": 1,
@@ -76,7 +75,6 @@ def main():
         kernel_y="Gaussian",
         kernel_X="Laplace",
         solver={
-            "type": "SGD",
             "burnin": 500,
             "n_step": 1000,
             "stepsize": 1,

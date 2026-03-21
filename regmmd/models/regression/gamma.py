@@ -72,7 +72,7 @@ class GammaRegressionBase(RegressionModel):
     def _beta_grad(self, X: NDArray, y: NDArray) -> NDArray:
         mu_given_x = self.predict(X)
 
-        residuals = (-self.shape + self.shape * y / mu_given_x) / mu_given_x
+        residuals = self.shape * (y / mu_given_x - 1)
         return X * (residuals[:, np.newaxis])
 
 

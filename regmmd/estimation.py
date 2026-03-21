@@ -17,7 +17,8 @@ from regmmd.models import (
     Poisson,
 )
 from regmmd.models.base_model import EstimationModel
-from regmmd.optimizer import _gd_gaussian_loc_exact_estimation, _sgd_estimation, MMDResult
+from regmmd.optimizers import _sgd_estimation
+from regmmd.utils import MMDResult
 
 
 class DefinedModels(Enum):
@@ -149,18 +150,15 @@ class MMDEstimator(BaseEstimator):
             self.par_v = pars[0]
             self.par_c = pars[1]
 
-        if isinstance(self.model, GaussianLoc) and self.kernel == "Gaussian":
-            res = _gd_gaussian_loc_exact_estimation(
-                X=X,
-                par_v=self.par_v,
-                par_c=self.par_c,
-                burn_in=self.solver["burnin"],
-                n_step=self.solver["n_step"],
-                stepsize=self.solver["stepsize"],
-                bandwidth=self.bandwidth,
-                epsilon=self.solver["epsilon"],
-            )
-        else:
+        res = self.model._exact_fit(
+            X=X,
+            par_v=self.par_v,
+            par_c=self.par_c,
+            solver=self.solver,
+            kernel=self.kernel,
+            bandwidth=self.bandwidth,
+        )
+        if res is None:
             res = _sgd_estimation(
                 X=X,
                 par_v=self.par_v,

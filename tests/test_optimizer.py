@@ -1,13 +1,13 @@
 import numpy as np
 import pytest
 
-from regmmd.optimizer import (
+from regmmd.optimizers import (
     _median_heuristic,
     _sgd_estimation,
     _gd_gaussian_loc_exact_estimation,
     sort_obs,
-    MMDResult,
 )
+from regmmd.utils import MMDResult
 from regmmd.models import GaussianLoc, Gaussian
 
 RNG = np.random.default_rng(42)
