@@ -17,7 +17,7 @@ from regmmd.models import (
     Poisson,
 )
 from regmmd.models.base_model import EstimationModel
-from regmmd.optimizer import _sgd_estimation
+from regmmd.optimizers import _sgd_estimation
 from regmmd.utils import MMDResult
 
 

@@ -113,7 +113,7 @@ class LinearGaussian(LinearGaussianBase):
         bandwidth_X=None,
     ):
         if kernel_y == "Gaussian" and (bandwidth_X is None or bandwidth_X == 0):
-            from regmmd.optimizer import _gd_backtracking_lg_tilde_regression
+            from regmmd.optimizers import _gd_backtracking_lg_tilde_regression
 
             return _gd_backtracking_lg_tilde_regression(
                 X=X,
@@ -166,7 +166,7 @@ class LinearGaussianLoc(LinearGaussianBase):
         bandwidth_X=None,
     ):
         if kernel_y == "Gaussian" and (bandwidth_X is None or bandwidth_X == 0):
-            from regmmd.optimizer import _gd_backtracking_lg_loc_tilde_regression
+            from regmmd.optimizers import _gd_backtracking_lg_loc_tilde_regression
 
             return _gd_backtracking_lg_loc_tilde_regression(
                 X=X,

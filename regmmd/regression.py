@@ -13,7 +13,7 @@ from regmmd.models import (
     PoissonRegression,
 )
 from regmmd.models.base_model import RegressionModel
-from regmmd.optimizer import _sgd_hat_regression, _sgd_tilde_regression
+from regmmd.optimizers import _sgd_hat_regression, _sgd_tilde_regression
 from regmmd.utils import MMDResult
 
 from sklearn.utils.validation import check_X_y, check_array

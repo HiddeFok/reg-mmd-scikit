@@ -89,7 +89,7 @@ class Logistic(LogisticBase):
         bandwidth_X=None,
     ):
         if bandwidth_X is None or bandwidth_X == 0:
-            from regmmd.optimizer import _gd_backtracking_logistic_tilde_regression
+            from regmmd.optimizers import _gd_backtracking_logistic_tilde_regression
 
             return _gd_backtracking_logistic_tilde_regression(
                 X=X,
@@ -103,7 +103,7 @@ class Logistic(LogisticBase):
                 eps_gd=solver.get("eps_gd", 1e-5),
             )
         else:
-            from regmmd.optimizer import _sgd_exact_logistic_hat_regression
+            from regmmd.optimizers import _sgd_exact_logistic_hat_regression
 
             return _sgd_exact_logistic_hat_regression(
                 X=X,
