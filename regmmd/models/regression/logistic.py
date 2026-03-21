@@ -103,9 +103,9 @@ class Logistic(LogisticBase):
                 eps_gd=solver.get("eps_gd", 1e-5),
             )
         else:
-            from regmmd.optimizers import _sgd_exact_logistic_hat_regression
+            from regmmd.optimizers import _gd_exact_logistic_hat_regression
 
-            return _sgd_exact_logistic_hat_regression(
+            return _gd_exact_logistic_hat_regression(
                 X=X,
                 y=y,
                 par_v=par_v,

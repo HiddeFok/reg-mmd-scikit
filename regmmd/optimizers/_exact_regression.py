@@ -163,18 +163,6 @@ def _gd_backtracking_lg_tilde_regression(
     are optimized jointly. The variance is reparametrized as ``log(phi)`` for
     unconstrained optimization.
 
-    The tilde MMD objective with a Gaussian kernel and Y | X ~ N(X @ beta, phi):
-
-    .. math::
-        f(\\beta, \\phi) =
-            \\frac{1}{\\sqrt{h^2 + 4\\phi}}
-            - \\frac{2}{\\sqrt{2\\phi + h^2}}
-              \\frac{1}{n}\\sum_i \\exp\\!\\left(
-                -\\frac{(y_i - X_i^\\top\\beta)^2}{2\\phi + h^2}
-              \\right)
-
-    where the first term is :math:`E[k(Y_1,Y_2)]` and the second is
-    :math:`E[k(Y,y_i)]`, both evaluated analytically.
 
     Parameters
     ----------
@@ -332,21 +320,10 @@ def _gd_backtracking_logistic_tilde_regression(
     backtracking line search on the tilde MMD criterion.
 
     Computes the exact tilde MMD gradient analytically for a logistic model,
-    avoiding Monte Carlo sampling entirely. Since Y | X ~ Bernoulli(p) with
-    p = sigmoid(X @ beta), the expectations E[k(Y1, Y2)] and E[k(Y1, y_i)]
-    reduce to closed-form expressions in p_i, enabling deterministic gradient
+    avoiding Monte Carlo sampling entirely. Since :math:`Y | X \\sim \\text{Bernoulli}(p)` with
+    :math:`p = \\text{sigmoid}(X^{\\top}\\beta)`, the expectations involving :math:`Y`
+    reduce to closed-form expressions in :math:`p_i`, enabling deterministic gradient
     descent with backtracking.
-
-    The tilde MMD objective for observation i:
-
-    .. math::
-        f_i(\\beta) = (p_i^2 + (1-p_i)^2)k_{00}
-                     + 2p_i(1-p_i)k_{01}
-                     - 2p_i k(1-y_i)
-                     - 2(1-p_i) k(-y_i)
-
-    where :math:`k_{00} = k(0)`, :math:`k_{01} = k(1)` are kernel constants
-    and :math:`p_i = \\sigma(x_i^\\top \\beta)`.
 
     Parameters
     ----------
@@ -474,7 +451,7 @@ def _gd_backtracking_logistic_tilde_regression(
     return res
 
 
-def _sgd_exact_logistic_hat_regression(
+def _gd_exact_logistic_hat_regression(
     X: NDArray,
     y: NDArray,
     par_v: NDArray,
@@ -498,24 +475,9 @@ def _sgd_exact_logistic_hat_regression(
 
     Replaces the Monte Carlo Y-sampling in :func:`_sgd_hat_regression` with
     closed-form gradient expressions for the logistic model. Since
-    Y | X ~ Bernoulli(p) with p = sigmoid(X @ beta), the expectations
-    E[k_Y(Y_i, Y_j)] and E[k_Y(Y_i, y_i)] reduce to simple functions of p_i
-    and p_j, so the gradient is computed analytically for each pair (i, j).
-
-    The gradient is split into three parts that mirror :func:`_sgd_hat_regression`:
-
-    - **Diagonal** (i = j): reduces to the tilde gradient at each observation.
-    - **Deterministic off-diagonal**: the M_det nearest covariate pairs.
-    - **Stochastic off-diagonal**: M_rand randomly sampled distant pairs.
-
-    For off-diagonal pair (i, j) the analytical gradient contribution is::
-
-        A = k00 * ((2*p_j - 1)*dp_i + (2*p_i - 1)*dp_j)
-        B = k01 * ((1 - 2*p_j)*dp_i + (1 - 2*p_i)*dp_j)
-        C = 2 * (k0y_i - k1y_i) * dp_i
-
-    where ``dp_i = p_i*(1-p_i)*x_i``, ``k00 = k(0)``, ``k01 = k(1)``,
-    ``k0y_i = k(0 - y_i)``, ``k1y_i = k(1 - y_i)``.
+    :math:`Y | X \\sim \\text{Bernoulli}(p)` with :math:`p = \\text{sigmoid}(X^{\\top} \\beta)`, the expectations
+    :math:`\\mathbb{E}[k_Y(Y_i, Y_j)]` and :math:`\\mathbb{E}[k_Y(Y_i, y_i)]` reduce to simple functions of :math:`p_i`
+    and :math:`p_j`, so the gradient is computed analytically for each pair :math:`(i, j)`.
 
     Parameters
     ----------

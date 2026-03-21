@@ -55,6 +55,17 @@ Alternatively, The following command clones the package and install it in one go
 uv add git+https://github.com/HiddeFok/reg-mmd-scikit
 ```
 
+## Optimization
+
+The optimizer uses exact analytical gradient methods wherever possible, and
+falls back to a general stochastic gradient descent (SGD) method otherwise.
+Each model can define an `_exact_fit()` method that computes closed-form
+gradients for its specific combination of model and kernel. When an exact
+method is not available (or the model/kernel combination is not supported),
+the optimizer automatically falls back to the general-purpose SGD solver which
+works with any model. For a detailed overview, see the
+[documentation](https://hiddefok.github.io/reg-mmd-scikit/).
+
 ## Examples
 
 The package has 2 main classes, `MMDEstimator` and `MMDRegressor` that

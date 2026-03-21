@@ -15,7 +15,7 @@ from regmmd.optimizers._exact_regression import (
     _gd_backtracking_lg_loc_tilde_regression,
     _gd_backtracking_lg_tilde_regression,
     _gd_backtracking_logistic_tilde_regression,
-    _sgd_exact_logistic_hat_regression,
+    _gd_exact_logistic_hat_regression,
 )
 
 __all__ = [
@@ -29,5 +29,5 @@ __all__ = [
     "_gd_backtracking_lg_loc_tilde_regression",
     "_gd_backtracking_lg_tilde_regression",
     "_gd_backtracking_logistic_tilde_regression",
-    "_sgd_exact_logistic_hat_regression",
+    "_gd_exact_logistic_hat_regression",
 ]
