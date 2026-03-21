@@ -42,9 +42,10 @@ SGD fallback
 
 The general SGD solver works with **any** model and kernel combination.  It
 approximates the MMD gradient by sampling from the model at each iteration and
-uses AdaGrad with Polyak-Ruppert averaging for stable convergence.
+uses the ``model.score()`` methods to calculate the gradients.
 
-For the regression setting, two SGD variants are available:
+For the regression setting, two SGD variants are available, as described in
+section 3.2 of `Universal robust regression via maximum mean discrepancy <https://academic.oup.com/biomet/article/111/1/71/7159184>`_:
 
 - **Tilde estimator** (``_sgd_tilde_regression``): uses only a kernel on
   :math:`Y`.  This is selected when no covariate kernel is specified
@@ -71,7 +72,7 @@ Estimation
      - Method
    * - ``GaussianLoc``
      - Gaussian
-     - Exact gradient descent with AdaGrad + Polyak-Ruppert averaging
+     - Exact gradient descent
 
 All other estimation models (``GaussianScale``, ``Gaussian``, ``Beta``,
 ``Poisson``, ``Gamma``, etc.) use the general SGD solver.
@@ -94,7 +95,7 @@ Regression
    * - ``LinearGaussian``
      - Gaussian
      - Tilde
-     - Exact GD with backtracking line search (joint optimisation of coefficients and variance)
+     - Exact GD with backtracking line search
    * - ``Logistic``
      - Any
      - Tilde
@@ -102,7 +103,7 @@ Regression
    * - ``Logistic``
      - Any
      - Hat
-     - Exact AdaGrad (analytical gradients over :math:`Y \in \{0, 1\}`)
+     - Exact gradients of the expectations are used, but the diagonal and off-diagonal elements are still sub-sampled for efficiency considerations.
 
 All other regression models (``GammaRegressionLoc``,
 ``PoissonRegressionLoc``, etc.) use the general SGD solver.
