@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "regmmd"
-version = "0.1.0"
+version = "0.1.1"
 authors = [
     { name="Hidde Fokkema", email="hidde.fokkema@gmail.com" }
 ]
@@ -38,9 +38,8 @@ docs = [
     "matplotlib>=3.10.8",
 ]
 
-[tool.setuptools]
-packages = ["regmmd"]
-
+[tool.setuptools.packages.find]
+include = ["regmmd*"]
 
 [tool.ruff] 
 line-length = 88
