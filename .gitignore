@@ -5,6 +5,7 @@
 .vscode
 .venv
 .ruff_cache
+.env
 build
 
 # Python related files 
