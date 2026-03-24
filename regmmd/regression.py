@@ -2,6 +2,7 @@ from typing import Dict, Optional, Union
 from enum import Enum
 
 import numpy as np
+from numpy.typing import NDArray
 from sklearn.base import BaseEstimator, RegressorMixin
 
 from regmmd.models import (
@@ -191,7 +192,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         self.y_offset = None
         self.X_scale = None
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> MMDResult:
+    def fit(self, X: NDArray, y: NDArray, use_exact: bool = True) -> MMDResult:
         """Fit the MMD regression model according to the given training data.
 
         Parameters
@@ -201,6 +202,10 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
 
         y : np.ndarray, shape (n_samples,)
             Target values.
+    
+        use_exact : bool, default=True
+            Use the ``model._exact_fit()`` method, if it is available, will default
+            to SGD if it is not. Mainly used for performance comparisons
 
         Returns
         -------
@@ -228,22 +233,25 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         ):
             self.par_v = np.insert(self.par_v, n_features, 1)
             self.model.update(self.par_v)
-            print("model.beta", self.model.beta)
 
         if self.par_v is None or self.par_c is None:
             self.par_v, self.par_c = self.model._init_params(X=X, y=y)
 
-        res = self.model._exact_fit(
-            X=X,
-            y=y,
-            par_v=self.par_v,
-            par_c=self.par_c,
-            solver=self.solver,
-            kernel_y=self.kernel_y,
-            bandwidth_y=self.bandwidth_y,
-            kernel_X=self.kernel_X,
-            bandwidth_X=self.bandwidth_X,
-        )
+        res = None
+
+        if use_exact:
+            res = self.model._exact_fit(
+                X=X,
+                y=y,
+                par_v=self.par_v,
+                par_c=self.par_c,
+                solver=self.solver,
+                kernel_y=self.kernel_y,
+                bandwidth_y=self.bandwidth_y,
+                kernel_X=self.kernel_X,
+                bandwidth_X=self.bandwidth_X,
+            )
+
         if res is None:
             if self.bandwidth_X == 0:
                 res = _sgd_tilde_regression(
@@ -303,7 +311,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         self.model.update(par_v=self.par_v)
         return res
 
-    def predict(self, X: np.ndarray) -> np.ndarray:
+    def predict(self, X: NDArray) -> NDArray:
         """Predict using the MMD regression model.
 
         Parameters

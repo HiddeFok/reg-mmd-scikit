@@ -1,6 +1,8 @@
 from typing import Dict, Optional
 from enum import Enum
 
+from numpy.typing import NDArray
+
 from sklearn.base import BaseEstimator
 
 from regmmd.models import (
@@ -131,13 +133,17 @@ class MMDEstimator(BaseEstimator):
         self.bandwidth = bandwidth
         self.solver = solver
 
-    def fit(self, X) -> MMDResult:
+    def fit(self, X: NDArray, use_exact: bool = True) -> MMDResult:
         """Fit the MMD estimation model according to the given training data.
 
         Parameters
         ----------
         X : np.ndarray, shape (n_samples, n_features)
             Training input samples.
+
+        use_exact : bool, default=True
+            Use the ``model._exact_fit()`` method, if it is available, will default
+            to SGD if it is not. Mainly used for performance comparisons
 
         Returns
         -------
@@ -150,14 +156,18 @@ class MMDEstimator(BaseEstimator):
             self.par_v = pars[0]
             self.par_c = pars[1]
 
-        res = self.model._exact_fit(
-            X=X,
-            par_v=self.par_v,
-            par_c=self.par_c,
-            solver=self.solver,
-            kernel=self.kernel,
-            bandwidth=self.bandwidth,
-        )
+        res = None
+
+        if use_exact:
+            res = self.model._exact_fit(
+                X=X,
+                par_v=self.par_v,
+                par_c=self.par_c,
+                solver=self.solver,
+                kernel=self.kernel,
+                bandwidth=self.bandwidth,
+            )
+
         if res is None:
             res = _sgd_estimation(
                 X=X,
