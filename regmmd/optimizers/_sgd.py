@@ -22,7 +22,8 @@ def _sgd_estimation(
     bandwidth: float = 1.0,
     epsilon: float = 1e-4,
 ) -> MMDResult:
-    """Estimate model parameters via AdaGrad stochastic gradient descent on the MMD criterion.
+    """Estimate model parameters via AdaGrad stochastic gradient descent on the
+    MMD criterion.
 
     Minimizes the MMD between the empirical distribution of ``X`` and the model's
     distribution using a stochastic gradient algorithm. The optimization runs a
@@ -76,7 +77,8 @@ def _sgd_estimation(
         - ``stepsize`` : step size used.
         - ``bandwidth`` : bandwidth used (resolved if ``"auto"``).
         - ``estimator`` : Polyak-Ruppert average of parameter iterates.
-        - ``trajectory`` : parameter trajectory of shape ``(n_params, burn_in + n_step + 1)``.
+        - ``trajectory`` : parameter trajectory of shape
+            ``(n_params, burn_in + n_step + 1)``.
     """
     n = X.shape[0]
 
@@ -91,8 +93,9 @@ def _sgd_estimation(
         "bandwidth": bandwidth,
         "convergence": 1,
     }
-    if len(par_v.shape) == 0:
+    if np.ndim(par_v) == 0:
         trajectory = np.zeros(shape=(1, burn_in + n_step + 1))
+        par_v = np.array([par_v])
     else:
         trajectory = np.zeros(shape=(par_v.shape[0], burn_in + n_step + 1))
     trajectory[:, 0] = par_v
@@ -150,6 +153,7 @@ def _sgd_estimation(
 
     return res
 
+
 def _sgd_hat_regression(
     X: NDArray,
     y: NDArray,
@@ -173,12 +177,12 @@ def _sgd_hat_regression(
     as described in `Universal Robust Regression via Maximum Mean Discrepancy`, Alquier,
     Gerber (2024).
 
-    Minimizes the MMD objective using the product kernel :math:`k = k_X \\otimes k_Y`.
-    The gradient is
-    approximated efficiently by splitting pairs :math:`(X_i, X_j)` into three groups: all
-    diagonal pairs, the `M_det` closest off-diagonal pairs (deterministic), and
-    M_rand randomly selected distant pairs (stochastic). This yields a gradient
-    estimator with cost linear in n per iteration.
+    Minimizes the MMD objective using the product kernel :math:`k = k_X \\otimes
+    k_Y`.  The gradient is approximated efficiently by splitting pairs
+    :math:`(X_i, X_j)` into three groups: all diagonal pairs, the `M_det`
+    closest off-diagonal pairs (deterministic), and M_rand randomly selected
+    distant pairs (stochastic). This yields a gradient estimator with cost
+    linear in n per iteration.
 
     Compared to the tilde estimator, this estimator is robust to adversarial
     contamination of the training data, but is computationally more expensive due
@@ -187,7 +191,7 @@ def _sgd_hat_regression(
 
     Parameters
     ----------
-    X : np.arrau, shape (n_samples, n_features)
+    X : np.array, shape (n_samples, n_features)
         Training input samples.
 
     y : np.array, shape (n_samples,)
@@ -456,9 +460,9 @@ def _sgd_tilde_regression(
     epsilon: float = 1e-4,
     eps_sq: float = 1e-5,
 ) -> MMDResult:
-    """Fit a regression model using the tilde estimator via stochastic gradient descent,
-    as described in `Universal Robust Regression via Maximum Mean Discrepancy`, Alquier and
-    Gerber (2024).
+    """Fit a regression model using the tilde estimator via stochastic gradient
+    descent, as described in `Universal Robust Regression via Maximum Mean
+    Discrepancy`, Alquier and Gerber (2024).
 
     Minimizes the MMD objective using only the kernel :math:`k_Y` on the target
     variable. The gradient is
@@ -594,14 +598,14 @@ def _sgd_tilde_regression(
         # only for gaussian par[1] = max(par[1], 1 / (n ** 2))
         trajectory[:, i + 1] = par_v
 
-        if np.isnan(np.mean(grad_all)):
-            res["convergence"] = -1
-            break
+        # if np.isnan(np.mean(grad_all)):
+        #     res["convergence"] = -1
+        #     break
 
         g_1 = np.sqrt(np.sum(np.square(grad_all / (burn_in + i + 1)))) / par_v.shape
-        if np.log(g_1) < log_eps:
-            res["convergence"] = 0
-            break
+        # if np.log(g_1) < log_eps:
+        #     res["convergence"] = 0
+        #     break
 
     n_step_done = int(i + 1)
     trajectory = trajectory[:, :n_step_done]

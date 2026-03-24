@@ -104,7 +104,8 @@ class GammaRate(GammaBase):
         return par_v, par_c
 
     def _project_params(self, par_v):
-        # par_v = max(0.5 , par_v) This was found empirically in the development of the R package
+        # par_v = max(0.5 , par_v) This was found empirically in the development
+        # of the R package
         par_v = max(1e-6, par_v)
         return par_v
 
@@ -135,7 +136,8 @@ class Gamma(GammaBase):
         return par_v, par_c
 
     def _project_params(self, par_v):
-        # par_v = max(0.5 , par_v) This was found empirically in the development of the R package
+        # par_v = max(0.5 , par_v) This was found empirically in the development
+        # of the R package
         par_v[0] = max(1e-6, par_v[0])
         par_v[1] = max(1e-6, par_v[1])
         return par_v

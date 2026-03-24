@@ -77,13 +77,14 @@ def _preprocess_data(
 class MMDRegressor(RegressorMixin, BaseEstimator):
     """Regression using the Maximum Mean Discrepancy (MMD) criterion.
 
-    This class implements regression using the MMD criterion, which is a kernel-based
-    method to compare distributions by measuring the distance between mean embeddings
-    in a Reproducing Kernel Hilbert Space (RKHS).
+    This class implements regression using the MMD criterion, which is a
+    kernel-based method to compare distributions by measuring the distance
+    between mean embeddings in a Reproducing Kernel Hilbert Space (RKHS).
 
-    MMDRegressor fits a regression model by minimizing the MMD between the distributions
-    of the observed data and the model's predictions. It supports various kernel types
-    and bandwidth selection methods for both the input features and the target variables.
+    MMDRegressor fits a regression model by minimizing the MMD between the
+    distributions of the observed data and the model's predictions. It supports
+    various kernel types and bandwidth selection methods for both the input
+    features and the target variables.
 
     Parameters
     ----------
@@ -124,13 +125,15 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         such as the median heuristic.
 
     solver : dict, optional
-        A dictionary specifying the solver parameters for the optimization process.
-        It should include keys such as "burnin" (number of burn-in iterations), "n_step" (number of
-        optimization steps), and "stepsize" (learning rate for the optimizer).
-        If `None`, default solver settings are used.
+        A dictionary specifying the solver parameters for the optimization
+        process.  It should include keys such as "burnin" (number of burn-in
+        iterations), "n_step" (number of optimization steps), and "stepsize"
+        (learning rate for the optimizer).  If `None`, default solver settings
+        are used.
 
     random_state : int, optional
-        random seed to be passed to the model and any sampler used in the SGD optimizers.
+        random seed to be passed to the model and any sampler used in the SGD
+        optimizers.
 
     Attributes
     ----------
@@ -202,7 +205,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
 
         y : np.ndarray, shape (n_samples,)
             Target values.
-    
+
         use_exact : bool, default=True
             Use the ``model._exact_fit()`` method, if it is available, will default
             to SGD if it is not. Mainly used for performance comparisons
@@ -282,7 +285,6 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                     bandwidth_x=self.bandwidth_X,
                 )
 
-        print("after model", self.model.beta)
 
         if not isinstance(self.model, Logistic):
             self.beta_ = res["estimator"][:n_features] / self.X_scale
@@ -370,7 +372,9 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         """
         if not hasattr(self, "beta_"):
             raise NotFittedError(
-                "This MMDRegressor instance is not fitted yet. Call 'fit' with appropriate arguments before using this method."
+                "This MMDRegressor instance is not fitted yet. " + \
+                "Call 'fit' with appropriate arguments before " + \
+                "using this method."
             )
 
 

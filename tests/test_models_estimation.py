@@ -36,7 +36,7 @@ def test_base_model_raises_error():
             self.random_state = random_state
 
     with pytest.raises(TypeError):
-        model = NewModel()
+        _ = NewModel()
 
 
 # --- GaussianLoc ---

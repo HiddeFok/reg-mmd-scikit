@@ -238,7 +238,9 @@ def _gd_backtracking_lg_tilde_regression(
     work = np.exp(-(diff**2) / new_var)
     f1 = 1.0 / np.sqrt(bdwth2 + 4 * sigma2) - 2 * np.mean(work) / np.sqrt(new_var)
 
-    grad_beta = -(4.0 / new_var**1.5) * np.mean((diff * work)[:, np.newaxis] * X, axis=0)
+    grad_beta = -(4.0 / new_var**1.5) * np.mean(
+        (diff * work)[:, np.newaxis] * X, axis=0
+    )
     g_log_phi = sigma2 * (
         -2.0 * (bdwth2 + 4 * sigma2) ** (-1.5)
         + 2 * np.mean(work) * new_var ** (-1.5)
@@ -257,10 +259,9 @@ def _gd_backtracking_lg_tilde_regression(
         sigma2_trial = np.exp(par_log_trial[d])
         new_var_trial = 2 * sigma2_trial + bdwth2
         work_trial = np.exp(-(diff_trial**2) / new_var_trial)
-        f2 = (
-            1.0 / np.sqrt(bdwth2 + 4 * sigma2_trial)
-            - 2 * np.mean(work_trial) / np.sqrt(new_var_trial)
-        )
+        f2 = 1.0 / np.sqrt(bdwth2 + 4 * sigma2_trial) - 2 * np.mean(
+            work_trial
+        ) / np.sqrt(new_var_trial)
 
         while f2 > f1 - 0.5 * step_t * grad_norm_sq:
             step_t *= alpha
@@ -269,10 +270,9 @@ def _gd_backtracking_lg_tilde_regression(
             sigma2_trial = np.exp(par_log_trial[d])
             new_var_trial = 2 * sigma2_trial + bdwth2
             work_trial = np.exp(-(diff_trial**2) / new_var_trial)
-            f2 = (
-                1.0 / np.sqrt(bdwth2 + 4 * sigma2_trial)
-                - 2 * np.mean(work_trial) / np.sqrt(new_var_trial)
-            )
+            f2 = 1.0 / np.sqrt(bdwth2 + 4 * sigma2_trial) - 2 * np.mean(
+                work_trial
+            ) / np.sqrt(new_var_trial)
 
         par_log = par_log_trial
         trajectory[:, i + 1] = np.concatenate([par_log[:d], [sigma2_trial]])
@@ -320,10 +320,10 @@ def _gd_backtracking_logistic_tilde_regression(
     backtracking line search on the tilde MMD criterion.
 
     Computes the exact tilde MMD gradient analytically for a logistic model,
-    avoiding Monte Carlo sampling entirely. Since :math:`Y | X \\sim \\text{Bernoulli}(p)` with
-    :math:`p = \\text{sigmoid}(X^{\\top}\\beta)`, the expectations involving :math:`Y`
-    reduce to closed-form expressions in :math:`p_i`, enabling deterministic gradient
-    descent with backtracking.
+    avoiding Monte Carlo sampling entirely. Since :math:`Y | X \\sim
+    \\text{Bernoulli}(p)` with :math:`p = \\text{sigmoid}(X^{\\top}\\beta)`, the
+    expectations involving :math:`Y` reduce to closed-form expressions in
+    :math:`p_i`, enabling deterministic gradient descent with backtracking.
 
     Parameters
     ----------
@@ -434,9 +434,9 @@ def _gd_backtracking_logistic_tilde_regression(
         par_v = par_v_trial
         trajectory[:, i + 1] = par_v
 
-        if np.log(abs(f2 - f1)) - np.log(abs(f1)) < log_eps:
-            res["convergence"] = 0
-            break
+        # if np.log(abs(f2 - f1)) - np.log(abs(f1)) < log_eps:
+        #     res["convergence"] = 0
+        #     break
 
         f1 = f2
         mu = X @ par_v
@@ -474,10 +474,12 @@ def _gd_exact_logistic_hat_regression(
     via Maximum Mean Discrepancy`, Alquier, Gerber (2024).
 
     Replaces the Monte Carlo Y-sampling in :func:`_sgd_hat_regression` with
-    closed-form gradient expressions for the logistic model. Since
-    :math:`Y | X \\sim \\text{Bernoulli}(p)` with :math:`p = \\text{sigmoid}(X^{\\top} \\beta)`, the expectations
-    :math:`\\mathbb{E}[k_Y(Y_i, Y_j)]` and :math:`\\mathbb{E}[k_Y(Y_i, y_i)]` reduce to simple functions of :math:`p_i`
-    and :math:`p_j`, so the gradient is computed analytically for each pair :math:`(i, j)`.
+    closed-form gradient expressions for the logistic model. Since :math:`Y | X
+    \\sim \\text{Bernoulli}(p)` with :math:`p = \\text{sigmoid}(X^{\\top}
+    \\beta)`, the expectations :math:`\\mathbb{E}[k_Y(Y_i, Y_j)]` and
+    :math:`\\mathbb{E}[k_Y(Y_i, y_i)]` reduce to simple functions of :math:`p_i`
+    and :math:`p_j`, so the gradient is computed analytically for each pair
+    :math:`(i, j)`.
 
     Parameters
     ----------
@@ -571,8 +573,8 @@ def _gd_exact_logistic_hat_regression(
     # Precompute kernel constants for binary Y in {0, 1}
     k00 = K1d_dist(np.array([0.0]), kernel=kernel, bandwidth=bandwidth_y)[0]
     k01 = K1d_dist(np.array([1.0]), kernel=kernel, bandwidth=bandwidth_y)[0]
-    K0y = K1d_dist(-y, kernel=kernel, bandwidth=bandwidth_y)        # k(0 - y_i)
-    K1y = K1d_dist(1.0 - y, kernel=kernel, bandwidth=bandwidth_y)   # k(1 - y_i)
+    K0y = K1d_dist(-y, kernel=kernel, bandwidth=bandwidth_y)  # k(0 - y_i)
+    K1y = K1d_dist(1.0 - y, kernel=kernel, bandwidth=bandwidth_y)  # k(1 - y_i)
 
     # Precompute sorted covariate pairs and their kernel values
     sorted_obs = sort_obs(X)
@@ -600,16 +602,10 @@ def _gd_exact_logistic_hat_regression(
         dp_i = (p_i * (1 - p_i))[:, np.newaxis] * X[s1]
         dp_j = (p_j * (1 - p_j))[:, np.newaxis] * X[s2]
         A = k00 * (
-            2 * p_j[:, np.newaxis] * dp_i
-            + 2 * p_i[:, np.newaxis] * dp_j
-            - dp_i
-            - dp_j
+            2 * p_j[:, np.newaxis] * dp_i + 2 * p_i[:, np.newaxis] * dp_j - dp_i - dp_j
         )
         B = k01 * (
-            dp_i
-            + dp_j
-            - 2 * p_i[:, np.newaxis] * dp_j
-            - 2 * dp_i * p_j[:, np.newaxis]
+            dp_i + dp_j - 2 * p_i[:, np.newaxis] * dp_j - 2 * dp_i * p_j[:, np.newaxis]
         )
         C = C_coef[s1, np.newaxis] * dp_i
         return kx[:, np.newaxis] * (A + B + C)  # (|s1|, d)
@@ -639,9 +635,7 @@ def _gd_exact_logistic_hat_regression(
         )
 
         return (
-            grad_p1.sum(axis=0)
-            + 2 * grad_p2.sum(axis=0)
-            + cons * grad_p3.sum(axis=0)
+            grad_p1.sum(axis=0) + 2 * grad_p2.sum(axis=0) + cons * grad_p3.sum(axis=0)
         ) / n
 
     for i in range(burn_in):

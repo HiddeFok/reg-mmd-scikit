@@ -1,5 +1,6 @@
-import numpy as np
 import pytest
+
+import numpy as np
 
 from regmmd.models.regression.linear_gaussian import LinearGaussian, LinearGaussianLoc
 from regmmd.models.regression.logistic import Logistic

@@ -1,7 +1,7 @@
 import numpy as np
 
 from regmmd import MMDEstimator
-from regmmd.models import Gaussian, GaussianLoc
+from regmmd.models import Gaussian
 from regmmd.utils import print_summary
 
 

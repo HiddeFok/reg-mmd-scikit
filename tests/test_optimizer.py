@@ -7,8 +7,7 @@ from regmmd.optimizers import (
     _gd_gaussian_loc_exact_estimation,
     sort_obs,
 )
-from regmmd.utils import MMDResult
-from regmmd.models import GaussianLoc, Gaussian
+from regmmd.models import Gaussian
 
 RNG = np.random.default_rng(42)
 

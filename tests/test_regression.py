@@ -1,5 +1,6 @@
-import numpy as np
 import pytest
+
+import numpy as np
 
 from regmmd.models.regression.linear_gaussian import LinearGaussian, LinearGaussianLoc
 from regmmd.models.regression.gamma import GammaRegressionLoc
@@ -11,7 +12,7 @@ RNG = np.random.default_rng(42)
 
 
 def test_log_prob():
-    X = np.array([[1., 2.], [3., 4.]])
+    X = np.array([[1.0, 2.0], [3.0, 4.0]])
     y = np.array([5.0, 6.0])
     beta = np.array([0.5, 0.5])
     phi = 1.0
@@ -24,7 +25,7 @@ def test_log_prob():
 
 
 def test_predict():
-    X = np.array([[1., 2.], [3., 4.]])
+    X = np.array([[1.0, 2.0], [3.0, 4.0]])
     beta = np.array([0.5, 0.5])
     phi = 1.0
 
@@ -37,7 +38,7 @@ def test_predict():
 
 
 def test_sample_n():
-    X = np.array([[1., 2.], [3., 4.]])
+    X = np.array([[1.0, 2.0], [3.0, 4.0]])
     beta = np.array([0.5, 0.5])
     phi = 1.0
 
@@ -48,7 +49,7 @@ def test_sample_n():
 
 
 def test_score():
-    X = np.array([[1., 2.], [3., 4.]])
+    X = np.array([[1.0, 2.0], [3.0, 4.0]])
     y = np.array([5.0, 6.0])
     beta = np.array([0.5, 0.5])
     phi = 1.0
@@ -190,9 +191,15 @@ def test_linear_gaussian_loc_exact_fit_tilde_returns_result():
     par_v = np.zeros(2)
     model = LinearGaussianLoc(par_v=par_v, par_c=1.0)
     res = model._exact_fit(
-        X=X, y=y, par_v=par_v, par_c=1.0,
-        solver=EXACT_SOLVER, kernel_y="Gaussian", bandwidth_y=1.0,
-        kernel_X="Laplace", bandwidth_X=0,
+        X=X,
+        y=y,
+        par_v=par_v,
+        par_c=1.0,
+        solver=EXACT_SOLVER,
+        kernel_y="Gaussian",
+        bandwidth_y=1.0,
+        kernel_X="Laplace",
+        bandwidth_X=0,
     )
     assert res is not None
     assert "estimator" in res
@@ -205,9 +212,15 @@ def test_linear_gaussian_loc_exact_fit_non_gaussian_kernel_returns_none(kernel_y
     par_v = np.zeros(2)
     model = LinearGaussianLoc(par_v=par_v, par_c=1.0)
     res = model._exact_fit(
-        X=X, y=y, par_v=par_v, par_c=1.0,
-        solver=EXACT_SOLVER, kernel_y=kernel_y, bandwidth_y=1.0,
-        kernel_X="Laplace", bandwidth_X=0,
+        X=X,
+        y=y,
+        par_v=par_v,
+        par_c=1.0,
+        solver=EXACT_SOLVER,
+        kernel_y=kernel_y,
+        bandwidth_y=1.0,
+        kernel_X="Laplace",
+        bandwidth_X=0,
     )
     assert res is None
 
@@ -218,9 +231,15 @@ def test_linear_gaussian_loc_exact_fit_hat_returns_none():
     par_v = np.zeros(2)
     model = LinearGaussianLoc(par_v=par_v, par_c=1.0)
     res = model._exact_fit(
-        X=X, y=y, par_v=par_v, par_c=1.0,
-        solver=EXACT_SOLVER, kernel_y="Gaussian", bandwidth_y=1.0,
-        kernel_X="Laplace", bandwidth_X="auto",
+        X=X,
+        y=y,
+        par_v=par_v,
+        par_c=1.0,
+        solver=EXACT_SOLVER,
+        kernel_y="Gaussian",
+        bandwidth_y=1.0,
+        kernel_X="Laplace",
+        bandwidth_X="auto",
     )
     assert res is None
 
@@ -231,9 +250,15 @@ def test_linear_gaussian_exact_fit_tilde_returns_result():
     par_v = np.array([0.0, 0.0, 1.0])  # [beta_0, beta_1, phi]
     model = LinearGaussian(par_v=par_v)
     res = model._exact_fit(
-        X=X, y=y, par_v=par_v, par_c=None,
-        solver=EXACT_SOLVER, kernel_y="Gaussian", bandwidth_y=1.0,
-        kernel_X="Laplace", bandwidth_X=0,
+        X=X,
+        y=y,
+        par_v=par_v,
+        par_c=None,
+        solver=EXACT_SOLVER,
+        kernel_y="Gaussian",
+        bandwidth_y=1.0,
+        kernel_X="Laplace",
+        bandwidth_X=0,
     )
     assert res is not None
     assert "estimator" in res
@@ -246,9 +271,15 @@ def test_linear_gaussian_exact_fit_non_gaussian_kernel_returns_none():
     par_v = np.array([0.0, 0.0, 1.0])
     model = LinearGaussian(par_v=par_v)
     res = model._exact_fit(
-        X=X, y=y, par_v=par_v, par_c=None,
-        solver=EXACT_SOLVER, kernel_y="Laplace", bandwidth_y=1.0,
-        kernel_X="Laplace", bandwidth_X=0,
+        X=X,
+        y=y,
+        par_v=par_v,
+        par_c=None,
+        solver=EXACT_SOLVER,
+        kernel_y="Laplace",
+        bandwidth_y=1.0,
+        kernel_X="Laplace",
+        bandwidth_X=0,
     )
     assert res is None
 
@@ -259,27 +290,33 @@ def test_linear_gaussian_exact_fit_hat_returns_none():
     par_v = np.array([0.0, 0.0, 1.0])
     model = LinearGaussian(par_v=par_v)
     res = model._exact_fit(
-        X=X, y=y, par_v=par_v, par_c=None,
-        solver=EXACT_SOLVER, kernel_y="Gaussian", bandwidth_y=1.0,
-        kernel_X="Laplace", bandwidth_X="auto",
+        X=X,
+        y=y,
+        par_v=par_v,
+        par_c=None,
+        solver=EXACT_SOLVER,
+        kernel_y="Gaussian",
+        bandwidth_y=1.0,
+        kernel_X="Laplace",
+        bandwidth_X="auto",
     )
     assert res is None
 
 
 def test_mmd_regressor_model_str_inits():
-    reg = MMDRegressor(model="linear-gaussian", solver=SOLVER)
+    _ = MMDRegressor(model="linear-gaussian", solver=SOLVER)
 
 
 def test_mmd_regressor_wrong_model_str_raises():
     par_v = np.zeros(3)
     with pytest.raises(ValueError):
-        reg = MMDRegressor(model="not-defined", par_v=par_v, solver=SOLVER)
+        _ = MMDRegressor(model="not-defined", par_v=par_v, solver=SOLVER)
 
 
 def test_mmd_regressor_wrong_model_type_raises():
     par_v = np.zeros(3)
     with pytest.raises(TypeError):
-        reg = MMDRegressor(model=None, par_v=par_v, solver=SOLVER)
+        _ = MMDRegressor(model=None, par_v=par_v, solver=SOLVER)
 
 
 def test_mmd_regressor_inits_params():

@@ -5,11 +5,6 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-import os
-import sys
-
-sys.path.insert(0, "../..")
-
 project = "RegMMD"
 copyright = "2026, Hidde Fokkema"
 author = "Hidde Fokkema"

@@ -70,6 +70,8 @@ ignore=[
     "E731",
     # do not use variables named 'l', 'O', or 'I'
     "E741",
+    # Import block warnigs
+    "I001"
 ]
 
 

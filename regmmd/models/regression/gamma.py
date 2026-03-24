@@ -7,9 +7,10 @@ from sklearn.linear_model import GammaRegressor
 
 
 class GammaRegressionBase(RegressionModel):
-    """Gamma regression, where exp(X^T \\beta) = mean(Y). The
-    mean parametrized gamma density is given by
-    p(y | x) ~ (shape * y / mean)^shape exp(-shape * y / mean) /  y for a: shape, b: rate
+    """Gamma regression, where :math:`e^{X^T \\beta} = \\mathbb{E}[Y \\mid X] =
+    \\mu`. The mean parametrized gamma density is given by :math:`p(y \\mid x)
+    \\sim (\\text{shape} * y / \\mu)^\\text{shape} e^{-\\text{shape} * y / \\mu}
+    /  \\mu`.
 
     """
 
@@ -119,6 +120,7 @@ class GammaRegression(GammaRegressionBase):
         return par_v, par_c
 
     def _project_params(self, par_v):
-        # par_v = max(0.5 , par_v) This was found empirically in the development of the R package
+        # par_v = max(0.5 , par_v) This was found empirically in the development
+        # of the R package
         par_v[-1] = max(1e-6, par_v[-1])
         return par_v
