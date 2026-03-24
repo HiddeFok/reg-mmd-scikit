@@ -33,27 +33,13 @@ as an official PyPI package, when it is finished.
 
 ### Using pip
 ```bash
-git clone git@github.com:HiddeFok/reg-mmd-scikit.git
-cd reg-mmd-scikit
-pip install .
+pip install regmmd
 ```
-
-Alternatively, The following command clones the package and install it in one go
-```bash
-pip install git+https://github.com/HiddeFok/reg-mmd-scikit
-```
-
 
 ### Using uv
 Assuming that you are in a directory where a `uv` project is initialised. 
 ```bash
-git clone git@github.com:HiddeFok/reg-mmd-scikit.git
-uv add ./reg-mmd-scikit/
-```
-
-Alternatively, The following command clones the package and install it in one go
-```bash
-uv add git+https://github.com/HiddeFok/reg-mmd-scikit
+uv add regmmd
 ```
 
 ## Optimization
@@ -91,7 +77,6 @@ mmd_estim = MMDEstimator(
     par_c=1.5,
     kernel="Gaussian",
     solver={
-        "type": "GD",
         "burnin": 500,
         "n_step": 1000,
         "stepsize": 1,
