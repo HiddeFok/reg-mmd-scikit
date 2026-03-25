@@ -220,7 +220,8 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         n_features = X.shape[1]
 
         y_int = y.astype(int)
-        if (y_int - y).sum() != 0:
+        is_not_discrete = (y_int - y).sum() != 0
+        if is_not_discrete:
             X, y, X_offset, X_scale = _preprocess_data(
                 X,
                 y,
@@ -286,7 +287,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                 )
 
 
-        if not isinstance(self.model, Logistic):
+        if is_not_discrete:
             self.beta_ = res["estimator"][:n_features] / self.X_scale
             res["estimator"][:n_features] = self.beta_
 
@@ -309,6 +310,8 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                 self.intercept_ = res["estimator"][n_features]
             else:
                 self.intercept_ = 0.0
+
+            self.par_v = res["estimator"]
 
         self.model.update(par_v=self.par_v)
         return res

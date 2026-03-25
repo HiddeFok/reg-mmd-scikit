@@ -399,6 +399,7 @@ def _gd_backtracking_logistic_tilde_regression(
     def _objective(beta):
         mu = X @ beta
         p = 1.0 / (1.0 + np.exp(-mu))
+
         return np.mean(
             (p**2 + (1 - p) ** 2) * k00
             + 2 * p * (1 - p) * k01
@@ -406,8 +407,10 @@ def _gd_backtracking_logistic_tilde_regression(
             - 2 * (1 - p) * k0y
         )
 
-    def _gradient(p):
-        # Gradient of f w.r.t. beta, given current p values
+    def _gradient(beta):
+        mu = X @ beta
+        p = 1.0 / (1.0 + np.exp(-mu))
+
         g11 = (
             k00 * (4 * (1 - p) * p**2 - 2 * p * (1 - p))
             + k01 * (p * (1 - p) - 2 * (1 - p) * p**2)
@@ -416,13 +419,12 @@ def _gd_backtracking_logistic_tilde_regression(
         return np.mean(g11 - 2 * g12, axis=0)
 
     # Initial objective and gradient
-    mu = X @ par_v
-    p = 1.0 / (1.0 + np.exp(-mu))
     f1 = _objective(par_v)
-    grad = _gradient(p)
+    grad = _gradient(par_v)
     grad_norm_sq = np.sum(np.square(grad))
 
     for i in range(n_step):
+        step_t = stepsize
         par_v_trial = par_v - step_t * grad
         f2 = _objective(par_v_trial)
 
@@ -434,15 +436,14 @@ def _gd_backtracking_logistic_tilde_regression(
         par_v = par_v_trial
         trajectory[:, i + 1] = par_v
 
-        # if np.log(abs(f2 - f1)) - np.log(abs(f1)) < log_eps:
-        #     res["convergence"] = 0
-        #     break
+        grad = _gradient(par_v)
+        grad_norm_sq = np.sum(np.square(grad))
+
+        if np.log(abs(f2 - f1)) - np.log(abs(f1)) < log_eps:
+            res["convergence"] = 0
+            break
 
         f1 = f2
-        mu = X @ par_v
-        p = 1.0 / (1.0 + np.exp(-mu))
-        grad = _gradient(p)
-        grad_norm_sq = np.sum(np.square(grad))
 
     n_step_done = i + 1
     res["estimator"] = par_v

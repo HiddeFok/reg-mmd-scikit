@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from regmmd import MMDEstimator, MMDRegressor
 from regmmd.models import GaussianLoc
-from regmmd.models import Logistic
+from regmmd.models import LinearGaussianLoc
 from regmmd.utils import print_summary
 
 
@@ -39,7 +39,7 @@ def main():
     gd_diff = time.time() - start
     gd_param = res["estimator"]
     print(f"\tTime elapsed using GD: {timedelta(seconds=gd_diff)}")
-    # print_summary(res)
+    print_summary(res)
 
     model = GaussianLoc(par_v=par_v_init, par_c=par_c_init, random_state=20)
 
@@ -61,14 +61,14 @@ def main():
     sgd_diff = time.time() - start
     sgd_param = res["estimator"][0]
     print(f"\tTime elapsed using SGD: {timedelta(seconds=sgd_diff)}")
-    # print_summary(res)
+    print_summary(res)
 
     print(f"\tGD is {sgd_diff / gd_diff:.6f} times faster")
     print(f"\tGD is {(abs(sgd_param) / abs(gd_param)):.4f} times closer")
 
 
-    print("\nSGD vs GD comparison in the Logistic RegressionModel")
-    n = 1000
+    print("\nSGD vs GD comparison in the LinearGaussianLoc RegressionModel")
+    n = 5000
     p_param = 4
     beta = np.arange(1, 5)
 
@@ -77,14 +77,16 @@ def main():
     X = rng.normal(loc=0, scale=1, size=(n, p_param))
     X_test = rng.normal(loc=0, scale=1, size=(n, p_param))
 
-    p = 1 / (1 + np.exp(-X @ beta))
-    y = rng.binomial(1, p, size=(n,))
+    model_true = LinearGaussianLoc(par_v=beta, par_c=1, random_state=24)
+    mu = model_true.predict(X=X)
+    mu_test = model_true.predict(X=X_test)
 
-    p_test = 1 / (1 + np.exp(-X_test @ beta))
-    y_test = rng.binomial(1, p_test, size=(n,))
+    y = model_true.sample_n(n=n, mu_given_x=mu)
+    y_test = model_true.sample_n(n=n, mu_given_x=mu_test)
 
-    par_v_init = np.array([0.5, 1.5, 2.5, 3.2])
-    model = Logistic(par_v=par_v_init)
+    par_v_init = np.array([0.5, 1.5, 1.1, 1.2])
+
+    model = LinearGaussianLoc(par_v=par_v_init, par_c=1, random_state=10)
 
     mmd_reg = MMDRegressor(
         model=model,
@@ -103,17 +105,16 @@ def main():
     start = time.time()
     res = mmd_reg.fit(X, y)
     gd_diff = time.time() - start
-    gd_param = res["estimator"]
+
+    y_pred = mmd_reg.predict(X_test)
+    mse = np.mean((y_test - y_pred) ** 2)
     print(f"\tGD convergence:{res["convergence"]}")
     print(f"\tGD steps take:{res["trajectory"].shape[1]}")
+    print(f"\tGD MSE: {mse:.4f}")
     print(f"\tGD param:")
     print(res["estimator"])
 
-    y_pred = (mmd_reg.predict(X_test) > 0.5).astype(np.int32)
-    gd_acc = np.mean(y_pred == y_test)
-
-    par_v_init = np.array([0.5, 1.5, 2.5, 3.2])
-    model = Logistic(par_v=par_v_init)
+    model = LinearGaussianLoc(par_v=par_v_init, par_c=1, random_state=10)
 
     mmd_reg = MMDRegressor(
         model=model,
@@ -121,7 +122,7 @@ def main():
         par_c=None,
         bandwidth_X=0,
         bandwidth_y=2,
-        kernel_y="Gaussian",
+        kernel_y="Cauchy",
         fit_intercept=False,
         solver={
             "burnin": BURNIN,
@@ -129,17 +130,17 @@ def main():
             "stepsize": 1,
             "epsilon": 1e-4,
         },
+        random_state=123
     )
     start = time.time()
     res = mmd_reg.fit(X, y, use_exact=False)
     sgd_diff = time.time() - start
-    sgd_param = res["estimator"]
-
-    y_pred = (mmd_reg.predict(X_test) > 0.5).astype(np.int32)
-    sgd_acc = np.mean(y_pred == y_test)
+    y_pred = mmd_reg.predict(X_test)
+    mse = np.mean((y_test - y_pred) ** 2)
 
     print(f"\tSGD convergence:{res["convergence"]}")
     print(f"\tSGD steps take:{res["trajectory"].shape[1]}")
+    print(f"\tSGD MSE: {mse:.4f}")
     print(f"\tSGD param:")
     print(res["estimator"])
 
@@ -147,10 +148,7 @@ def main():
     print(f"\tTime elapsed using GD: {timedelta(seconds=gd_diff)}")
     print(f"\tTime elapsed using SGD: {timedelta(seconds=sgd_diff)}")
 
-    print(f"\n\tAcc using GD: {gd_acc}")
-    print(f"\tAcc elapsed using SGD: {sgd_acc}")
-
-
+    print(f"\tGD is {sgd_diff / gd_diff:.6f} times faster")
 
 if __name__ == "__main__":
     main()

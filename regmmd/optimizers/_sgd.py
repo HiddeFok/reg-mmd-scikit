@@ -598,14 +598,14 @@ def _sgd_tilde_regression(
         # only for gaussian par[1] = max(par[1], 1 / (n ** 2))
         trajectory[:, i + 1] = par_v
 
-        # if np.isnan(np.mean(grad_all)):
-        #     res["convergence"] = -1
-        #     break
+        if np.isnan(np.mean(grad_all)):
+            res["convergence"] = -1
+            break
 
         g_1 = np.sqrt(np.sum(np.square(grad_all / (burn_in + i + 1)))) / par_v.shape
-        # if np.log(g_1) < log_eps:
-        #     res["convergence"] = 0
-        #     break
+        if np.log(g_1) < log_eps:
+            res["convergence"] = 0
+            break
 
     n_step_done = int(i + 1)
     trajectory = trajectory[:, :n_step_done]
