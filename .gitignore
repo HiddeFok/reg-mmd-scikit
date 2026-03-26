@@ -19,6 +19,12 @@ coverage.*
 *.pyd
 .pytest_cache
 
+
+# Cython generated files
+
+regmmd/**/*.so
+regmmd/**/*.c
+
 # Docs related
 
 docs/build
