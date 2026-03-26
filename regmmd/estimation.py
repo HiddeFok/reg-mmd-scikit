@@ -135,7 +135,7 @@ class MMDEstimator(BaseEstimator):
         self.bandwidth = bandwidth
         self.solver = solver
 
-    def fit(self, X: NDArray, use_exact: bool = True) -> MMDResult:
+    def fit(self, X: NDArray, use_exact: bool = True, use_fast: bool = True) -> MMDResult:
         """Fit the MMD estimation model according to the given training data.
 
         Parameters
@@ -146,6 +146,11 @@ class MMDEstimator(BaseEstimator):
         use_exact : bool, default=True
             Use the ``model._exact_fit()`` method, if it is available, will default
             to SGD if it is not. Mainly used for performance comparisons
+
+        use_fast : bool, default=True
+            If ``True``, will try to build the ``CyModel`` version through
+            ``model._build_cy_model()``.  If successful, a Cython version of the
+            SGD loop will be called, which often results in a ``5-10x`` speed up.
 
         Returns
         -------
@@ -168,6 +173,7 @@ class MMDEstimator(BaseEstimator):
                 solver=self.solver,
                 kernel=self.kernel,
                 bandwidth=self.bandwidth,
+                use_fast=use_fast
             )
 
         if res is None:
@@ -182,5 +188,6 @@ class MMDEstimator(BaseEstimator):
                 stepsize=self.solver["stepsize"],
                 bandwidth=self.bandwidth,
                 epsilon=self.solver["epsilon"],
+                use_fast=use_fast
             )
         return res

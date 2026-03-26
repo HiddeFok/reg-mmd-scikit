@@ -65,7 +65,7 @@ class GaussianLoc(GaussianBase):
     def _project_params(self, par_v):
         return par_v
 
-    def _exact_fit(self, X, par_v, par_c, solver, kernel, bandwidth):
+    def _exact_fit(self, X, par_v, par_c, solver, kernel, bandwidth, use_fast=True):
         if kernel == "Gaussian":
             from regmmd.optimizers import _gd_gaussian_loc_exact_estimation
 

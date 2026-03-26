@@ -34,74 +34,6 @@ def header(n_runs):
     print(f"{'n':>10}  {'NumPy (ms)':>14}  {'Cython (ms)':>14}  {'Speedup':>8}")
     print("-" * 55)
 
-
-def bench_K1d_dist():
-    print("K1d_dist: elementwise kernel evaluation")
-    print("=" * 55)
-
-    sizes = [100, 1_000, 10_000, 100_000, 1_000_000]
-    kernels = ["Gaussian", "Laplace", "Cauchy"]
-    bandwidth = 1.5
-    n_runs = 50
-
-    rng = np.random.default_rng(seed=42)
-
-    for kernel in kernels:
-        print(f"\nKernel: {kernel}  (averaged over {n_runs} runs)")
-        header(n_runs)
-
-        kernel_id = KERNEL_MAP[kernel]
-
-        for n in sizes:
-            u = rng.standard_normal(n)
-            out = np.empty(n)
-
-            mean_np, std_np = benchmark(
-                lambda: K1d_dist_numpy(u, kernel, bandwidth), n_runs
-            )
-            mean_cy, std_cy = benchmark(
-                lambda: py_K1d_dist(u, out, kernel_id, bandwidth), n_runs
-            )
-
-            print_row(f"{n:,}", mean_np, std_np, mean_cy, std_cy)
-
-
-def bench_K1d():
-    print("\n\nK1d: pairwise kernel matrix K(x_i - y_j)")
-    print("=" * 55)
-
-    sizes = [50, 100, 500, 1_000, 2_000]
-    kernels = ["Gaussian", "Laplace", "Cauchy"]
-    bandwidth = 1.5
-    n_runs = 50
-
-    rng = np.random.default_rng(seed=42)
-
-    for kernel in kernels:
-        print(f"\nKernel: {kernel}  (averaged over {n_runs} runs)")
-        header(n_runs)
-
-        kernel_id = KERNEL_MAP[kernel]
-
-        for n in sizes:
-            x = rng.standard_normal(n)
-            y = rng.standard_normal(n)
-            out = np.empty((n, n))
-
-            mean_np, std_np = benchmark(
-                lambda: K1d_numpy(x, y, kernel, bandwidth), n_runs
-            )
-            mean_cy, std_cy = benchmark(
-                lambda: py_K1d(x, y, out, kernel_id, bandwidth), n_runs
-            )
-            mean_cy_sim, std_cy_sim = benchmark(
-                lambda: py_K1d_sym(x, y, out, kernel_id, bandwidth), n_runs
-            )
-
-            print_row(f"{n:,}x{n:,}", mean_np, std_np, mean_cy, std_cy)
-            print_row(f"{n:,}x{n:,}", mean_np, std_np, mean_cy_sim, std_cy_sim)
-
-
 def bench_sgd_estimation():
     from regmmd.models.estimation.gaussian import GaussianLoc
     from regmmd.optimizers._sgd import _sgd_estimation
@@ -135,7 +67,6 @@ def bench_sgd_estimation():
             _sgd_estimation(
                 X=X,
                 par_v=np.array([0.0]),
-                par_c=np.array([true_scale]),
                 model=model,
                 kernel="Gaussian",
                 burn_in=burn_in,
@@ -168,8 +99,6 @@ def bench_sgd_estimation():
 
 
 def main():
-    bench_K1d_dist()
-    bench_K1d()
     bench_sgd_estimation()
 
 

@@ -11,7 +11,6 @@ from regmmd.optimizers._cy_kernels cimport KernelType, kernel_combined
 def cy_sgd_estimation(
     double[:] X,
     double[:] par_v,
-    double[:] par_c,
     CyEstimationModel model,
     KernelType kernel,
     Py_ssize_t burn_in,
@@ -41,7 +40,6 @@ def cy_sgd_estimation(
         trajectory[j, 0] = par_v[j]
 
     with nogil:
-        # ---- Burn-in phase (no averaging) ----
         for i in range(burn_in):
             model.sample_n(n, sample_buf)
 
@@ -65,7 +63,6 @@ def cy_sgd_estimation(
             for j in range(n_par_v):
                 trajectory[j, i + 1] = par_v[j]
 
-        # ---- Averaging phase (Polyak-Ruppert) ----
         for j in range(n_par_v):
             par_mean[j] = par_v[j]
 

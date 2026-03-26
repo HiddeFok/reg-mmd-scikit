@@ -149,6 +149,7 @@ def _gd_backtracking_lg_tilde_regression(
     X: NDArray,
     y: NDArray,
     par_v: NDArray,
+    par_c: NDArray,
     n_step: int = 1000,
     stepsize: float = 1.0,
     bandwidth: Union[float, str] = 1.0,
@@ -175,6 +176,9 @@ def _gd_backtracking_lg_tilde_regression(
     par_v : np.array, shape (n_features + 1,)
         Initial parameter vector ``[beta_0, ..., beta_p, phi]`` where
         ``phi > 0`` is the noise variance.
+
+    par_c : array or None, default=None
+        Unused; included for API consistency.
 
     n_step : int, default=1000
         Maximum number of gradient descent iterations.
@@ -336,6 +340,9 @@ def _gd_backtracking_logistic_tilde_regression(
     par_v : np.array, shape (n_features,)
         Initial value of the regression coefficients (beta).
 
+    par_c : array or None, default=None
+        Unused; included for API consistency.
+
     n_step : int, default=1000
         Maximum number of gradient descent iterations.
 
@@ -377,7 +384,6 @@ def _gd_backtracking_logistic_tilde_regression(
 
     res = {
         "par_v_init": np.copy(par_v),
-        "par_c_init": None,
         "stepsize": stepsize,
         "bandwidth": bandwidth,
         "convergence": 1,
