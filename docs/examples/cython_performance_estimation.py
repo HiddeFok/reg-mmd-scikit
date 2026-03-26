@@ -1,9 +1,7 @@
 import numpy as np
 import time
 
-from regmmd.kernels import K1d_dist as K1d_dist_numpy, K1d as K1d_numpy
-from regmmd.optimizers._cy_kernels import py_K1d_dist, py_K1d, py_K1d_sym
-
+from regmmd import MMDEstimator
 
 KERNEL_MAP = {"Gaussian": 0, "Laplace": 1, "Cauchy": 2}
 
@@ -36,10 +34,6 @@ def header(n_runs):
 
 def bench_sgd_estimation():
     from regmmd.models.estimation.gaussian import GaussianLoc
-    from regmmd.optimizers._sgd import _sgd_estimation
-    from regmmd.optimizers._cy_sgd import cy_sgd_estimation
-    from regmmd.models._cy_models import CyGaussianLoc
-    from numpy.random import PCG64
 
     print("\n\nSGD Estimation: GaussianLoc model")
     print("=" * 55)
@@ -52,7 +46,7 @@ def bench_sgd_estimation():
     epsilon = 1e-4
     true_loc = 1.0
     true_scale = 1.5
-    n_runs = 10
+    n_runs = 2
 
     rng = np.random.default_rng(seed=42)
 
@@ -64,32 +58,44 @@ def bench_sgd_estimation():
 
         def run_python():
             model = GaussianLoc(par_v=0.0, par_c=true_scale, random_state=123)
-            _sgd_estimation(
-                X=X,
-                par_v=np.array([0.0]),
+            mmd_estim = MMDEstimator(
                 model=model,
+                par_v=np.array([0.0]),
+                par_c=np.array([true_scale]),
                 kernel="Gaussian",
-                burn_in=burn_in,
-                n_step=n_step,
-                stepsize=stepsize,
                 bandwidth=bandwidth,
-                epsilon=epsilon,
+                solver={
+                    "burnin": burn_in,
+                    "n_step": n_step,
+                    "stepsize": stepsize,
+                    "epsilon": epsilon
+                }
+            )
+            res = mmd_estim.fit(
+                X=X, 
+                use_exact=False,
+                use_fast=False
             )
 
         def run_cython():
-            bit_gen = PCG64(seed=123)
-            cy_model = CyGaussianLoc(0.0, true_scale, bit_gen)
-            cy_sgd_estimation(
-                X=X,
+            model = GaussianLoc(par_v=0.0, par_c=true_scale, random_state=123)
+            mmd_estim = MMDEstimator(
+                model=model,
                 par_v=np.array([0.0]),
                 par_c=np.array([true_scale]),
-                model=cy_model,
-                kernel=KERNEL_MAP["Gaussian"],
-                burn_in=burn_in,
-                n_step=n_step,
-                stepsize=stepsize,
+                kernel="Gaussian",
                 bandwidth=bandwidth,
-                epsilon=epsilon,
+                solver={
+                    "burnin": burn_in,
+                    "n_step": n_step,
+                    "stepsize": stepsize,
+                    "epsilon": epsilon
+                }
+            )
+            res = mmd_estim.fit(
+                X=X, 
+                use_exact=False,
+                use_fast=True
             )
 
         mean_np, std_np = benchmark(run_python, n_runs)

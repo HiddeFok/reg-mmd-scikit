@@ -96,22 +96,25 @@ def _sgd_estimation(
     }
 
     cy_model = None
-
     if use_fast:
         cy_model = model._build_cy_model()
+
     if cy_model is not None:
         from regmmd.optimizers._cy_sgd import cy_sgd_estimation
         par_mean, trajectory = cy_sgd_estimation(
-            X=X,
-            par_v=np.atleast_1d(np.asarray([par_v], dtype=np.float64)),
-            model=cy_model,
-            kernel=KERNEL_MAP[kernel],
-            burn_in=burn_in,
-            n_step=n_step,
-            stepsize=stepsize,
-            bandwidth=bandwidth,
-            epsilon=epsilon
+            X,
+            np.atleast_1d(np.asarray(par_v, dtype=np.float64)),
+            cy_model,
+            KERNEL_MAP[kernel],
+            burn_in,
+            n_step,
+            stepsize,
+            bandwidth,
+            epsilon
         )
+        par_mean = np.asarray(par_mean)
+        trajectory = np.asarray(trajectory)
+        model.update(par_v=par_v)
 
     else:
         if np.ndim(par_v) == 0:
