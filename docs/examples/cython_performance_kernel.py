@@ -23,7 +23,7 @@ def benchmark(func, n_runs=50):
 def print_row(n_label, mean_np, std_np, mean_cy, std_cy):
     speedup = mean_np / mean_cy if mean_cy > 0 else float("inf")
     print(
-        f"{n_label:>10}  "
+        f"{n_label:>12}  "
         f"{mean_np:>10.3f} +/- {std_np:<5.2f}"
         f"{mean_cy:>10.3f} +/- {std_cy:<5.2f}"
         f"{speedup:>7.2f}x"
@@ -31,13 +31,13 @@ def print_row(n_label, mean_np, std_np, mean_cy, std_cy):
 
 
 def header(n_runs):
-    print(f"{'n':>10}  {'NumPy (ms)':>14}  {'Cython (ms)':>14}  {'Speedup':>8}")
-    print("-" * 55)
+    print(f"{'n':>12}  {'NumPy (ms)':>20}  {'Cython (ms)':>17}  {'Speedup':>6}")
+    print("-" * 60)
 
 
 def bench_K1d_dist():
     print("K1d_dist: elementwise kernel evaluation")
-    print("=" * 55)
+    print("=" * 60)
 
     sizes = [100, 1_000, 10_000, 100_000, 1_000_000]
     kernels = ["Gaussian", "Laplace", "Cauchy"]
@@ -68,7 +68,7 @@ def bench_K1d_dist():
 
 def bench_K1d():
     print("\n\nK1d: pairwise kernel matrix K(x_i - y_j)")
-    print("=" * 55)
+    print("=" * 60)
 
     sizes = [50, 100, 500, 1_000, 2_000]
     kernels = ["Gaussian", "Laplace", "Cauchy"]
