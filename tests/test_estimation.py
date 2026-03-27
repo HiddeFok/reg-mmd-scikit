@@ -3,13 +3,7 @@ import pytest
 import numpy as np
 
 from regmmd import MMDEstimator
-from regmmd.models import (
-    GaussianLoc,
-    GaussianScale,
-    Gaussian,
-    BetaA,
-    GammaRate
-)
+from regmmd.models import GaussianLoc, GaussianScale, Gaussian, BetaA, GammaRate
 
 RNG = np.random.default_rng(0)
 

@@ -135,7 +135,9 @@ class MMDEstimator(BaseEstimator):
         self.bandwidth = bandwidth
         self.solver = solver
 
-    def fit(self, X: NDArray, use_exact: bool = True, use_fast: bool = True) -> MMDResult:
+    def fit(
+        self, X: NDArray, use_exact: bool = True, use_fast: bool = True
+    ) -> MMDResult:
         """Fit the MMD estimation model according to the given training data.
 
         Parameters
@@ -173,7 +175,7 @@ class MMDEstimator(BaseEstimator):
                 solver=self.solver,
                 kernel=self.kernel,
                 bandwidth=self.bandwidth,
-                use_fast=use_fast
+                use_fast=use_fast,
             )
 
         if res is None:
@@ -188,6 +190,6 @@ class MMDEstimator(BaseEstimator):
                 stepsize=self.solver["stepsize"],
                 bandwidth=self.bandwidth,
                 epsilon=self.solver["epsilon"],
-                use_fast=use_fast
+                use_fast=use_fast,
             )
         return res

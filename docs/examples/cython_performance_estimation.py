@@ -22,7 +22,17 @@ def benchmark(func, n_runs=50):
     return times.mean(), times.std(), estimator.mean(), estimator.std()
 
 
-def print_row(n_label, mean_np, std_np, mean_cy, std_cy, mean_est_np, std_est_np, mean_est_cy, std_est_cy):
+def print_row(
+    n_label,
+    mean_np,
+    std_np,
+    mean_cy,
+    std_cy,
+    mean_est_np,
+    std_est_np,
+    mean_est_cy,
+    std_est_cy,
+):
     speedup = mean_np / mean_cy if mean_cy > 0 else float("inf")
     error_str = "Est Error"
     print(
@@ -42,6 +52,7 @@ def header(n_runs):
     print(f"{'n':>12}  {'NumPy (ms)':>20}  {'Cython (ms)':>17}  {'Speedup':>6}")
     print("-" * 60)
 
+
 def bench_sgd_estimation():
     from regmmd.models.estimation.gaussian import GaussianLoc
 
@@ -57,7 +68,6 @@ def bench_sgd_estimation():
     true_loc = 1.0
     true_scale = 1.5
     n_runs = 10
-
 
     print(f"burn_in={burn_in}, n_step={n_step}  (averaged over {n_runs} runs)")
     header(n_runs)
@@ -78,14 +88,10 @@ def bench_sgd_estimation():
                     "burnin": burn_in,
                     "n_step": n_step,
                     "stepsize": stepsize,
-                    "epsilon": epsilon
-                }
+                    "epsilon": epsilon,
+                },
             )
-            res = mmd_estim.fit(
-                X=X, 
-                use_exact=False,
-                use_fast=False
-            )
+            res = mmd_estim.fit(X=X, use_exact=False, use_fast=False)
             return res["estimator"]
 
         def run_cython():
@@ -100,20 +106,26 @@ def bench_sgd_estimation():
                     "burnin": burn_in,
                     "n_step": n_step,
                     "stepsize": stepsize,
-                    "epsilon": epsilon
-                }
+                    "epsilon": epsilon,
+                },
             )
-            res = mmd_estim.fit(
-                X=X, 
-                use_exact=False,
-                use_fast=True
-            )
+            res = mmd_estim.fit(X=X, use_exact=False, use_fast=True)
             return res["estimator"]
 
         mean_np, std_np, mean_est_np, std_est_np = benchmark(run_python, n_runs)
         mean_cy, std_cy, mean_est_cy, std_est_cy = benchmark(run_cython, n_runs)
 
-        print_row(f"{n:,}", mean_np, std_np, mean_cy, std_cy, mean_est_np, std_est_np, mean_est_cy, std_est_cy)
+        print_row(
+            f"{n:,}",
+            mean_np,
+            std_np,
+            mean_cy,
+            std_cy,
+            mean_est_np,
+            std_est_np,
+            mean_est_cy,
+            std_est_cy,
+        )
 
 
 def main():

@@ -1,5 +1,3 @@
-import pytest
-
 import numpy as np
 
 from regmmd.models.regression.linear_gaussian import LinearGaussian, LinearGaussianLoc

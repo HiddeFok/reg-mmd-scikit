@@ -101,6 +101,7 @@ def bench_K1d():
             print_row(f"{n:,}x{n:,}", mean_np, std_np, mean_cy, std_cy)
             print_row(f"{n:,}x{n:,}", mean_np, std_np, mean_cy_sim, std_cy_sim)
 
+
 def main():
     bench_K1d_dist()
     bench_K1d()

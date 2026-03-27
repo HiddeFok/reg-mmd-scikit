@@ -87,7 +87,7 @@ class Logistic(LogisticBase):
         bandwidth_y,
         kernel_X=None,
         bandwidth_X=None,
-        use_fast=True
+        use_fast=True,
     ):
         if bandwidth_X is None or bandwidth_X == 0:
             from regmmd.optimizers import _gd_backtracking_logistic_tilde_regression

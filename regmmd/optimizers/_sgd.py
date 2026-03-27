@@ -11,6 +11,7 @@ from regmmd.optimizers._common import _median_heuristic, sort_obs, _get_grad_est
 
 KERNEL_MAP = {"Gaussian": 0, "Laplace": 1, "Cauchy": 2}
 
+
 def _sgd_estimation(
     X: NDArray,
     par_v: NDArray,
@@ -22,7 +23,7 @@ def _sgd_estimation(
     stepsize: float = 1,
     bandwidth: float = 1.0,
     epsilon: float = 1e-4,
-    use_fast: bool = True
+    use_fast: bool = True,
 ) -> MMDResult:
     """Estimate model parameters via AdaGrad stochastic gradient descent on the
     MMD criterion.
@@ -101,6 +102,7 @@ def _sgd_estimation(
 
     if cy_model is not None:
         from regmmd.optimizers._cy_sgd import cy_sgd_estimation
+
         par_mean, trajectory = cy_sgd_estimation(
             X,
             np.atleast_1d(np.asarray(par_v, dtype=np.float64)),
@@ -110,7 +112,7 @@ def _sgd_estimation(
             n_step,
             stepsize,
             bandwidth,
-            epsilon
+            epsilon,
         )
         par_mean = np.asarray(par_mean)
         trajectory = np.asarray(trajectory)
@@ -127,7 +129,9 @@ def _sgd_estimation(
         for i in range(burn_in):
             x_sampled = model.sample_n(n=n)
 
-            ker_sampled_1 = K1d(x_sampled, x_sampled, kernel=kernel, bandwidth=bandwidth)
+            ker_sampled_1 = K1d(
+                x_sampled, x_sampled, kernel=kernel, bandwidth=bandwidth
+            )
             ker_sampled_1 = ker_sampled_1 / (n - 1)
             np.fill_diagonal(ker_sampled_1, 0)
 
@@ -152,7 +156,9 @@ def _sgd_estimation(
         for i in range(n_step):
             x_sampled = model.sample_n(n=n)
 
-            ker_sampled_1 = K1d(x_sampled, x_sampled, kernel=kernel, bandwidth=bandwidth)
+            ker_sampled_1 = K1d(
+                x_sampled, x_sampled, kernel=kernel, bandwidth=bandwidth
+            )
             ker_sampled_1 = ker_sampled_1 / (n - 1)
             np.fill_diagonal(ker_sampled_1, 0)
 

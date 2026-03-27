@@ -13,8 +13,8 @@ def main():
     BURNIN = 500
     N_STEPS = 1000
 
-    par_v_init = 1.
-    par_c_init = 2.
+    par_v_init = 1.0
+    par_c_init = 2.0
 
     rng = np.random.default_rng(seed=123)
 
@@ -23,10 +23,10 @@ def main():
 
     mmd_estim = MMDEstimator(
         model=model,
-        par_v=par_v_init, 
+        par_v=par_v_init,
         par_c=par_c_init,
         kernel="Gaussian",
-        bandwidth=2.,
+        bandwidth=2.0,
         solver={
             "burnin": BURNIN,
             "n_step": N_STEPS,
@@ -45,9 +45,9 @@ def main():
 
     mmd_estim = MMDEstimator(
         model=model,
-        par_v=par_v_init, 
+        par_v=par_v_init,
         par_c=par_c_init,
-        bandwidth=2.,
+        bandwidth=2.0,
         kernel="Gaussian",
         solver={
             "burnin": BURNIN,
@@ -65,7 +65,6 @@ def main():
 
     print(f"\tGD is {sgd_diff / gd_diff:.6f} times faster")
     print(f"\tGD is {(abs(sgd_param) / abs(gd_param)):.4f} times closer")
-
 
     print("\nSGD vs GD comparison in the LinearGaussianLoc RegressionModel")
     n = 5000
@@ -108,8 +107,8 @@ def main():
 
     y_pred = mmd_reg.predict(X_test)
     mse = np.mean((y_test - y_pred) ** 2)
-    print(f"\tGD convergence:{res["convergence"]}")
-    print(f"\tGD steps take:{res["trajectory"].shape[1]}")
+    print(f"\tGD convergence:{res['convergence']}")
+    print(f"\tGD steps take:{res['trajectory'].shape[1]}")
     print(f"\tGD MSE: {mse:.4f}")
     print(f"\tGD param:")
     print(res["estimator"])
@@ -130,7 +129,7 @@ def main():
             "stepsize": 1,
             "epsilon": 1e-4,
         },
-        random_state=123
+        random_state=123,
     )
     start = time.time()
     res = mmd_reg.fit(X, y, use_exact=False)
@@ -138,17 +137,17 @@ def main():
     y_pred = mmd_reg.predict(X_test)
     mse = np.mean((y_test - y_pred) ** 2)
 
-    print(f"\tSGD convergence:{res["convergence"]}")
-    print(f"\tSGD steps take:{res["trajectory"].shape[1]}")
+    print(f"\tSGD convergence:{res['convergence']}")
+    print(f"\tSGD steps take:{res['trajectory'].shape[1]}")
     print(f"\tSGD MSE: {mse:.4f}")
     print(f"\tSGD param:")
     print(res["estimator"])
-
 
     print(f"\tTime elapsed using GD: {timedelta(seconds=gd_diff)}")
     print(f"\tTime elapsed using SGD: {timedelta(seconds=sgd_diff)}")
 
     print(f"\tGD is {sgd_diff / gd_diff:.6f} times faster")
+
 
 if __name__ == "__main__":
     main()

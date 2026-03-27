@@ -195,7 +195,9 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         self.y_offset = None
         self.X_scale = None
 
-    def fit(self, X: NDArray, y: NDArray, use_exact: bool = True, use_fast: bool = True) -> MMDResult:
+    def fit(
+        self, X: NDArray, y: NDArray, use_exact: bool = True, use_fast: bool = True
+    ) -> MMDResult:
         """Fit the MMD regression model according to the given training data.
 
         Parameters
@@ -259,7 +261,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                 bandwidth_y=self.bandwidth_y,
                 kernel_X=self.kernel_X,
                 bandwidth_X=self.bandwidth_X,
-                use_fast=use_fast
+                use_fast=use_fast,
             )
 
         if res is None:
@@ -291,7 +293,6 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                     bandwidth_y=self.bandwidth_y,
                     bandwidth_x=self.bandwidth_X,
                 )
-
 
         if is_not_discrete:
             self.beta_ = res["estimator"][:n_features] / self.X_scale
@@ -381,9 +382,9 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         """
         if not hasattr(self, "beta_"):
             raise NotFittedError(
-                "This MMDRegressor instance is not fitted yet. " + \
-                "Call 'fit' with appropriate arguments before " + \
-                "using this method."
+                "This MMDRegressor instance is not fitted yet. "
+                + "Call 'fit' with appropriate arguments before "
+                + "using this method."
             )
 
 

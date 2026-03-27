@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 
 from regmmd.optimizers import (
     _median_heuristic,
