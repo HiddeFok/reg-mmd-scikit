@@ -95,6 +95,8 @@ cdef void kernel_combined(
 
     if n >= PRANGE_THRESHOLD:
         # Self-kernel: symmetric, upper triangle only
+        # TODO: Check that this symmetric assumption is not messing with the
+        # estimation performance
         for i in prange(n, schedule='dynamic'):
             for j in range(i + 1, n):
                 val = _kernel_eval((x_sampled[i] - x_sampled[j]) / bandwidth, kernel) * inv_nm1
