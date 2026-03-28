@@ -113,6 +113,14 @@ class GaussianScale(GaussianBase):
     def _project_params(self, par_v):
         return max(1e-6, par_v)
 
+    def _build_cy_model(self):
+        """Create a CyGaussianScale mirror of this model"""
+        from regmmd.models._cy_models import CyGaussianScale
+        from numpy.random import PCG64
+
+        bit_gen = PCG64(seed=self.random_state)
+        return CyGaussianScale(self.loc, self.scale, bit_gen)
+
 
 class Gaussian(GaussianBase):
     def __init__(self, par_v=None, par_c=None, random_state=None):
@@ -144,3 +152,11 @@ class Gaussian(GaussianBase):
     def _project_params(self, par_v):
         par_v[1] = max(1e-6, par_v[1])
         return par_v
+
+    def _build_cy_model(self):
+        """Create a CyGaussian mirror of this model"""
+        from regmmd.models._cy_models import CyGaussian
+        from numpy.random import PCG64
+
+        bit_gen = PCG64(seed=self.random_state)
+        return CyGaussian(self.loc, self.scale, bit_gen)

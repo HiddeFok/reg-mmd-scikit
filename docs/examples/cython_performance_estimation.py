@@ -54,9 +54,9 @@ def header(n_runs):
 
 
 def bench_sgd_estimation():
-    from regmmd.models.estimation.gaussian import GaussianLoc
+    from regmmd.models.estimation.gaussian import Gaussian
 
-    print("\n\nSGD Estimation: GaussianLoc model")
+    print("\n\nSGD Estimation: Gaussian model")
     print("=" * 60)
 
     sizes = [100, 500, 1_000]
@@ -67,7 +67,7 @@ def bench_sgd_estimation():
     epsilon = 1e-4
     true_loc = 1.0
     true_scale = 1.5
-    n_runs = 10
+    n_runs = 2
 
     print(f"burn_in={burn_in}, n_step={n_step}  (averaged over {n_runs} runs)")
     header(n_runs)
@@ -77,11 +77,11 @@ def bench_sgd_estimation():
         X = rng.normal(loc=true_loc, scale=true_scale, size=n)
 
         def run_python():
-            model = GaussianLoc(par_v=0.0, par_c=true_scale, random_state=n)
+            model = Gaussian(par_v=np.array([0.0, 2.0]), par_c=None, random_state=n)
             mmd_estim = MMDEstimator(
                 model=model,
-                par_v=np.array([0.0]),
-                par_c=np.array([true_scale]),
+                par_v=np.array([0.0, 2.0]),
+                par_c=None,
                 kernel="Gaussian",
                 bandwidth=bandwidth,
                 solver={
@@ -95,11 +95,11 @@ def bench_sgd_estimation():
             return res["estimator"]
 
         def run_cython():
-            model = GaussianLoc(par_v=0.0, par_c=true_scale, random_state=n)
+            model = Gaussian(par_v=np.array([0.0, 2.0]), par_c=None, random_state=n)
             mmd_estim = MMDEstimator(
                 model=model,
-                par_v=np.array([0.0]),
-                par_c=np.array([true_scale]),
+                par_v=np.array([0.0, 2.0]),
+                par_c=None,
                 kernel="Gaussian",
                 bandwidth=bandwidth,
                 solver={

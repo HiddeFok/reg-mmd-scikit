@@ -9,3 +9,18 @@ cdef class CyEstimationModel:
     cdef void score(self, double[:] x, double[:, :] out) noexcept nogil
     cdef void update(self, double[:] par_v) noexcept nogil
     cdef void project_params(self, double[:] par_v) noexcept nogil
+
+
+cdef class CyGaussianLoc(CyEstimationModel):
+    cdef double loc
+    cdef double scale
+
+
+cdef class CyGaussianScale(CyEstimationModel):
+    cdef double loc
+    cdef double scale
+
+
+cdef class CyGaussian(CyEstimationModel):
+    cdef double loc
+    cdef double scale
