@@ -1,5 +1,8 @@
 # distutils: extra_compile_args = -Xpreprocessor -fopenmp -I/usr/local/opt/libomp/include
 # distutils: extra_link_args = -L/usr/local/opt/libomp/lib -lomp
+# cython: cdivision=True
+
+import cython
 
 from libc.math cimport exp, fabs
 from cython.parallel cimport prange
@@ -8,6 +11,8 @@ DEF PRANGE_THRESHOLD = 500
 DEF PRANGE_THRESHOLD_DIST = 1_000_000
 
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
 cdef inline double _kernel_eval(double v, KernelType kernel) noexcept nogil:
     if kernel == GAUSSIAN:
         return exp(-v * v)
@@ -16,7 +21,8 @@ cdef inline double _kernel_eval(double v, KernelType kernel) noexcept nogil:
     else:  # CAUCHY
         return 1.0 / (2.0 + v * v)
 
-
+@cython.boundscheck(False)
+@cython.wraparound(False)
 cdef void K1d_dist(
     double[:] u,
     double[:] out,
@@ -32,7 +38,8 @@ cdef void K1d_dist(
         for i in range(n):
             out[i] = _kernel_eval(u[i] / bandwidth, kernel)
 
-
+@cython.boundscheck(False)
+@cython.wraparound(False)
 cdef void K1d(
     double[:] x,
     double[:] y,
@@ -50,7 +57,8 @@ cdef void K1d(
             for j in range(m):
                 out[i, j] = _kernel_eval((x[i] - y[j]) / bandwidth, kernel)
 
-
+@cython.boundscheck(False)
+@cython.wraparound(False)
 cdef void K1d_sym(
     double[:] x,
     double[:] y,
@@ -79,7 +87,8 @@ cdef void K1d_sym(
                 out[i, j] = val
                 out[j, i] = val
 
-
+@cython.boundscheck(False)
+@cython.wraparound(False)
 cdef void kernel_combined(
     double[:] x_sampled,
     double[:] X,
@@ -104,11 +113,11 @@ cdef void kernel_combined(
                 out[j, i] = val
             # Zero diagonal (self-kernel K(0)/(n-1) is removed)
             out[i, i] = 0.0
-            # Cross-kernel: subtract K(X_i, x_s_j)/n for full row
-            for j in range(i + 1, n):
+        # Cross-kernel: subtract K(X_i, x_s_j)/n for full row
+        for i in prange(n, schedule='static'):
+            for j in range(n):
                 val = _kernel_eval((X[i] - x_sampled[j]) / bandwidth, kernel) * inv_n
                 out[i, j] -= val
-                out[j, i] -= val
     else:
         for i in range(n):
             for j in range(i + 1, n):
@@ -119,7 +128,6 @@ cdef void kernel_combined(
             for j in range(n):
                 val = _kernel_eval((X[i] - x_sampled[j]) / bandwidth, kernel) * inv_n
                 out[i, j] -= val
-                out[j, i] -= val
 
 
 def py_K1d_dist(

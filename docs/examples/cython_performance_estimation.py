@@ -15,7 +15,7 @@ def benchmark(func, n_runs=50):
         est = func()
         elapsed = (time.perf_counter() - start) * 1000
         times.append(elapsed)
-        estimator.append(abs(est - 1))
+        estimator.append(abs(est - np.array([1.0 , 1.5])).sum())
 
     times = np.array(times)
     estimator = np.array(estimator)
@@ -59,15 +59,15 @@ def bench_sgd_estimation():
     print("\n\nSGD Estimation: Gaussian model")
     print("=" * 60)
 
-    sizes = [100, 500, 1_000]
+    sizes = [100, 500, 1_000, 2000]
     burn_in = 500
     n_step = 1000
     stepsize = 1.0
     bandwidth = 2.0
     epsilon = 1e-4
-    true_loc = 1.0
+    true_loc = 2.0
     true_scale = 1.5
-    n_runs = 2
+    n_runs = 10
 
     print(f"burn_in={burn_in}, n_step={n_step}  (averaged over {n_runs} runs)")
     header(n_runs)
