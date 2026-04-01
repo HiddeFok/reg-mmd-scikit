@@ -10,7 +10,6 @@ build
 
 # Python related files 
 **/__pycache__
-uv.lock
 dist/
 *.egg-info
 .coverage
