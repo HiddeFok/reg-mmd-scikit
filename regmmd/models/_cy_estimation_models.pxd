@@ -1,4 +1,7 @@
 from numpy.random cimport bitgen_t
+cdef extern from "numpy/random/distributions.h":
+    ctypedef struct binomial_t:
+        pass
 
 
 cdef class CyEstimationModel:

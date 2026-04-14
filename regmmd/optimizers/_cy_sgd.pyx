@@ -1,10 +1,13 @@
+# distutils: extra_compile_args = -Xpreprocessor -fopenmp -I/usr/local/opt/libomp/include
+# distutils: extra_link_args = -L/usr/local/opt/libomp/lib -lomp
+# cython: boundscheck=False, wraparound=False, cdivision=True
 import numpy as np
 cimport numpy as np
 
 from libc.math cimport sqrt
 from scipy.linalg.cython_blas cimport dgemv, dgemm
 
-from regmmd.models._cy_models cimport CyEstimationModel
+from regmmd.models._cy_estimation_models cimport CyEstimationModel
 from regmmd.optimizers._cy_kernels cimport KernelType, kernel_combined
 
 

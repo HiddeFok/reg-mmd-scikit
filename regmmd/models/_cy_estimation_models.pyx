@@ -1,13 +1,16 @@
+# distutils: extra_compile_args = -Xpreprocessor -fopenmp -I/usr/local/opt/libomp/include
+# distutils: extra_link_args = -L/usr/local/opt/libomp/lib -lomp
+# cython: boundscheck=False, wraparound=False, cdivision=True
+
 from numpy.random cimport bitgen_t
-from libc.math cimport exp, digamma, log
+from libc.math cimport exp, log
 from libc.string cimport memset 
+from scipy.special.cython_special cimport psi
 from cpython.pycapsule cimport PyCapsule_GetPointer
 
 cdef extern from "numpy/random/distributions.h":
     double random_standard_normal(bitgen_t *bitgen_state) nogil
     double random_beta(bitgen_t *bitgen_state, double a, double b) nogil
-    ctypedef struct binomial_t:
-        pass
     int random_binomial(bitgen_t *bitgen_state, double p, int n, binomial_t *binomial) nogil
 
 cdef class CyEstimationModel:
@@ -140,7 +143,7 @@ cdef class CyBetaA(CyEstimationModel):
         
     cdef void score(self, double[:] x, double[:, :] out) noexcept nogil:
         cdef Py_ssize_t i, n = x.shape[0]
-        cdef double log_beta_func = -digamma(self.alpha) + digamma(self.alpha + self.beta)
+        cdef double log_beta_func = -psi(self.alpha) + psi(self.alpha + self.beta)
         for i in range(n):
             out[i, 0] = log(x[i]) + log_beta_func
 
@@ -170,7 +173,7 @@ cdef class CyBetaB(CyEstimationModel):
         
     cdef void score(self, double[:] x, double[:, :] out) noexcept nogil:
         cdef Py_ssize_t i, n = x.shape[0]
-        cdef double log_beta_func = -digamma(self.beta) + digamma(self.alpha + self.beta)
+        cdef double log_beta_func = -psi(self.beta) + psi(self.alpha + self.beta)
         for i in range(n):
             out[i, 0] = log(1 - x[i]) + log_beta_func
 
@@ -199,8 +202,8 @@ cdef class CyBeta(CyEstimationModel):
         
     cdef void score(self, double[:] x, double[:, :] out) noexcept nogil:
         cdef Py_ssize_t i, n = x.shape[0]
-        cdef double log_alpha_func = -digamma(self.alpha) + digamma(self.alpha + self.beta)
-        cdef double log_beta_func = -digamma(self.beta) + digamma(self.alpha + self.beta)
+        cdef double log_alpha_func = -psi(self.alpha) + psi(self.alpha + self.beta)
+        cdef double log_beta_func = -psi(self.beta) + psi(self.alpha + self.beta)
         for i in range(n):
             out[i, 0] = log(x[i]) + log_alpha_func
             out[i, 1] = log(1 - x[i]) + log_beta_func
