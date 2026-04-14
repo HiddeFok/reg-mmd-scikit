@@ -83,6 +83,14 @@ class BetaA(BetaBase):
         par_v = max(1e-6, par_v)
         return par_v
 
+    def _build_cy_model(self):
+        """Create a CyBetaA mirror of this model"""
+        from regmmd.models._cy_estimation_models import CyBetaA
+        from numpy.random import PCG64
+
+        bit_gen = PCG64(seed=self.random_state)
+        return CyBetaA(self.alpha, self.beta, bit_gen)
+
 
 class BetaB(BetaBase):
     def __init__(self, par_v=None, par_c=None, random_state=None):
@@ -106,6 +114,14 @@ class BetaB(BetaBase):
     def _project_params(self, par_v):
         par_v = max(1e-6, par_v)
         return par_v
+
+    def _build_cy_model(self):
+        """Create a CyBetaB mirror of this model"""
+        from regmmd.models._cy_estimation_models import CyBetaB
+        from numpy.random import PCG64
+
+        bit_gen = PCG64(seed=self.random_state)
+        return CyBetaB(self.alpha, self.beta, bit_gen)
 
 
 class Beta(BetaBase):
@@ -137,3 +153,11 @@ class Beta(BetaBase):
         par_v[0] = max(1e-6, par_v[0])
         par_v[1] = max(1e-6, par_v[1])
         return par_v
+
+    def _build_cy_model(self):
+        """Create a CyBeta mirror of this model"""
+        from regmmd.models._cy_estimation_models import CyBeta
+        from numpy.random import PCG64
+
+        bit_gen = PCG64(seed=self.random_state)
+        return CyBeta(self.alpha, self.beta, bit_gen)

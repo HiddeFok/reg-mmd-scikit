@@ -83,6 +83,16 @@ class GammaShape(GammaBase):
         par_v = max(1e-6, par_v)
         return par_v
 
+    def _build_cy_model(self):
+        """Create a CyGammaShape mirror of this model"""
+        from regmmd.models._cy_estimation_models import CyGammaShape
+        from numpy.random import PCG64
+
+        bit_gen = PCG64(seed=self.random_state)
+        return CyGammaShape(self.shape, self.rate, bit_gen)
+
+
+
 
 class GammaRate(GammaBase):
     def __init__(self, par_v=None, par_c=None, random_state=None):
@@ -108,6 +118,14 @@ class GammaRate(GammaBase):
         # of the R package
         par_v = max(1e-6, par_v)
         return par_v
+
+    def _build_cy_model(self):
+        """Create a CyGammaRate mirror of this model"""
+        from regmmd.models._cy_estimation_models import CyGammaRate
+        from numpy.random import PCG64
+
+        bit_gen = PCG64(seed=self.random_state)
+        return CyGammaRate(self.shape, self.rate, bit_gen)
 
 
 class Gamma(GammaBase):
@@ -141,3 +159,11 @@ class Gamma(GammaBase):
         par_v[0] = max(1e-6, par_v[0])
         par_v[1] = max(1e-6, par_v[1])
         return par_v
+
+    def _build_cy_model(self):
+        """Create a CyGamma mirror of this model"""
+        from regmmd.models._cy_estimation_models import CyGamma
+        from numpy.random import PCG64
+
+        bit_gen = PCG64(seed=self.random_state)
+        return CyGamma(self.shape, self.rate, bit_gen)

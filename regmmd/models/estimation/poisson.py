@@ -54,6 +54,14 @@ class PoissonBase(EstimationModel):
         par_c = None
         return par_v, par_c
 
+    def _build_cy_model(self):
+        """Create a CyPoisson mirror of this model"""
+        from regmmd.models._cy_estimation_models import CyPoisson
+        from numpy.random import PCG64
+
+        bit_gen = PCG64(seed=self.random_state)
+        return CyPoisson(self.lam, bit_gen)
+
 
 class Poisson(PoissonBase):
     def __init__(self, par_v=None, par_c=None, random_state=None):

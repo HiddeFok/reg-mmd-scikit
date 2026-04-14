@@ -83,7 +83,7 @@ class GaussianLoc(GaussianBase):
 
     def _build_cy_model(self):
         """Create a CyGaussianLoc mirror of this model"""
-        from regmmd.models._cy_models import CyGaussianLoc
+        from regmmd.models._cy_estimation_models import CyGaussianLoc
         from numpy.random import PCG64
 
         bit_gen = PCG64(seed=self.random_state)
@@ -115,7 +115,7 @@ class GaussianScale(GaussianBase):
 
     def _build_cy_model(self):
         """Create a CyGaussianScale mirror of this model"""
-        from regmmd.models._cy_models import CyGaussianScale
+        from regmmd.models._cy_estimation_models import CyGaussianScale
         from numpy.random import PCG64
 
         bit_gen = PCG64(seed=self.random_state)
