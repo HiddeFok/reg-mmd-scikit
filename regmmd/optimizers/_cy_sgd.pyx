@@ -1,5 +1,3 @@
-# distutils: extra_compile_args = -Xpreprocessor -fopenmp -I/usr/local/opt/libomp/include
-# distutils: extra_link_args = -L/usr/local/opt/libomp/lib -lomp
 # cython: boundscheck=False, wraparound=False, cdivision=True
 import numpy as np
 cimport numpy as np

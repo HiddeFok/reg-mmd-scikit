@@ -1,5 +1,3 @@
-# distutils: extra_compile_args = -Xpreprocessor -fopenmp -I/usr/local/opt/libomp/include
-# distutils: extra_link_args = -L/usr/local/opt/libomp/lib -lomp
 # cython: boundscheck=False, wraparound=False, cdivision=True
 
 from numpy.random cimport bitgen_t
@@ -12,6 +10,8 @@ cdef extern from "numpy/random/distributions.h":
     double random_standard_normal(bitgen_t *bitgen_state) nogil
     double random_beta(bitgen_t *bitgen_state, double a, double b) nogil
     int random_binomial(bitgen_t *bitgen_state, double p, int n, binomial_t *binomial) nogil
+    double random_gamma(bitgen_t *bitgen_state, double shape, double scale) nogil
+    int random_poisson(bitgen_t *bitgen_state, double lam) nogil
 
 cdef class CyEstimationModel:
     cdef void sample_n(self, Py_ssize_t n, double[:] out) noexcept nogil:
@@ -251,3 +251,131 @@ cdef class CyBinomial(CyEstimationModel):
             par_v[0] = 1e-6
         if par_v[0] > (1 - 1e-6):
             par_v[0] = (1 - 1e-6)
+
+
+cdef class CyGammaShape(CyEstimationModel):
+    """Gamma with shape parameter variable and Rate fixed"""
+
+    def __init__(self, double shape, double rate, bit_gen):
+        self.shape = shape
+        self.rate = rate
+        self._bit_gen = bit_gen
+        self.rng = <bitgen_t *>PyCapsule_GetPointer(
+            bit_gen.capsule, "BitGenerator"
+        )
+
+    cdef void sample_n(self, Py_ssize_t n, double[:] out) noexcept nogil:
+        cdef Py_ssize_t i
+        cdef double scale = 1 / self.rate
+        for i in range(n):
+            out[i] = random_gamma(self.rng, self.shape, scale)
+        
+    cdef void score(self, double[:] x, double[:, :] out) noexcept nogil:
+        cdef Py_ssize_t i, n = x.shape[0]
+        cdef double log_rate = log(self.rate)
+        cdef double log_gamma = psi(self.shape)
+        for i in range(n):
+            out[i, 0] = log(x[i]) + log_rate + log_gamma
+
+    cdef void update(self, double[:] par_v) noexcept nogil:
+        self.shape = par_v[0]
+
+    cdef void project_params(self, double[:] par_v) noexcept nogil:
+        if par_v[0] < 1e-6:
+            par_v[0] = 1e-6
+
+
+cdef class CyGammaRate(CyEstimationModel):
+    """Gamma with rate parameter variable and shape fixed"""
+
+    def __init__(self, double shape, double rate, bit_gen):
+        self.shape = shape
+        self.rate = rate
+        self._bit_gen = bit_gen
+        self.rng = <bitgen_t *>PyCapsule_GetPointer(
+            bit_gen.capsule, "BitGenerator"
+        )
+
+    cdef void sample_n(self, Py_ssize_t n, double[:] out) noexcept nogil:
+        cdef Py_ssize_t i
+        cdef double scale = 1 / self.rate
+        for i in range(n):
+            out[i] = random_gamma(self.rng, self.shape, scale)
+        
+    cdef void score(self, double[:] x, double[:, :] out) noexcept nogil:
+        cdef Py_ssize_t i, n = x.shape[0]
+        cdef double log_rate = self.shape / self.rate
+        for i in range(n):
+            out[i, 0] = -x[i] + log_rate
+
+    cdef void update(self, double[:] par_v) noexcept nogil:
+        self.rate = par_v[0]
+
+    cdef void project_params(self, double[:] par_v) noexcept nogil:
+        if par_v[0] < 1e-6:
+            par_v[0] = 1e-6
+
+cdef class CyGamma(CyEstimationModel):
+    """Gamma with both parameter variable"""
+
+    def __init__(self, double shape, double rate, bit_gen):
+        self.shape = shape
+        self.rate = rate
+        self._bit_gen = bit_gen
+        self.rng = <bitgen_t *>PyCapsule_GetPointer(
+            bit_gen.capsule, "BitGenerator"
+        )
+
+    cdef void sample_n(self, Py_ssize_t n, double[:] out) noexcept nogil:
+        cdef Py_ssize_t i
+        cdef double scale = 1 / self.rate
+        for i in range(n):
+            out[i] = random_gamma(self.rng, self.shape, scale)
+        
+    cdef void score(self, double[:] x, double[:, :] out) noexcept nogil:
+        cdef Py_ssize_t i, n = x.shape[0]
+        cdef double shape_div_rate = self.shape / self.rate
+        cdef double log_rate = log(self.rate)
+        cdef double log_gamma = psi(self.shape)
+        for i in range(n):
+            out[i, 0] = log(x) + log_rate + log_gamma
+            out[i, 1] = -x[i] + shape_div_rate
+
+    cdef void update(self, double[:] par_v) noexcept nogil:
+        self.shape = par_v[0]
+        self.rate = par_v[1]
+
+    cdef void project_params(self, double[:] par_v) noexcept nogil:
+        if par_v[0] < 1e-6:
+            par_v[0] = 1e-6
+        if par_v[1] < 1e-6:
+            par_v[1] = 1e-6
+
+
+cdef class CyPoisson(CyEstimationModel):
+    """Poisson with lambda parameter variable"""
+
+    def __init__(self, double lam, bit_gen):
+        self.lam = lam
+        self._bit_gen = bit_gen
+        self.rng = <bitgen_t *>PyCapsule_GetPointer(
+            bit_gen.capsule, "BitGenerator"
+        )
+
+    cdef void sample_n(self, Py_ssize_t n, double[:] out) noexcept nogil:
+        cdef Py_ssize_t i
+        for i in range(n):
+            out[i] = random_gamma(self.rng, self.lam)
+        
+    cdef void score(self, double[:] x, double[:, :] out) noexcept nogil:
+        cdef Py_ssize_t i, n = x.shape[0]
+        cdef double inv_lam = 1 / self.rate
+        for i in range(n):
+            out[i, 0] = -1 + x[i] * inv_lam
+
+    cdef void update(self, double[:] par_v) noexcept nogil:
+        self.lam = par_v[0]
+
+    cdef void project_params(self, double[:] par_v) noexcept nogil:
+        if par_v[0] < 1e-6:
+            par_v[0] = 1e-6

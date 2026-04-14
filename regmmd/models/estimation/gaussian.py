@@ -155,7 +155,7 @@ class Gaussian(GaussianBase):
 
     def _build_cy_model(self):
         """Create a CyGaussian mirror of this model"""
-        from regmmd.models._cy_models import CyGaussian
+        from regmmd.models._cy_estimation_models import CyGaussian
         from numpy.random import PCG64
 
         bit_gen = PCG64(seed=self.random_state)
