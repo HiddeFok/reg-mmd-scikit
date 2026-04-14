@@ -5,6 +5,7 @@ from cpython.pycapsule cimport PyCapsule_GetPointer
 cdef extern from "numpy/random/distributions.h":
     double random_standard_normal(bitgen_t *bitgen_state) nogil
     double random_beta(bitgen_t *bitgen_state, double a, double b) nogil
+    double random_binomial(bitgen_t *bitgen_state, double p, int n ) nogil
 
 cdef class CyEstimationModel:
     cdef void sample_n(self, Py_ssize_t n, double[:] out) noexcept nogil:
@@ -204,3 +205,34 @@ cdef class CyBeta(CyEstimationModel):
             par_v[0] = 1e-6
         if par_v[1] < 1e-6:
             par_v[1] = 1e-6
+
+
+cdef class CyBinomial(CyEstimationModel):
+    """Binomial with p variable and n fixed"""
+
+    def __init__(self, double p, int n, bit_gen):
+        self.p = p
+        self.n = n
+        self._bit_gen = bit_gen
+        self.rng = <bitgen_t *>PyCapsule_GetPointer()
+
+    cdef void sample_n(self, Py_ssize_t n, double[:] out) noexcept nogil:
+        cdef Py_ssize_t i
+        for i in range(n):
+            out[i] = random_binomial(self.rng, self.p, self.n)
+        
+    cdef void score(self, double[:] x, double[:, :] out) noexcept nogil:
+        cdef Py_ssize_t i, n = x.shape[0]
+        cdef double p_inv = 1 / self.p
+        cdef double one_p_inv = 1 / (1 - self.p)
+        for i in range(n):
+            out[i, 0] = x[i] * p_inv - (self.n - x[i]) * one_p_inv
+
+    cdef void update(self, double[:] par_v) noexcept nogil:
+        self.p = par_v[0]
+
+    cdef void project_params(self, double[:] par_v) noexcept nogil:
+        if par_v[0] < 1e-6:
+            par_v[0] = 1e-6
+        if par_v[0] > (1 - 1e-6):
+            par_v[0] = (1 - 1e-6)
