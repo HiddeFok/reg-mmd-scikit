@@ -1,5 +1,3 @@
-# distutils: extra_compile_args = -Xpreprocessor -fopenmp -I/opt/homebrew/opt/libomp/include
-# distutils: extra_link_args = -L/opt/homebrew/opt/libomp/lib -lomp
 # cython: cdivision=True
 
 import cython

@@ -338,7 +338,7 @@ cdef class CyGamma(CyEstimationModel):
         cdef double log_rate = log(self.rate)
         cdef double log_gamma = psi(self.shape)
         for i in range(n):
-            out[i, 0] = log(x) + log_rate + log_gamma
+            out[i, 0] = log(x[i]) + log_rate + log_gamma
             out[i, 1] = -x[i] + shape_div_rate
 
     cdef void update(self, double[:] par_v) noexcept nogil:
@@ -365,11 +365,11 @@ cdef class CyPoisson(CyEstimationModel):
     cdef void sample_n(self, Py_ssize_t n, double[:] out) noexcept nogil:
         cdef Py_ssize_t i
         for i in range(n):
-            out[i] = random_gamma(self.rng, self.lam)
+            out[i] = random_poisson(self.rng, self.lam)
         
     cdef void score(self, double[:] x, double[:, :] out) noexcept nogil:
         cdef Py_ssize_t i, n = x.shape[0]
-        cdef double inv_lam = 1 / self.rate
+        cdef double inv_lam = 1 / self.lam
         for i in range(n):
             out[i, 0] = -1 + x[i] * inv_lam
 
