@@ -44,6 +44,7 @@ cdef class CyBeta(CyEstimationModel):
 cdef class CyBinomial(CyEstimationModel):
     cdef double p
     cdef int n
+    cdef binomial_t binomial_state
 
 
 cdef class CyGamma(CyEstimationModel):

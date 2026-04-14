@@ -1,11 +1,14 @@
 from numpy.random cimport bitgen_t
 from libc.math cimport exp, digamma, log
+from libc.string cimport memset 
 from cpython.pycapsule cimport PyCapsule_GetPointer
 
 cdef extern from "numpy/random/distributions.h":
     double random_standard_normal(bitgen_t *bitgen_state) nogil
     double random_beta(bitgen_t *bitgen_state, double a, double b) nogil
-    double random_binomial(bitgen_t *bitgen_state, double p, int n ) nogil
+    ctypedef struct binomial_t:
+        pass
+    int random_binomial(bitgen_t *bitgen_state, double p, int n, binomial_t *binomial) nogil
 
 cdef class CyEstimationModel:
     cdef void sample_n(self, Py_ssize_t n, double[:] out) noexcept nogil:
@@ -126,7 +129,9 @@ cdef class CyBetaA(CyEstimationModel):
         self.alpha = alpha
         self.beta = beta
         self._bit_gen = bit_gen
-        self.rng = <bitgen_t *>PyCapsule_GetPointer()
+        self.rng = <bitgen_t *>PyCapsule_GetPointer(
+            bit_gen.capsule, "BitGenerator"
+        )
 
     cdef void sample_n(self, Py_ssize_t n, double[:] out) noexcept nogil:
         cdef Py_ssize_t i
@@ -154,7 +159,9 @@ cdef class CyBetaB(CyEstimationModel):
         self.alpha = alpha
         self.beta = beta
         self._bit_gen = bit_gen
-        self.rng = <bitgen_t *>PyCapsule_GetPointer()
+        self.rng = <bitgen_t *>PyCapsule_GetPointer(
+            bit_gen.capsule, "BitGenerator"
+        )
 
     cdef void sample_n(self, Py_ssize_t n, double[:] out) noexcept nogil:
         cdef Py_ssize_t i
@@ -181,7 +188,9 @@ cdef class CyBeta(CyEstimationModel):
         self.alpha = alpha
         self.beta = beta
         self._bit_gen = bit_gen
-        self.rng = <bitgen_t *>PyCapsule_GetPointer()
+        self.rng = <bitgen_t *>PyCapsule_GetPointer(
+            bit_gen.capsule, "BitGenerator"
+        )
 
     cdef void sample_n(self, Py_ssize_t n, double[:] out) noexcept nogil:
         cdef Py_ssize_t i
@@ -214,12 +223,15 @@ cdef class CyBinomial(CyEstimationModel):
         self.p = p
         self.n = n
         self._bit_gen = bit_gen
-        self.rng = <bitgen_t *>PyCapsule_GetPointer()
+        self.rng = <bitgen_t *>PyCapsule_GetPointer(
+            bit_gen.capsule, "BitGenerator"
+        )
+        memset(&self.binomial_state, 0, sizeof(binomial_t))
 
     cdef void sample_n(self, Py_ssize_t n, double[:] out) noexcept nogil:
         cdef Py_ssize_t i
         for i in range(n):
-            out[i] = random_binomial(self.rng, self.p, self.n)
+            out[i] = random_binomial(self.rng, self.p, self.n, &self.binomial_state)
         
     cdef void score(self, double[:] x, double[:, :] out) noexcept nogil:
         cdef Py_ssize_t i, n = x.shape[0]
