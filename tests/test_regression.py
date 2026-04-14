@@ -1,4 +1,5 @@
 import numpy as np
+import pytest 
 
 from regmmd.models.regression.linear_gaussian import LinearGaussian, LinearGaussianLoc
 from regmmd.models.regression.gamma import GammaRegressionLoc

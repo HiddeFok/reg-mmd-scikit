@@ -8,10 +8,23 @@ on:
 
 jobs:
   build-wheels:
+    name: Build wheels for ${{ matrix.os }}
+    runs-on: ${{ matrix.runs-on }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-13, macos-14, windows-latest]
-    runs-on: ${{ matrix.os }}
+        include:
+          - os: linux-intel
+            runs-on: ubuntu-latest
+          - os: linux-arm
+            runs-on: ubuntu-24.04-arm
+          - os: windows-intel
+            runs-on: windows-latest
+          - os: windows-arm
+            runs-on: windows-11-arm
+          - os: macos-intel
+            runs-on: macos-15-intel
+          - os: macos-arm
+            runs-on: macos-14
     steps:
     - uses: actions/checkout@v6
       with: 
@@ -23,7 +36,6 @@ jobs:
         CIBW_BEFORE_BUILD_LINUX: yum install -y libgomp || apt-get install -y libgomp1
         CIBW_ARCHS_MACOS: "x86_64 arm64"
         CIBW_ARCHS_LINUX: "x86_64 aarch64"
-        CIBW_SKIP: "pp* *-musllinux_i686"
     - uses: actions/upload-artifact@v4 
       with: 
         name: cibw-wheels-${{ matrix.os }}, 
@@ -60,3 +72,6 @@ jobs:
             merge-multiple: true
 
       - uses: pypa/gh-action-pypi-publish@release/v1
+        # To test uploads to TestPyPI, uncomment the following:
+        with:
+          repository-url: https://test.pypi.org/legacy/
