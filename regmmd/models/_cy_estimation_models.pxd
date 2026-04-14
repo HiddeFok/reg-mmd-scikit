@@ -24,3 +24,39 @@ cdef class CyGaussianScale(CyEstimationModel):
 cdef class CyGaussian(CyEstimationModel):
     cdef double loc
     cdef double scale
+
+
+cdef class CyBeta(CyEstimationModel):
+    cdef double alpha
+    cdef double beta
+
+cdef class CyBetaA(CyEstimationModel):
+    cdef double alpha
+    cdef double beta
+
+cdef class CyBetaB(CyEstimationModel):
+    cdef double alpha
+    cdef double beta
+
+cdef class CyBinomial(CyEstimationModel):
+    cdef double p
+    cdef int n
+
+cdef class CyGamma(CyEstimationModel):
+    cdef double shape
+    cdef double rate
+
+cdef class CyGammaShape(CyEstimationModel):
+    cdef double shape
+    cdef double rate
+
+cdef class CyGammaRate(CyEstimationModel):
+    cdef double shape
+    cdef double rate
+
+cdef class CyPoisson(CyEstimationModel):
+    cdef double lam
+
+
+
+
