@@ -8,7 +8,9 @@ from Cython.Build import cythonize
 
 import numpy as np
 
-numpy_random_lib_dir = os.path.join(os.path.dirname(np.random.__file__))
+numpy_random_lib_dir = os.path.join(
+      os.path.dirname(np.__file__), "random", "lib"
+)
 
 if sys.platform == "darwin":
     omp_compile = ["-Xpreprocessor", "-fopenmp"]
