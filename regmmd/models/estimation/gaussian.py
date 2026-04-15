@@ -1,6 +1,6 @@
 import numpy as np
 
-from regmmd.models.base_model import EstimationModel
+from regmmd.models.base_model import EstimationModel, none_on_import_error
 
 
 class GaussianBase(EstimationModel):
@@ -81,6 +81,7 @@ class GaussianLoc(GaussianBase):
             )
         return None
 
+    @none_on_import_error
     def _build_cy_model(self):
         """Create a CyGaussianLoc mirror of this model"""
         from regmmd.models._cy_estimation_models import CyGaussianLoc
@@ -113,6 +114,7 @@ class GaussianScale(GaussianBase):
     def _project_params(self, par_v):
         return max(1e-6, par_v)
 
+    @none_on_import_error
     def _build_cy_model(self):
         """Create a CyGaussianScale mirror of this model"""
         from regmmd.models._cy_estimation_models import CyGaussianScale
@@ -153,6 +155,7 @@ class Gaussian(GaussianBase):
         par_v[1] = max(1e-6, par_v[1])
         return par_v
 
+    @none_on_import_error
     def _build_cy_model(self):
         """Create a CyGaussian mirror of this model"""
         from regmmd.models._cy_estimation_models import CyGaussian

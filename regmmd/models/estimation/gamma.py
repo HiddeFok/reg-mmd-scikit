@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.special import gamma, digamma
 
-from regmmd.models.base_model import EstimationModel
+from regmmd.models.base_model import EstimationModel, none_on_import_error
 
 
 class GammaBase(EstimationModel):
@@ -83,6 +83,7 @@ class GammaShape(GammaBase):
         par_v = max(1e-6, par_v)
         return par_v
 
+    @none_on_import_error
     def _build_cy_model(self):
         """Create a CyGammaShape mirror of this model"""
         from regmmd.models._cy_estimation_models import CyGammaShape
@@ -119,6 +120,7 @@ class GammaRate(GammaBase):
         par_v = max(1e-6, par_v)
         return par_v
 
+    @none_on_import_error
     def _build_cy_model(self):
         """Create a CyGammaRate mirror of this model"""
         from regmmd.models._cy_estimation_models import CyGammaRate
@@ -160,6 +162,7 @@ class Gamma(GammaBase):
         par_v[1] = max(1e-6, par_v[1])
         return par_v
 
+    @none_on_import_error
     def _build_cy_model(self):
         """Create a CyGamma mirror of this model"""
         from regmmd.models._cy_estimation_models import CyGamma

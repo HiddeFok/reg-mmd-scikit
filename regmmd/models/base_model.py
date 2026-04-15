@@ -1,8 +1,19 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Union
+from functools import wraps
 
 from numpy.typing import NDArray
 from regmmd.utils import MMDResult
+
+
+def none_on_import_error(method):
+    @wraps(method)
+    def wrapper(*args, **kwargs):
+        try:
+            return method(*args, **kwargs)
+        except ImportError:
+            return None
+    return wrapper
 
 
 class EstimationModel(ABC):
