@@ -1,8 +1,14 @@
-import sys, platform
+
+import sys
+import platform
+import os
+
 from setuptools import setup, Extension
 from Cython.Build import cythonize
-from pathlib import Path
+
 import numpy as np
+
+numpy_random_lib_dir = os.path.join(os.path.dirname(np.random.__file__))
 
 if sys.platform == "darwin":
     omp_compile = ["-Xpreprocessor", "-fopenmp"]
@@ -39,7 +45,9 @@ cy_sgd = Extension(
 cy_estimation_model = Extension(
     "regmmd.models._cy_estimation_models",
     sources=["regmmd/models/_cy_estimation_models.pyx"],
-    include_dirs=[np.get_include(), "."]
+    include_dirs=[np.get_include(), "."],
+    library_dirs=[numpy_random_lib_dir],
+    libraries=["npyrandom"]
 )
 
 setup(
