@@ -36,7 +36,7 @@ jobs:
         CIBW_BEFORE_BUILD_LINUX: yum install -y libgomp || apt-get install -y libgomp1
         CIBW_ARCHS_MACOS: "x86_64 arm64"
         CIBW_ARCHS_LINUX: "x86_64 aarch64"
-        CIBW_ENVIRONMENT_MACOS: "14.0"
+        CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=14.0
     - uses: actions/upload-artifact@v4 
       with: 
         name: cibw-wheels-${{ matrix.os }}, 
