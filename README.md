@@ -53,6 +53,11 @@ the optimizer automatically falls back to the general-purpose SGD solver which
 works with any model. For a detailed overview, see the
 [documentation](https://hiddefok.github.io/reg-mmd-scikit/).
 
+### Speedup
+
+Where possible, a `Cython` version of the model is implemented as well. 
+
+
 ## Examples
 
 The package has 2 main classes, `MMDEstimator` and `MMDRegressor` that
