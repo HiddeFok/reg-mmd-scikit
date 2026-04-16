@@ -9,6 +9,8 @@ from regmmd.utils import MMDResult
 
 from regmmd.optimizers._common import _median_heuristic, sort_obs, _get_grad_estimate
 
+KERNEL_MAP = {"Gaussian": 0, "Laplace": 1, "Cauchy": 2}
+
 
 def _sgd_estimation(
     X: NDArray,
@@ -21,8 +23,10 @@ def _sgd_estimation(
     stepsize: float = 1,
     bandwidth: float = 1.0,
     epsilon: float = 1e-4,
+    use_fast: bool = True,
 ) -> MMDResult:
-    """Estimate model parameters via AdaGrad stochastic gradient descent on the MMD criterion.
+    """Estimate model parameters via AdaGrad stochastic gradient descent on the
+    MMD criterion.
 
     Minimizes the MMD between the empirical distribution of ``X`` and the model's
     distribution using a stochastic gradient algorithm. The optimization runs a
@@ -37,8 +41,8 @@ def _sgd_estimation(
     par_v : np.array
         Initial values of the variable (optimized) model parameters.
 
-    par_c : np.array
-        Constant model parameters that are not optimized.
+    par_c : array or None, default=None
+        Unused; included for API consistency.
 
     model : EstimationModel
         The statistical model to fit. Must implement ``sample_n``, ``score``,
@@ -72,11 +76,11 @@ def _sgd_estimation(
         Dictionary containing:
 
         - ``par_v_init`` : initial variable parameters.
-        - ``par_c_init`` : initial constant parameters.
         - ``stepsize`` : step size used.
         - ``bandwidth`` : bandwidth used (resolved if ``"auto"``).
         - ``estimator`` : Polyak-Ruppert average of parameter iterates.
-        - ``trajectory`` : parameter trajectory of shape ``(n_params, burn_in + n_step + 1)``.
+        - ``trajectory`` : parameter trajectory of shape
+            ``(n_params, burn_in + n_step + 1)``.
     """
     n = X.shape[0]
 
@@ -91,64 +95,94 @@ def _sgd_estimation(
         "bandwidth": bandwidth,
         "convergence": 1,
     }
-    if len(par_v.shape) == 0:
-        trajectory = np.zeros(shape=(1, burn_in + n_step + 1))
-    else:
-        trajectory = np.zeros(shape=(par_v.shape[0], burn_in + n_step + 1))
-    trajectory[:, 0] = par_v
 
-    for i in range(burn_in):
-        x_sampled = model.sample_n(n=n)
+    cy_model = None
+    if use_fast:
+        cy_model = model._build_cy_model()
 
-        ker_sampled_1 = K1d(x_sampled, x_sampled, kernel=kernel, bandwidth=bandwidth)
-        ker_sampled_1 = ker_sampled_1 / (n - 1)
-        np.fill_diagonal(ker_sampled_1, 0)
+    if cy_model is not None:
+        from regmmd.optimizers._cy_sgd import cy_sgd_estimation
 
-        ker_sampled_2 = K1d(X, x_sampled, kernel=kernel, bandwidth=bandwidth) / n
-        ker = ker_sampled_1 - ker_sampled_2
-
-        grad_ll = model.score(x_sampled)
-        grad = 2 * np.mean(ker @ grad_ll, axis=0)
-        # Expected outcome shape: (n, par.shape) -> (shape_par)
-
-        norm_grad += np.sum(np.square(grad))
-        par_v -= stepsize * grad / np.sqrt(norm_grad)
-        par_v = model._project_params(par_v=par_v)
-
+        par_mean, trajectory = cy_sgd_estimation(
+            X,
+            np.atleast_1d(np.asarray(par_v, dtype=np.float64)),
+            cy_model,
+            KERNEL_MAP[kernel],
+            burn_in,
+            n_step,
+            stepsize,
+            bandwidth,
+            epsilon,
+        )
+        par_mean = np.asarray(par_mean)
+        trajectory = np.asarray(trajectory)
         model.update(par_v=par_v)
 
-        # only for gaussian par[1] = max(par[1], 1 / (n ** 2))
-        trajectory[:, i + 1] = par_v
+    else:
+        if np.ndim(par_v) == 0:
+            trajectory = np.zeros(shape=(1, burn_in + n_step + 1))
+            par_v = np.array([par_v])
+        else:
+            trajectory = np.zeros(shape=(par_v.shape[0], burn_in + n_step + 1))
+        trajectory[:, 0] = par_v
 
-    par_mean = par_v
+        for i in range(burn_in):
+            x_sampled = model.sample_n(n=n)
 
-    for i in range(n_step):
-        x_sampled = model.sample_n(n=n)
+            ker_sampled_1 = K1d(
+                x_sampled, x_sampled, kernel=kernel, bandwidth=bandwidth
+            )
+            ker_sampled_1 = ker_sampled_1 / (n - 1)
+            np.fill_diagonal(ker_sampled_1, 0)
 
-        ker_sampled_1 = K1d(x_sampled, x_sampled, kernel=kernel, bandwidth=bandwidth)
-        ker_sampled_1 = ker_sampled_1 / (n - 1)
-        np.fill_diagonal(ker_sampled_1, 0)
+            ker_sampled_2 = K1d(X, x_sampled, kernel=kernel, bandwidth=bandwidth) / n
+            ker = ker_sampled_1 - ker_sampled_2
 
-        ker_sampled_2 = K1d(X, x_sampled, kernel=kernel, bandwidth=bandwidth) / n
-        ker = ker_sampled_1 - ker_sampled_2
+            grad_ll = model.score(x_sampled)
+            grad = 2 * np.mean(ker @ grad_ll, axis=0)
+            # Expected outcome shape: (n, par.shape) -> (shape_par)
 
-        grad_ll = model.score(x_sampled)
-        grad = 2 * np.mean(ker @ grad_ll, axis=0)
-        # Expected outcome shape: (n, par.shape) -> (shape_par)
+            norm_grad += np.sum(np.square(grad))
+            par_v -= stepsize * grad / np.sqrt(norm_grad)
+            par_v = model._project_params(par_v=par_v)
 
-        norm_grad += np.sum(np.square(grad))
-        par_v -= stepsize * grad / np.sqrt(norm_grad)
-        par_v = model._project_params(par_v=par_v)
+            model.update(par_v=par_v)
 
-        par_mean = (par_mean * (i + 1) + par_v) / (i + 2)
+            # only for gaussian par[1] = max(par[1], 1 / (n ** 2))
+            trajectory[:, i + 1] = par_v
 
-        model.update(par_v=par_mean)
-        trajectory[:, i + burn_in + 1] = par_mean
+        par_mean = par_v
+
+        for i in range(n_step):
+            x_sampled = model.sample_n(n=n)
+
+            ker_sampled_1 = K1d(
+                x_sampled, x_sampled, kernel=kernel, bandwidth=bandwidth
+            )
+            ker_sampled_1 = ker_sampled_1 / (n - 1)
+            np.fill_diagonal(ker_sampled_1, 0)
+
+            ker_sampled_2 = K1d(X, x_sampled, kernel=kernel, bandwidth=bandwidth) / n
+            ker = ker_sampled_1 - ker_sampled_2
+
+            grad_ll = model.score(x_sampled)
+            grad = 2 * np.mean(ker @ grad_ll, axis=0)
+            # Expected outcome shape: (n, par.shape) -> (shape_par)
+
+            norm_grad += np.sum(np.square(grad))
+            par_v -= stepsize * grad / np.sqrt(norm_grad)
+            par_v = model._project_params(par_v=par_v)
+
+            par_mean = (par_mean * (i + 1) + par_v) / (i + 2)
+
+            model.update(par_v=par_mean)
+            trajectory[:, i + burn_in + 1] = par_mean
 
     res["estimator"] = par_mean
     res["trajectory"] = trajectory
 
     return res
+
 
 def _sgd_hat_regression(
     X: NDArray,
@@ -173,12 +207,12 @@ def _sgd_hat_regression(
     as described in `Universal Robust Regression via Maximum Mean Discrepancy`, Alquier,
     Gerber (2024).
 
-    Minimizes the MMD objective using the product kernel :math:`k = k_X \\otimes k_Y`.
-    The gradient is
-    approximated efficiently by splitting pairs :math:`(X_i, X_j)` into three groups: all
-    diagonal pairs, the `M_det` closest off-diagonal pairs (deterministic), and
-    M_rand randomly selected distant pairs (stochastic). This yields a gradient
-    estimator with cost linear in n per iteration.
+    Minimizes the MMD objective using the product kernel :math:`k = k_X \\otimes
+    k_Y`.  The gradient is approximated efficiently by splitting pairs
+    :math:`(X_i, X_j)` into three groups: all diagonal pairs, the `M_det`
+    closest off-diagonal pairs (deterministic), and M_rand randomly selected
+    distant pairs (stochastic). This yields a gradient estimator with cost
+    linear in n per iteration.
 
     Compared to the tilde estimator, this estimator is robust to adversarial
     contamination of the training data, but is computationally more expensive due
@@ -187,7 +221,7 @@ def _sgd_hat_regression(
 
     Parameters
     ----------
-    X : np.arrau, shape (n_samples, n_features)
+    X : np.array, shape (n_samples, n_features)
         Training input samples.
 
     y : np.array, shape (n_samples,)
@@ -456,9 +490,9 @@ def _sgd_tilde_regression(
     epsilon: float = 1e-4,
     eps_sq: float = 1e-5,
 ) -> MMDResult:
-    """Fit a regression model using the tilde estimator via stochastic gradient descent,
-    as described in `Universal Robust Regression via Maximum Mean Discrepancy`, Alquier and
-    Gerber (2024).
+    """Fit a regression model using the tilde estimator via stochastic gradient
+    descent, as described in `Universal Robust Regression via Maximum Mean
+    Discrepancy`, Alquier and Gerber (2024).
 
     Minimizes the MMD objective using only the kernel :math:`k_Y` on the target
     variable. The gradient is

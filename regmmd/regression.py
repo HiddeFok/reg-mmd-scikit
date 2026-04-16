@@ -2,6 +2,7 @@ from typing import Dict, Optional, Union
 from enum import Enum
 
 import numpy as np
+from numpy.typing import NDArray
 from sklearn.base import BaseEstimator, RegressorMixin
 
 from regmmd.models import (
@@ -76,13 +77,14 @@ def _preprocess_data(
 class MMDRegressor(RegressorMixin, BaseEstimator):
     """Regression using the Maximum Mean Discrepancy (MMD) criterion.
 
-    This class implements regression using the MMD criterion, which is a kernel-based
-    method to compare distributions by measuring the distance between mean embeddings
-    in a Reproducing Kernel Hilbert Space (RKHS).
+    This class implements regression using the MMD criterion, which is a
+    kernel-based method to compare distributions by measuring the distance
+    between mean embeddings in a Reproducing Kernel Hilbert Space (RKHS).
 
-    MMDRegressor fits a regression model by minimizing the MMD between the distributions
-    of the observed data and the model's predictions. It supports various kernel types
-    and bandwidth selection methods for both the input features and the target variables.
+    MMDRegressor fits a regression model by minimizing the MMD between the
+    distributions of the observed data and the model's predictions. It supports
+    various kernel types and bandwidth selection methods for both the input
+    features and the target variables.
 
     Parameters
     ----------
@@ -123,13 +125,15 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         such as the median heuristic.
 
     solver : dict, optional
-        A dictionary specifying the solver parameters for the optimization process.
-        It should include keys such as "burnin" (number of burn-in iterations), "n_step" (number of
-        optimization steps), and "stepsize" (learning rate for the optimizer).
-        If `None`, default solver settings are used.
+        A dictionary specifying the solver parameters for the optimization
+        process.  It should include keys such as "burnin" (number of burn-in
+        iterations), "n_step" (number of optimization steps), and "stepsize"
+        (learning rate for the optimizer).  If `None`, default solver settings
+        are used.
 
     random_state : int, optional
-        random seed to be passed to the model and any sampler used in the SGD optimizers.
+        random seed to be passed to the model and any sampler used in the SGD
+        optimizers.
 
     Attributes
     ----------
@@ -191,7 +195,9 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         self.y_offset = None
         self.X_scale = None
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> MMDResult:
+    def fit(
+        self, X: NDArray, y: NDArray, use_exact: bool = True, use_fast: bool = True
+    ) -> MMDResult:
         """Fit the MMD regression model according to the given training data.
 
         Parameters
@@ -201,6 +207,15 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
 
         y : np.ndarray, shape (n_samples,)
             Target values.
+
+        use_exact : bool, default=True
+            Use the ``model._exact_fit()`` method, if it is available, will default
+            to SGD if it is not. Mainly used for performance comparisons
+
+        use_fast : bool, default=True
+            If ``True``, will try to build the ``CyModel`` version through
+            ``model._build_cy_model()``.  If successful, a Cython version of the
+            SGD loop will be called, which often results in a ``5-10x`` speed up.
 
         Returns
         -------
@@ -212,7 +227,8 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         n_features = X.shape[1]
 
         y_int = y.astype(int)
-        if (y_int - y).sum() != 0:
+        is_not_discrete = (y_int - y).sum() != 0
+        if is_not_discrete:
             X, y, X_offset, X_scale = _preprocess_data(
                 X,
                 y,
@@ -228,22 +244,26 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         ):
             self.par_v = np.insert(self.par_v, n_features, 1)
             self.model.update(self.par_v)
-            print("model.beta", self.model.beta)
 
         if self.par_v is None or self.par_c is None:
             self.par_v, self.par_c = self.model._init_params(X=X, y=y)
 
-        res = self.model._exact_fit(
-            X=X,
-            y=y,
-            par_v=self.par_v,
-            par_c=self.par_c,
-            solver=self.solver,
-            kernel_y=self.kernel_y,
-            bandwidth_y=self.bandwidth_y,
-            kernel_X=self.kernel_X,
-            bandwidth_X=self.bandwidth_X,
-        )
+        res = None
+
+        if use_exact:
+            res = self.model._exact_fit(
+                X=X,
+                y=y,
+                par_v=self.par_v,
+                par_c=self.par_c,
+                solver=self.solver,
+                kernel_y=self.kernel_y,
+                bandwidth_y=self.bandwidth_y,
+                kernel_X=self.kernel_X,
+                bandwidth_X=self.bandwidth_X,
+                use_fast=use_fast,
+            )
+
         if res is None:
             if self.bandwidth_X == 0:
                 res = _sgd_tilde_regression(
@@ -274,9 +294,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                     bandwidth_x=self.bandwidth_X,
                 )
 
-        print("after model", self.model.beta)
-
-        if not isinstance(self.model, Logistic):
+        if is_not_discrete:
             self.beta_ = res["estimator"][:n_features] / self.X_scale
             res["estimator"][:n_features] = self.beta_
 
@@ -300,10 +318,12 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
             else:
                 self.intercept_ = 0.0
 
+            self.par_v = res["estimator"]
+
         self.model.update(par_v=self.par_v)
         return res
 
-    def predict(self, X: np.ndarray) -> np.ndarray:
+    def predict(self, X: NDArray) -> NDArray:
         """Predict using the MMD regression model.
 
         Parameters
@@ -362,7 +382,9 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         """
         if not hasattr(self, "beta_"):
             raise NotFittedError(
-                "This MMDRegressor instance is not fitted yet. Call 'fit' with appropriate arguments before using this method."
+                "This MMDRegressor instance is not fitted yet. "
+                + "Call 'fit' with appropriate arguments before "
+                + "using this method."
             )
 
 

@@ -1,6 +1,8 @@
 from typing import Dict, Optional
 from enum import Enum
 
+from numpy.typing import NDArray
+
 from sklearn.base import BaseEstimator
 
 from regmmd.models import (
@@ -86,7 +88,8 @@ class MMDEstimator(BaseEstimator):
         If ``None``, solver settings must be provided before calling :meth:`fit`.
 
     random_state : int, optional
-        random seed to be passed to the model and any sampler used in the SGD optimizers.
+        random seed to be passed to the model and any sampler used in the SGD
+        optimizers.
 
     Attributes
     ----------
@@ -98,7 +101,8 @@ class MMDEstimator(BaseEstimator):
     Notes
     -----
     - For :class:`GaussianLoc` models, an exact gradient descent routine
-      (``_gd_gaussian_loc_exact_estimation``) can be used, when the kernel is ``"Gaussian"`` as wellduring fitting.
+      (``_gd_gaussian_loc_exact_estimation``) can be used, when the kernel
+      is ``"Gaussian"`` as wellduring fitting.
     - For all other models, a stochastic gradient descent routine
       (``_sgd_estimation``) is applied instead.
     """
@@ -131,13 +135,24 @@ class MMDEstimator(BaseEstimator):
         self.bandwidth = bandwidth
         self.solver = solver
 
-    def fit(self, X) -> MMDResult:
+    def fit(
+        self, X: NDArray, use_exact: bool = True, use_fast: bool = True
+    ) -> MMDResult:
         """Fit the MMD estimation model according to the given training data.
 
         Parameters
         ----------
         X : np.ndarray, shape (n_samples, n_features)
             Training input samples.
+
+        use_exact : bool, default=True
+            Use the ``model._exact_fit()`` method, if it is available, will default
+            to SGD if it is not. Mainly used for performance comparisons
+
+        use_fast : bool, default=True
+            If ``True``, will try to build the ``CyModel`` version through
+            ``model._build_cy_model()``.  If successful, a Cython version of the
+            SGD loop will be called, which often results in a ``5-10x`` speed up.
 
         Returns
         -------
@@ -150,14 +165,19 @@ class MMDEstimator(BaseEstimator):
             self.par_v = pars[0]
             self.par_c = pars[1]
 
-        res = self.model._exact_fit(
-            X=X,
-            par_v=self.par_v,
-            par_c=self.par_c,
-            solver=self.solver,
-            kernel=self.kernel,
-            bandwidth=self.bandwidth,
-        )
+        res = None
+
+        if use_exact:
+            res = self.model._exact_fit(
+                X=X,
+                par_v=self.par_v,
+                par_c=self.par_c,
+                solver=self.solver,
+                kernel=self.kernel,
+                bandwidth=self.bandwidth,
+                use_fast=use_fast,
+            )
+
         if res is None:
             res = _sgd_estimation(
                 X=X,
@@ -170,5 +190,6 @@ class MMDEstimator(BaseEstimator):
                 stepsize=self.solver["stepsize"],
                 bandwidth=self.bandwidth,
                 epsilon=self.solver["epsilon"],
+                use_fast=use_fast,
             )
         return res

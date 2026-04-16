@@ -1,6 +1,7 @@
 ![code coverage](https://gist.githubusercontent.com/HiddeFok/73b75fdbeb1fba4b08092b0af7b746f3/raw/coverage_badge.svg)
 ![License](https://img.shields.io/badge/license-GPLv3-green.svg?style=flat)
 ![python](https://img.shields.io/badge/python-3.12-blue?style=flat&logo=python)
+![PyPI](https://img.shields.io/pypi/v/regmmd)
 
 # Scikit implementation of RegMMD
 
@@ -51,6 +52,11 @@ method is not available (or the model/kernel combination is not supported),
 the optimizer automatically falls back to the general-purpose SGD solver which
 works with any model. For a detailed overview, see the
 [documentation](https://hiddefok.github.io/reg-mmd-scikit/).
+
+### Speedup
+
+Where possible, a `Cython` version of the model is implemented as well. 
+
 
 ## Examples
 

@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.special import factorial
-from regmmd.models.base_model import EstimationModel
+from regmmd.models.base_model import EstimationModel, none_on_import_error
 
 
 class PoissonBase(EstimationModel):
@@ -53,6 +53,15 @@ class PoissonBase(EstimationModel):
         par_v = self.lam
         par_c = None
         return par_v, par_c
+
+    @none_on_import_error
+    def _build_cy_model(self):
+        """Create a CyPoisson mirror of this model"""
+        from regmmd.models._cy_estimation_models import CyPoisson
+        from numpy.random import PCG64
+
+        bit_gen = PCG64(seed=self.random_state)
+        return CyPoisson(self.lam, bit_gen)
 
 
 class Poisson(PoissonBase):

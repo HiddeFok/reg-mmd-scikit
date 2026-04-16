@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.special import comb
 
-from regmmd.models.base_model import EstimationModel
+from regmmd.models.base_model import EstimationModel, none_on_import_error
 
 
 class BinomialBase(EstimationModel):
@@ -63,3 +63,13 @@ class Binomial(BinomialBase):
         par_v = self.p
         par_c = self.n
         return par_v, par_c
+
+    @none_on_import_error
+    def _build_cy_model(self):
+        """Create a CyBinomial mirror of this model"""
+        from regmmd.models._cy_estimation_models import CyBinomial
+        from numpy.random import PCG64
+
+        bit_gen = PCG64(seed=self.random_state)
+        return CyBinomial(self.p, self.p, bit_gen)
+

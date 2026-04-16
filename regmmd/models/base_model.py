@@ -1,8 +1,19 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Union
+from functools import wraps
 
 from numpy.typing import NDArray
 from regmmd.utils import MMDResult
+
+
+def none_on_import_error(method):
+    @wraps(method)
+    def wrapper(*args, **kwargs):
+        try:
+            return method(*args, **kwargs)
+        except ImportError:
+            return None
+    return wrapper
 
 
 class EstimationModel(ABC):
@@ -79,6 +90,7 @@ class EstimationModel(ABC):
         solver: Dict,
         kernel: str,
         bandwidth: Union[float, str],
+        use_fast: bool = True,
     ) -> None | MMDResult:
         """Possible exact gradient descent optimization.
 
@@ -86,6 +98,10 @@ class EstimationModel(ABC):
         a specific kernel. Returns an MMDResult dict when an exact method
         is available, or None to fall back to SGD.
         """
+        return None
+
+    def _build_cy_model(self):
+        """Create ``CyModel`` of the current model, or None if not available"""
         return None
 
 
@@ -125,12 +141,13 @@ class RegressionModel(EstimationModel):
         X: NDArray,
         y: NDArray,
         par_v: NDArray,
-        par_c: Union[float, None],
+        par_c: NDArray,
         solver: Dict,
         kernel_y: str,
         bandwidth_y: Union[float, str],
         kernel_X: str,
         bandwidth_X: Union[float, str],
+        use_fast: bool = True,
     ) -> None | MMDResult:
         """Possible exact gradient descent optimization for regression.
 

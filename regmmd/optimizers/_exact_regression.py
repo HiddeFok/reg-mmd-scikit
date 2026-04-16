@@ -149,6 +149,7 @@ def _gd_backtracking_lg_tilde_regression(
     X: NDArray,
     y: NDArray,
     par_v: NDArray,
+    par_c: NDArray,
     n_step: int = 1000,
     stepsize: float = 1.0,
     bandwidth: Union[float, str] = 1.0,
@@ -175,6 +176,9 @@ def _gd_backtracking_lg_tilde_regression(
     par_v : np.array, shape (n_features + 1,)
         Initial parameter vector ``[beta_0, ..., beta_p, phi]`` where
         ``phi > 0`` is the noise variance.
+
+    par_c : array or None, default=None
+        Unused; included for API consistency.
 
     n_step : int, default=1000
         Maximum number of gradient descent iterations.
@@ -238,7 +242,9 @@ def _gd_backtracking_lg_tilde_regression(
     work = np.exp(-(diff**2) / new_var)
     f1 = 1.0 / np.sqrt(bdwth2 + 4 * sigma2) - 2 * np.mean(work) / np.sqrt(new_var)
 
-    grad_beta = -(4.0 / new_var**1.5) * np.mean((diff * work)[:, np.newaxis] * X, axis=0)
+    grad_beta = -(4.0 / new_var**1.5) * np.mean(
+        (diff * work)[:, np.newaxis] * X, axis=0
+    )
     g_log_phi = sigma2 * (
         -2.0 * (bdwth2 + 4 * sigma2) ** (-1.5)
         + 2 * np.mean(work) * new_var ** (-1.5)
@@ -257,10 +263,9 @@ def _gd_backtracking_lg_tilde_regression(
         sigma2_trial = np.exp(par_log_trial[d])
         new_var_trial = 2 * sigma2_trial + bdwth2
         work_trial = np.exp(-(diff_trial**2) / new_var_trial)
-        f2 = (
-            1.0 / np.sqrt(bdwth2 + 4 * sigma2_trial)
-            - 2 * np.mean(work_trial) / np.sqrt(new_var_trial)
-        )
+        f2 = 1.0 / np.sqrt(bdwth2 + 4 * sigma2_trial) - 2 * np.mean(
+            work_trial
+        ) / np.sqrt(new_var_trial)
 
         while f2 > f1 - 0.5 * step_t * grad_norm_sq:
             step_t *= alpha
@@ -269,10 +274,9 @@ def _gd_backtracking_lg_tilde_regression(
             sigma2_trial = np.exp(par_log_trial[d])
             new_var_trial = 2 * sigma2_trial + bdwth2
             work_trial = np.exp(-(diff_trial**2) / new_var_trial)
-            f2 = (
-                1.0 / np.sqrt(bdwth2 + 4 * sigma2_trial)
-                - 2 * np.mean(work_trial) / np.sqrt(new_var_trial)
-            )
+            f2 = 1.0 / np.sqrt(bdwth2 + 4 * sigma2_trial) - 2 * np.mean(
+                work_trial
+            ) / np.sqrt(new_var_trial)
 
         par_log = par_log_trial
         trajectory[:, i + 1] = np.concatenate([par_log[:d], [sigma2_trial]])
@@ -320,10 +324,10 @@ def _gd_backtracking_logistic_tilde_regression(
     backtracking line search on the tilde MMD criterion.
 
     Computes the exact tilde MMD gradient analytically for a logistic model,
-    avoiding Monte Carlo sampling entirely. Since :math:`Y | X \\sim \\text{Bernoulli}(p)` with
-    :math:`p = \\text{sigmoid}(X^{\\top}\\beta)`, the expectations involving :math:`Y`
-    reduce to closed-form expressions in :math:`p_i`, enabling deterministic gradient
-    descent with backtracking.
+    avoiding Monte Carlo sampling entirely. Since :math:`Y | X \\sim
+    \\text{Bernoulli}(p)` with :math:`p = \\text{sigmoid}(X^{\\top}\\beta)`, the
+    expectations involving :math:`Y` reduce to closed-form expressions in
+    :math:`p_i`, enabling deterministic gradient descent with backtracking.
 
     Parameters
     ----------
@@ -335,6 +339,9 @@ def _gd_backtracking_logistic_tilde_regression(
 
     par_v : np.array, shape (n_features,)
         Initial value of the regression coefficients (beta).
+
+    par_c : array or None, default=None
+        Unused; included for API consistency.
 
     n_step : int, default=1000
         Maximum number of gradient descent iterations.
@@ -377,7 +384,6 @@ def _gd_backtracking_logistic_tilde_regression(
 
     res = {
         "par_v_init": np.copy(par_v),
-        "par_c_init": None,
         "stepsize": stepsize,
         "bandwidth": bandwidth,
         "convergence": 1,
@@ -399,6 +405,7 @@ def _gd_backtracking_logistic_tilde_regression(
     def _objective(beta):
         mu = X @ beta
         p = 1.0 / (1.0 + np.exp(-mu))
+
         return np.mean(
             (p**2 + (1 - p) ** 2) * k00
             + 2 * p * (1 - p) * k01
@@ -406,8 +413,10 @@ def _gd_backtracking_logistic_tilde_regression(
             - 2 * (1 - p) * k0y
         )
 
-    def _gradient(p):
-        # Gradient of f w.r.t. beta, given current p values
+    def _gradient(beta):
+        mu = X @ beta
+        p = 1.0 / (1.0 + np.exp(-mu))
+
         g11 = (
             k00 * (4 * (1 - p) * p**2 - 2 * p * (1 - p))
             + k01 * (p * (1 - p) - 2 * (1 - p) * p**2)
@@ -416,13 +425,12 @@ def _gd_backtracking_logistic_tilde_regression(
         return np.mean(g11 - 2 * g12, axis=0)
 
     # Initial objective and gradient
-    mu = X @ par_v
-    p = 1.0 / (1.0 + np.exp(-mu))
     f1 = _objective(par_v)
-    grad = _gradient(p)
+    grad = _gradient(par_v)
     grad_norm_sq = np.sum(np.square(grad))
 
     for i in range(n_step):
+        step_t = stepsize
         par_v_trial = par_v - step_t * grad
         f2 = _objective(par_v_trial)
 
@@ -434,15 +442,14 @@ def _gd_backtracking_logistic_tilde_regression(
         par_v = par_v_trial
         trajectory[:, i + 1] = par_v
 
+        grad = _gradient(par_v)
+        grad_norm_sq = np.sum(np.square(grad))
+
         if np.log(abs(f2 - f1)) - np.log(abs(f1)) < log_eps:
             res["convergence"] = 0
             break
 
         f1 = f2
-        mu = X @ par_v
-        p = 1.0 / (1.0 + np.exp(-mu))
-        grad = _gradient(p)
-        grad_norm_sq = np.sum(np.square(grad))
 
     n_step_done = i + 1
     res["estimator"] = par_v
@@ -474,10 +481,12 @@ def _gd_exact_logistic_hat_regression(
     via Maximum Mean Discrepancy`, Alquier, Gerber (2024).
 
     Replaces the Monte Carlo Y-sampling in :func:`_sgd_hat_regression` with
-    closed-form gradient expressions for the logistic model. Since
-    :math:`Y | X \\sim \\text{Bernoulli}(p)` with :math:`p = \\text{sigmoid}(X^{\\top} \\beta)`, the expectations
-    :math:`\\mathbb{E}[k_Y(Y_i, Y_j)]` and :math:`\\mathbb{E}[k_Y(Y_i, y_i)]` reduce to simple functions of :math:`p_i`
-    and :math:`p_j`, so the gradient is computed analytically for each pair :math:`(i, j)`.
+    closed-form gradient expressions for the logistic model. Since :math:`Y | X
+    \\sim \\text{Bernoulli}(p)` with :math:`p = \\text{sigmoid}(X^{\\top}
+    \\beta)`, the expectations :math:`\\mathbb{E}[k_Y(Y_i, Y_j)]` and
+    :math:`\\mathbb{E}[k_Y(Y_i, y_i)]` reduce to simple functions of :math:`p_i`
+    and :math:`p_j`, so the gradient is computed analytically for each pair
+    :math:`(i, j)`.
 
     Parameters
     ----------
@@ -571,8 +580,8 @@ def _gd_exact_logistic_hat_regression(
     # Precompute kernel constants for binary Y in {0, 1}
     k00 = K1d_dist(np.array([0.0]), kernel=kernel, bandwidth=bandwidth_y)[0]
     k01 = K1d_dist(np.array([1.0]), kernel=kernel, bandwidth=bandwidth_y)[0]
-    K0y = K1d_dist(-y, kernel=kernel, bandwidth=bandwidth_y)        # k(0 - y_i)
-    K1y = K1d_dist(1.0 - y, kernel=kernel, bandwidth=bandwidth_y)   # k(1 - y_i)
+    K0y = K1d_dist(-y, kernel=kernel, bandwidth=bandwidth_y)  # k(0 - y_i)
+    K1y = K1d_dist(1.0 - y, kernel=kernel, bandwidth=bandwidth_y)  # k(1 - y_i)
 
     # Precompute sorted covariate pairs and their kernel values
     sorted_obs = sort_obs(X)
@@ -600,16 +609,10 @@ def _gd_exact_logistic_hat_regression(
         dp_i = (p_i * (1 - p_i))[:, np.newaxis] * X[s1]
         dp_j = (p_j * (1 - p_j))[:, np.newaxis] * X[s2]
         A = k00 * (
-            2 * p_j[:, np.newaxis] * dp_i
-            + 2 * p_i[:, np.newaxis] * dp_j
-            - dp_i
-            - dp_j
+            2 * p_j[:, np.newaxis] * dp_i + 2 * p_i[:, np.newaxis] * dp_j - dp_i - dp_j
         )
         B = k01 * (
-            dp_i
-            + dp_j
-            - 2 * p_i[:, np.newaxis] * dp_j
-            - 2 * dp_i * p_j[:, np.newaxis]
+            dp_i + dp_j - 2 * p_i[:, np.newaxis] * dp_j - 2 * dp_i * p_j[:, np.newaxis]
         )
         C = C_coef[s1, np.newaxis] * dp_i
         return kx[:, np.newaxis] * (A + B + C)  # (|s1|, d)
@@ -639,9 +642,7 @@ def _gd_exact_logistic_hat_regression(
         )
 
         return (
-            grad_p1.sum(axis=0)
-            + 2 * grad_p2.sum(axis=0)
-            + cons * grad_p3.sum(axis=0)
+            grad_p1.sum(axis=0) + 2 * grad_p2.sum(axis=0) + cons * grad_p3.sum(axis=0)
         ) / n
 
     for i in range(burn_in):

@@ -1,6 +1,6 @@
 import numpy as np
 
-from regmmd.models.base_model import EstimationModel
+from regmmd.models.base_model import EstimationModel, none_on_import_error
 
 
 class GaussianBase(EstimationModel):
@@ -65,7 +65,7 @@ class GaussianLoc(GaussianBase):
     def _project_params(self, par_v):
         return par_v
 
-    def _exact_fit(self, X, par_v, par_c, solver, kernel, bandwidth):
+    def _exact_fit(self, X, par_v, par_c, solver, kernel, bandwidth, use_fast=True):
         if kernel == "Gaussian":
             from regmmd.optimizers import _gd_gaussian_loc_exact_estimation
 
@@ -80,6 +80,15 @@ class GaussianLoc(GaussianBase):
                 epsilon=solver["epsilon"],
             )
         return None
+
+    @none_on_import_error
+    def _build_cy_model(self):
+        """Create a CyGaussianLoc mirror of this model"""
+        from regmmd.models._cy_estimation_models import CyGaussianLoc
+        from numpy.random import PCG64
+
+        bit_gen = PCG64(seed=self.random_state)
+        return CyGaussianLoc(self.loc, self.scale, bit_gen)
 
 
 class GaussianScale(GaussianBase):
@@ -104,6 +113,15 @@ class GaussianScale(GaussianBase):
 
     def _project_params(self, par_v):
         return max(1e-6, par_v)
+
+    @none_on_import_error
+    def _build_cy_model(self):
+        """Create a CyGaussianScale mirror of this model"""
+        from regmmd.models._cy_estimation_models import CyGaussianScale
+        from numpy.random import PCG64
+
+        bit_gen = PCG64(seed=self.random_state)
+        return CyGaussianScale(self.loc, self.scale, bit_gen)
 
 
 class Gaussian(GaussianBase):
@@ -136,3 +154,12 @@ class Gaussian(GaussianBase):
     def _project_params(self, par_v):
         par_v[1] = max(1e-6, par_v[1])
         return par_v
+
+    @none_on_import_error
+    def _build_cy_model(self):
+        """Create a CyGaussian mirror of this model"""
+        from regmmd.models._cy_estimation_models import CyGaussian
+        from numpy.random import PCG64
+
+        bit_gen = PCG64(seed=self.random_state)
+        return CyGaussian(self.loc, self.scale, bit_gen)
