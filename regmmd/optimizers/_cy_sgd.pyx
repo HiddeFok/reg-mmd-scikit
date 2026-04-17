@@ -10,8 +10,8 @@ from regmmd.optimizers._cy_kernels cimport KernelType, kernel_combined
 
 
 def cy_sgd_estimation(
-    double[:] X,
-    double[:] par_v,
+    double[::1] X,
+    double[::1] par_v,
     CyEstimationModel model,
     KernelType kernel,
     Py_ssize_t burn_in,
@@ -24,13 +24,13 @@ def cy_sgd_estimation(
     cdef Py_ssize_t n_par_v = par_v.shape[0]
     cdef Py_ssize_t i, j
 
-    cdef double[:] sample_buf = np.empty(n)
-    cdef double[:, :] ker_buf = np.empty((n, n))
-    cdef double[:, :] score_buf = np.empty((n, n_par_v))
-    cdef double[:, :] ker_score_buf = np.empty((n, n_par_v))
-    cdef double[:] grad = np.empty(n_par_v)
-    cdef double[:, :] trajectory = np.zeros((n_par_v, burn_in + n_step + 1))
-    cdef double[:] par_mean = np.empty(n_par_v)
+    cdef double[::1] sample_buf = np.empty(n)
+    cdef double[:, ::1] ker_buf = np.empty((n, n))
+    cdef double[:, ::1] score_buf = np.empty((n, n_par_v))
+    cdef double[:, ::1] ker_score_buf = np.empty((n, n_par_v))
+    cdef double[::1] grad = np.empty(n_par_v)
+    cdef double[:, ::1] trajectory = np.zeros((n_par_v, burn_in + n_step + 1))
+    cdef double[::1] par_mean = np.empty(n_par_v)
 
     cdef double norm_grad = epsilon
     cdef double inv_n = 1.0 / n
@@ -99,7 +99,7 @@ def cy_sgd_estimation(
 # ---------- helpers ----------
 
 cdef void blas_matmul(
-    double[:, :] A, double[:, :] B, double[:, :] C,
+    double[:, ::1] A, double[:, ::1] B, double[:, ::1] C,
     Py_ssize_t n, Py_ssize_t d
 ) noexcept nogil:
     """C = A @ B using BLAS dgemv (d=1) or dgemm (d>1).
@@ -135,7 +135,7 @@ cdef void blas_matmul(
               &C[0, 0], &d_int)
 
 
-cdef void mean_axis0(double[:, :] A, double[:] out) noexcept nogil:
+cdef void mean_axis0(double[:, ::1] A, double[::1] out) noexcept nogil:
     cdef Py_ssize_t i, j, n = A.shape[0], m = A.shape[1]
     for j in range(m):
         out[j] = 0.0
@@ -144,7 +144,7 @@ cdef void mean_axis0(double[:, :] A, double[:] out) noexcept nogil:
         out[j] /= n
 
 
-cdef double sum_sq(double[:] v) noexcept nogil:
+cdef double sum_sq(double[::1] v) noexcept nogil:
     cdef Py_ssize_t i, n = v.shape[0]
     cdef double s = 0.0
     for i in range(n):

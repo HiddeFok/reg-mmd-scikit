@@ -4,19 +4,19 @@ cdef enum KernelType:
     CAUCHY = 2
 
 cdef void K1d_dist(
-    double[:] u, double[:] out, KernelType kernel, double bandwidth
+    double[::1] u, double[::1] out, KernelType kernel, double bandwidth
 ) noexcept nogil
 
 cdef void K1d(
-    double[:] x, double[:] y, double[:, :] out, KernelType kernel, double bandwidth
+    double[::1] x, double[::1] y, double[:, ::1] out, KernelType kernel, double bandwidth
 ) noexcept nogil
 
 cdef void K1d_sym(
-    double[:] x, double[:] y, double[:, :] out, KernelType kernel, double bandwidth
+    double[::1] x, double[::1] y, double[:, ::1] out, KernelType kernel, double bandwidth
 ) noexcept nogil
 
 cdef void kernel_combined(
-    double[:] x_sampled, double[:] X, double[:, :] out,
+    double[::1] x_sampled, double[::1] X, double[:, ::1] out,
     KernelType kernel, double bandwidth,
     double inv_nm1, double inv_n
 ) noexcept nogil

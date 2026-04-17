@@ -22,8 +22,8 @@ cdef inline double _kernel_eval(double v, KernelType kernel) noexcept nogil:
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef void K1d_dist(
-    double[:] u,
-    double[:] out,
+    double[::1] u,
+    double[::1] out,
     KernelType kernel,
     double bandwidth
 ) noexcept nogil:
@@ -39,9 +39,9 @@ cdef void K1d_dist(
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef void K1d(
-    double[:] x,
-    double[:] y,
-    double[:, :] out,
+    double[::1] x,
+    double[::1] y,
+    double[:, ::1] out,
     KernelType kernel,
     double bandwidth
 ) noexcept nogil:
@@ -58,9 +58,9 @@ cdef void K1d(
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef void K1d_sym(
-    double[:] x,
-    double[:] y,
-    double[:, :] out,
+    double[::1] x,
+    double[::1] y,
+    double[:, ::1] out,
     KernelType kernel,
     double bandwidth
 ) noexcept nogil:
@@ -88,9 +88,9 @@ cdef void K1d_sym(
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef void kernel_combined(
-    double[:] x_sampled,
-    double[:] X,
-    double[:, :] out,
+    double[::1] x_sampled,
+    double[::1] X,
+    double[:, ::1] out,
     KernelType kernel,
     double bandwidth,
     double inv_nm1,
@@ -129,26 +129,26 @@ cdef void kernel_combined(
 
 
 def py_K1d_dist(
-    double[:] u,
-    double[:] out,
+    double[::1] u,
+    double[::1] out,
     int kernel,
     double bandwidth
 ):
     K1d_dist(u, out, <KernelType>kernel, bandwidth)
 
 def py_K1d(
-    double[:] x,
-    double[:] y,
-    double[:, :] out,
+    double[::1] x,
+    double[::1] y,
+    double[:, ::1] out,
     int kernel,
     double bandwidth
 ):
     K1d(x, y, out, <KernelType>kernel, bandwidth)
 
 def py_K1d_sym(
-    double[:] x,
-    double[:] y,
-    double[:, :] out,
+    double[::1] x,
+    double[::1] y,
+    double[:, ::1] out,
     int kernel,
     double bandwidth
 ):
