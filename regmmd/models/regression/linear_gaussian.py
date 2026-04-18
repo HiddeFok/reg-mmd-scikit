@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.typing import NDArray
 
-from regmmd.models.base_model import RegressionModel
+from regmmd.models.base_model import RegressionModel, none_on_import_error
 from sklearn.linear_model import LinearRegression
 
 
@@ -182,3 +182,12 @@ class LinearGaussianLoc(LinearGaussianBase):
                 eps_gd=solver.get("eps_gd", 1e-5),
             )
         return None
+
+    @none_on_import_error
+    def _build_cy_model(self):
+        """Create a CyLinearGaussianLoc mirror of this model"""
+        from regmmd.models._cy_regression_models import CyLinearGaussianLoc
+        from numpy.random import PCG64
+
+        bit_gen = PCG64(seed=self.random_state)
+        return CyLinearGaussianLoc(self.beta, self.phi, bit_gen)

@@ -10,7 +10,7 @@ cdef class CyRegressionModel:
 
     cdef void sample_n(self, Py_ssize_t n, double[::1] mu_given_x, double[::1] out) noexcept nogil
     cdef void predict(self, double[:, ::1] x, double[::1] out) noexcept nogil
-    cdef void score(self, double[:, ::1] x, double[::1] y, double[:, ::1] out) noexcept nogil
+    cdef void score(self, double[:, ::1] x, double[::1] y, double[::1] mu_buff, double[:, ::1] out) noexcept nogil
     cdef void update(self, double[::1] par_v) noexcept nogil
     cdef void project_params(self, double[::1] par_v) noexcept nogil
 
@@ -18,8 +18,12 @@ cdef class CyRegressionModel:
 cdef class CyLinearGaussianLoc(CyRegressionModel):
     cdef double[::1] beta
     cdef double phi
+    cdef double scale
+    cdef double phi_inv
 
 
-cdef class CyLinearGaussianLoc(CyRegressionModel):
-    cdef double[::1] beta
-    cdef double phi
+# cdef class CyLinearGaussian(CyRegressionModel):
+#     cdef double[::1] beta
+#     cdef double phi
+#     cdef double scale
+#     cdef double phi_inv

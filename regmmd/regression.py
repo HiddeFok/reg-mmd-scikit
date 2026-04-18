@@ -277,6 +277,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                     n_step=self.solver["n_step"],
                     stepsize=self.solver["stepsize"],
                     bandwidth=self.bandwidth_y,
+                    use_fast=use_fast
                 )
             else:
                 res = _sgd_hat_regression(

@@ -82,6 +82,7 @@ class BetaA(BetaBase):
     def _project_params(self, par_v):
         par_v = max(1e-6, par_v)
         return par_v
+
     @none_on_import_error
     def _build_cy_model(self):
         """Create a CyBetaA mirror of this model"""

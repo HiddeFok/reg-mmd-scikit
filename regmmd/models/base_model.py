@@ -13,6 +13,7 @@ def none_on_import_error(method):
             return method(*args, **kwargs)
         except ImportError:
             return None
+
     return wrapper
 
 

@@ -72,4 +72,3 @@ class Binomial(BinomialBase):
 
         bit_gen = PCG64(seed=self.random_state)
         return CyBinomial(self.p, self.p, bit_gen)
-

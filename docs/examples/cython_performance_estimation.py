@@ -15,7 +15,7 @@ def benchmark(func, n_runs=50):
         est = func()
         elapsed = (time.perf_counter() - start) * 1000
         times.append(elapsed)
-        estimator.append(abs(est - np.array([2.0 , 1.5])).sum())
+        estimator.append(abs(est - np.array([2.0, 1.5])).sum())
 
     times = np.array(times)
     estimator = np.array(estimator)

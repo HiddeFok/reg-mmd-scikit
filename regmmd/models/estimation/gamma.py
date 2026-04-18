@@ -93,8 +93,6 @@ class GammaShape(GammaBase):
         return CyGammaShape(self.shape, self.rate, bit_gen)
 
 
-
-
 class GammaRate(GammaBase):
     def __init__(self, par_v=None, par_c=None, random_state=None):
         super().__init__(shape=par_c, rate=par_v, random_state=random_state)
