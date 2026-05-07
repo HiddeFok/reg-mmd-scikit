@@ -8,10 +8,10 @@ cdef class CyEstimationModel:
     cdef bitgen_t *rng
     cdef object _bit_gen  # prevent garbage collection of the BitGenerator
 
-    cdef void sample_n(self, Py_ssize_t n, double[:] out) noexcept nogil
-    cdef void score(self, double[:] x, double[:, :] out) noexcept nogil
-    cdef void update(self, double[:] par_v) noexcept nogil
-    cdef void project_params(self, double[:] par_v) noexcept nogil
+    cdef void sample_n(self, Py_ssize_t n, double[::1] out) noexcept nogil
+    cdef void score(self, double[::1] x, double[:, ::1] out) noexcept nogil
+    cdef void update(self, double[::1] par_v) noexcept nogil
+    cdef void project_params(self, double[::1] par_v) noexcept nogil
 
 
 cdef class CyGaussianLoc(CyEstimationModel):

@@ -60,6 +60,9 @@ class BetaBase(EstimationModel):
 
 
 class BetaA(BetaBase):
+    """Beta :math:`\\mathrm{Beta}(\\alpha, \\beta)` with shape :math:`\\alpha`
+    estimated and :math:`\\beta` fixed."""
+
     def __init__(self, par_v=None, par_c=None, random_state=None):
         super().__init__(alpha=par_v, beta=par_c, random_state=random_state)
 
@@ -82,6 +85,7 @@ class BetaA(BetaBase):
     def _project_params(self, par_v):
         par_v = max(1e-6, par_v)
         return par_v
+
     @none_on_import_error
     def _build_cy_model(self):
         """Create a CyBetaA mirror of this model"""
@@ -93,6 +97,9 @@ class BetaA(BetaBase):
 
 
 class BetaB(BetaBase):
+    """Beta :math:`\\mathrm{Beta}(\\alpha, \\beta)` with shape :math:`\\beta`
+    estimated and :math:`\\alpha` fixed."""
+
     def __init__(self, par_v=None, par_c=None, random_state=None):
         super().__init__(alpha=par_c, beta=par_v, random_state=random_state)
 
@@ -126,6 +133,9 @@ class BetaB(BetaBase):
 
 
 class Beta(BetaBase):
+    """Beta :math:`\\mathrm{Beta}(\\alpha, \\beta)` with both shape parameters
+    estimated jointly."""
+
     def __init__(self, par_v=None, par_c=None, random_state=None):
         if par_v is None:
             super().__init__(alpha=None, beta=None, random_state=random_state)

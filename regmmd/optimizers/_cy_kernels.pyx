@@ -1,4 +1,4 @@
-# cython: cdivision=True
+# cython: boundscheck=False, wraparound=False, cdivision=True
 
 import cython
 
@@ -9,8 +9,6 @@ DEF PRANGE_THRESHOLD = 500
 DEF PRANGE_THRESHOLD_DIST = 1_000_000
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
 cdef inline double _kernel_eval(double v, KernelType kernel) noexcept nogil:
     if kernel == GAUSSIAN:
         return exp(-v * v)
@@ -19,11 +17,10 @@ cdef inline double _kernel_eval(double v, KernelType kernel) noexcept nogil:
     else:  # CAUCHY
         return 1.0 / (2.0 + v * v)
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
+
 cdef void K1d_dist(
-    double[:] u,
-    double[:] out,
+    double[::1] u,
+    double[::1] out,
     KernelType kernel,
     double bandwidth
 ) noexcept nogil:
@@ -36,12 +33,11 @@ cdef void K1d_dist(
         for i in range(n):
             out[i] = _kernel_eval(u[i] / bandwidth, kernel)
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
+
 cdef void K1d(
-    double[:] x,
-    double[:] y,
-    double[:, :] out,
+    double[::1] x,
+    double[::1] y,
+    double[:, ::1] out,
     KernelType kernel,
     double bandwidth
 ) noexcept nogil:
@@ -55,12 +51,11 @@ cdef void K1d(
             for j in range(m):
                 out[i, j] = _kernel_eval((x[i] - y[j]) / bandwidth, kernel)
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
+
 cdef void K1d_sym(
-    double[:] x,
-    double[:] y,
-    double[:, :] out,
+    double[::1] x,
+    double[::1] y,
+    double[:, ::1] out,
     KernelType kernel,
     double bandwidth
 ) noexcept nogil:
@@ -85,12 +80,11 @@ cdef void K1d_sym(
                 out[i, j] = val
                 out[j, i] = val
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
+
 cdef void kernel_combined(
-    double[:] x_sampled,
-    double[:] X,
-    double[:, :] out,
+    double[::1] x_sampled,
+    double[::1] X,
+    double[:, ::1] out,
     KernelType kernel,
     double bandwidth,
     double inv_nm1,
@@ -102,8 +96,6 @@ cdef void kernel_combined(
 
     if n >= PRANGE_THRESHOLD:
         # Self-kernel: symmetric, upper triangle only
-        # TODO: Check that this symmetric assumption is not messing with the
-        # estimation performance
         for i in prange(n, schedule='dynamic'):
             for j in range(i + 1, n):
                 val = _kernel_eval((x_sampled[i] - x_sampled[j]) / bandwidth, kernel) * inv_nm1
@@ -127,28 +119,27 @@ cdef void kernel_combined(
                 val = _kernel_eval((X[i] - x_sampled[j]) / bandwidth, kernel) * inv_n
                 out[i, j] -= val
 
-
 def py_K1d_dist(
-    double[:] u,
-    double[:] out,
+    double[::1] u,
+    double[::1] out,
     int kernel,
     double bandwidth
 ):
     K1d_dist(u, out, <KernelType>kernel, bandwidth)
 
 def py_K1d(
-    double[:] x,
-    double[:] y,
-    double[:, :] out,
+    double[::1] x,
+    double[::1] y,
+    double[:, ::1] out,
     int kernel,
     double bandwidth
 ):
     K1d(x, y, out, <KernelType>kernel, bandwidth)
 
 def py_K1d_sym(
-    double[:] x,
-    double[:] y,
-    double[:, :] out,
+    double[::1] x,
+    double[::1] y,
+    double[:, ::1] out,
     int kernel,
     double bandwidth
 ):

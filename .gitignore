@@ -28,6 +28,9 @@ regmmd/**/*.c
 # Docs related
 
 docs/build
+docs/source/api/generated/
+docs/source/api/estimation_models.rst
+docs/source/api/regression_models.rst
 
 **/profile_stats
 

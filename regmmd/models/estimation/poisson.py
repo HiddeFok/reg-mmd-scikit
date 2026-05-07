@@ -65,5 +65,7 @@ class PoissonBase(EstimationModel):
 
 
 class Poisson(PoissonBase):
+    """Poisson distribution with rate :math:`\\lambda` estimated."""
+
     def __init__(self, par_v=None, par_c=None, random_state=None):
         super().__init__(lam=par_v, random_state=random_state)

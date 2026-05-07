@@ -62,6 +62,10 @@ class PoissonRegressionBase(RegressionModel):
 
 
 class PoissonRegression(PoissonRegressionBase):
+    """Poisson regression :math:`Y \\mid X \\sim
+    \\mathrm{Poisson}(\\exp(X^\\top\\beta))` with regression coefficients
+    estimated."""
+
     def __init__(self, par_v=None, par_c=None, random_state=None):
         super().__init__(beta=par_v, random_state=random_state)
 

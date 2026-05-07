@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.typing import NDArray
 
-from regmmd.models.base_model import RegressionModel
+from regmmd.models.base_model import RegressionModel, none_on_import_error
 from sklearn.linear_model import LinearRegression
 
 
@@ -69,6 +69,10 @@ class LinearGaussianBase(RegressionModel):
 
 
 class LinearGaussian(LinearGaussianBase):
+    """Linear regression :math:`Y \\mid X \\sim \\mathcal{N}(X^\\top\\beta,
+    \\phi)` with both regression coefficients :math:`\\beta` and noise variance
+    :math:`\\phi` estimated jointly."""
+
     def __init__(self, par_v=None, par_c=None, random_state=None):
         if par_v is None:
             super().__init__(beta=None, phi=None, random_state=random_state)
@@ -130,6 +134,10 @@ class LinearGaussian(LinearGaussianBase):
 
 
 class LinearGaussianLoc(LinearGaussianBase):
+    """Linear regression :math:`Y \\mid X \\sim \\mathcal{N}(X^\\top\\beta,
+    \\phi)` with regression coefficients :math:`\\beta` estimated and noise
+    variance :math:`\\phi` fixed."""
+
     def __init__(self, par_v=None, par_c=None, random_state=None):
         super().__init__(beta=par_v, phi=par_c, random_state=random_state)
 
@@ -182,3 +190,4 @@ class LinearGaussianLoc(LinearGaussianBase):
                 eps_gd=solver.get("eps_gd", 1e-5),
             )
         return None
+

@@ -489,6 +489,7 @@ def _sgd_tilde_regression(
     bandwidth: float = 1.0,
     epsilon: float = 1e-4,
     eps_sq: float = 1e-5,
+    use_fast: bool = True
 ) -> MMDResult:
     """Fit a regression model using the tilde estimator via stochastic gradient
     descent, as described in `Universal Robust Regression via Maximum Mean
@@ -575,71 +576,97 @@ def _sgd_tilde_regression(
         "bandwidth": bandwidth,
         "convergence": 1,
     }
-    trajectory = np.zeros(shape=(*par_v.shape, n_step + 1))
-    trajectory[:, 0] = par_v
-    grad_all = np.zeros(shape=par_v.shape)
-    log_eps = np.log(eps_sq)
 
-    for i in range(burn_in):
-        mu_given_x = model.predict(X)
-        y_sampled_1 = model.sample_n(n, mu_given_x)
-        y_sampled_2 = model.sample_n(n, mu_given_x)
+    cy_model = None
+    if use_fast:
+        cy_model = model._build_cy_model()
 
-        ker_sampled_1 = K1d_dist(
-            y_sampled_1 - y_sampled_2, kernel=kernel, bandwidth=bandwidth
+    if cy_model is not None:
+        from regmmd.optimizers._cy_sgd import cy_sgd_tilde_regression
+
+        par_v, trajectory = cy_sgd_tilde_regression(
+            X, 
+            y, 
+            np.atleast_1d(np.asarray(par_v, dtype=np.float64)),
+            cy_model,
+            KERNEL_MAP[kernel],
+            burn_in,
+            n_step,
+            stepsize,
+            bandwidth,
+            epsilon,
+            eps_sq
         )
-        ker_sampled_2 = K1d_dist(y_sampled_1 - y, kernel=kernel, bandwidth=bandwidth)
-        ker = ker_sampled_1 - ker_sampled_2
-
-        grad_ll = model.score(X, y_sampled_1)
-        grad = 2 * np.mean(ker @ grad_ll, axis=0)
-        # Expected outcome shape: (n, par.shape) -> (shape_par)
-
-        grad_all += grad
-        norm_grad += np.sum(np.square(grad))
-
-        par_v -= stepsize * grad / np.sqrt(norm_grad)
-        par_v = model._project_params(par_v=par_v)
-
+        par_v = np.asarray(par_v)
+        trajectory = np.asarray(trajectory)
         model.update(par_v=par_v)
 
-    for i in range(n_step):
-        mu_given_x = model.predict(X)
-        y_sampled_1 = model.sample_n(n, mu_given_x)
-        y_sampled_2 = model.sample_n(n, mu_given_x)
+    else:
+        trajectory = np.zeros(shape=(*par_v.shape, n_step + 1))
+        trajectory[:, 0] = par_v
+        grad_all = np.zeros(shape=par_v.shape)
+        log_eps = np.log(eps_sq)
 
-        ker_sampled_1 = K1d_dist(
-            y_sampled_1 - y_sampled_2, kernel=kernel, bandwidth=bandwidth
-        )
-        ker_sampled_2 = K1d_dist(y_sampled_1 - y, kernel=kernel, bandwidth=bandwidth)
-        ker = ker_sampled_1 - ker_sampled_2
+        for i in range(burn_in):
+            mu_given_x = model.predict(X)
+            y_sampled_1 = model.sample_n(n, mu_given_x)
+            y_sampled_2 = model.sample_n(n, mu_given_x)
 
-        grad_ll = model.score(X, y_sampled_1)
-        grad = 2 * np.mean(ker @ grad_ll, axis=0)
-        # Expected outcome shape: (n, par.shape) -> (shape_par)
+            ker_sampled_1 = K1d_dist(
+                y_sampled_1 - y_sampled_2, kernel=kernel, bandwidth=bandwidth
+            )
+            ker_sampled_2 = K1d_dist(y_sampled_1 - y, kernel=kernel, bandwidth=bandwidth)
+            ker = ker_sampled_1 - ker_sampled_2
 
-        grad_all += grad
-        norm_grad += np.sum(np.square(grad))
+            grad_ll = model.score(X, y_sampled_1)
+            grad = 2 * np.mean(ker @ grad_ll, axis=0)
+            # Expected outcome shape: (n, par.shape) -> (shape_par)
 
-        par_v -= stepsize * grad / np.sqrt(norm_grad)
-        par_v = model._project_params(par_v=par_v)
+            grad_all += grad
+            norm_grad += np.sum(np.square(grad))
 
-        model.update(par_v=par_v)
-        # only for gaussian par[1] = max(par[1], 1 / (n ** 2))
-        trajectory[:, i + 1] = par_v
+            par_v -= stepsize * grad / np.sqrt(norm_grad)
+            par_v = model._project_params(par_v=par_v)
 
-        if np.isnan(np.mean(grad_all)):
-            res["convergence"] = -1
-            break
+            model.update(par_v=par_v)
 
-        g_1 = np.sqrt(np.sum(np.square(grad_all / (burn_in + i + 1)))) / par_v.shape
-        if np.log(g_1) < log_eps:
-            res["convergence"] = 0
-            break
+        for i in range(n_step):
+            mu_given_x = model.predict(X)
+            y_sampled_1 = model.sample_n(n, mu_given_x)
+            y_sampled_2 = model.sample_n(n, mu_given_x)
 
-    n_step_done = int(i + 1)
-    trajectory = trajectory[:, :n_step_done]
-    trajectory = np.cumsum(trajectory, axis=1) / np.arange(1, n_step_done + 1)
+            ker_sampled_1 = K1d_dist(
+                y_sampled_1 - y_sampled_2, kernel=kernel, bandwidth=bandwidth
+            )
+            ker_sampled_2 = K1d_dist(y_sampled_1 - y, kernel=kernel, bandwidth=bandwidth)
+            ker = ker_sampled_1 - ker_sampled_2
+
+            grad_ll = model.score(X, y_sampled_1)
+            grad = 2 * np.mean(ker @ grad_ll, axis=0)
+            # Expected outcome shape: (n, par.shape) -> (shape_par)
+
+            grad_all += grad
+            norm_grad += np.sum(np.square(grad))
+
+            par_v -= stepsize * grad / np.sqrt(norm_grad)
+            par_v = model._project_params(par_v=par_v)
+
+            model.update(par_v=par_v)
+            # only for gaussian par[1] = max(par[1], 1 / (n ** 2))
+            trajectory[:, i + 1] = par_v
+
+            if np.isnan(np.mean(grad_all)):
+                res["convergence"] = -1
+                break
+
+            g_1 = np.sqrt(np.sum(np.square(grad_all / (burn_in + i + 1)))) / par_v.shape
+            if np.log(g_1) < log_eps:
+                res["convergence"] = 0
+                break
+
+        n_step_done = int(i + 1)
+        trajectory = trajectory[:, :n_step_done]
+        trajectory = np.cumsum(trajectory, axis=1) / np.arange(1, n_step_done + 1)
     res["estimator"] = trajectory[:, -1]
     res["trajectory"] = trajectory
 

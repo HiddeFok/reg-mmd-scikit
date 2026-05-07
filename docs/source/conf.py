@@ -70,3 +70,64 @@ autodoc_type_aliases = {
     "ndarray[tuple[Any, ...], dtype[_ScalarT]]": "NDArray",
 }
 autodoc_typehints = "description"
+
+# Auto-generate stub .rst pages for every entry in :toctree: autosummary blocks.
+autosummary_generate = True
+
+
+def _write_model_index(app):
+    """Regenerate the estimation/regression model API pages from ``__all__``.
+
+    Keeps the autosummary lists on those pages in lockstep with the package
+    so adding a new model class to ``regmmd.models`` automatically surfaces it
+    in the docs after a rebuild.
+    """
+    from pathlib import Path
+    from regmmd.models.estimation import __all__ as estimation_all
+    from regmmd.models.regression import __all__ as regression_all
+
+    api_dir = Path(app.srcdir) / "api"
+
+    def _render(title, intro, names):
+        lines = [
+            title,
+            "-" * len(title),
+            "",
+            intro,
+            "",
+            ".. autosummary::",
+            "   :toctree: generated/",
+            "   :nosignatures:",
+            "",
+        ]
+        lines += [f"   regmmd.models.{name}" for name in names]
+        lines.append("")
+        return "\n".join(lines)
+
+    estimation_intro = (
+        "The package ships with parametric estimation models covering the "
+        "most common univariate distributions. Each model can be selected by "
+        "string name in :class:`~regmmd.MMDEstimator` (e.g. "
+        "``model=\"gaussian-loc\"``) or by passing a class instance directly. "
+        "``par_v`` denotes the variable parameter(s) that are optimised; "
+        "``par_c`` denotes constant parameter(s) that are held fixed. Click "
+        "a model name for its full reference page."
+    )
+    regression_intro = (
+        "The regression models follow the same conventions as the estimation "
+        "models (see :doc:`estimation_models`). Select a model by string name "
+        "in :class:`~regmmd.MMDRegressor` (e.g. ``model=\"linear-gaussian-loc\"``) "
+        "or pass a class instance directly. Click a model name for its full "
+        "reference page."
+    )
+
+    (api_dir / "estimation_models.rst").write_text(
+        _render("Estimation Models", estimation_intro, estimation_all)
+    )
+    (api_dir / "regression_models.rst").write_text(
+        _render("Regression Models", regression_intro, regression_all)
+    )
+
+
+def setup(app):
+    app.connect("builder-inited", _write_model_index)

@@ -17,6 +17,14 @@ from regmmd.models import (
     GammaRate,
     GammaShape,
     Poisson,
+    Cauchy,
+    Dirac,
+    ContinuousUniformLoc,
+    ContinuousUniformUpper,
+    ContinuousUniformLowerUpper,
+    DiscreteUniform,
+    Geometric,
+    Pareto,
 )
 from regmmd.models.base_model import EstimationModel
 from regmmd.optimizers import _sgd_estimation
@@ -35,6 +43,14 @@ class DefinedModels(Enum):
     GAMMA_RATE = GammaRate
     GAMMA_SHAPE = GammaShape
     POISSON = Poisson
+    CAUCHY = Cauchy
+    DIRAC = Dirac
+    CONTINUOUS_UNIFORM_LOC = ContinuousUniformLoc
+    CONTINUOUS_UNIFORM_UPPER = ContinuousUniformUpper
+    CONTINUOUS_UNIFORM_LOWER_UPPER = ContinuousUniformLowerUpper
+    DISCRETE_UNIFORM = DiscreteUniform
+    GEOMETRIC = Geometric
+    PARETO = Pareto
 
 
 class MMDEstimator(BaseEstimator):
