@@ -52,6 +52,10 @@ class LogisticBase(RegressionModel):
 
 
 class Logistic(LogisticBase):
+    """Logistic regression :math:`Y \\mid X \\sim
+    \\mathrm{Bernoulli}(\\sigma(X^\\top\\beta))` with regression coefficients
+    estimated."""
+
     def __init__(self, par_v=None, par_c=None, random_state=None):
         super().__init__(beta=par_v, random_state=random_state)
 

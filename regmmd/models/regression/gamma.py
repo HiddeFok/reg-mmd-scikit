@@ -78,6 +78,9 @@ class GammaRegressionBase(RegressionModel):
 
 
 class GammaRegressionLoc(GammaRegressionBase):
+    """Gamma regression with mean :math:`\\mu = \\exp(X^\\top\\beta)`;
+    coefficients :math:`\\beta` estimated and shape parameter fixed."""
+
     def __init__(self, par_v=None, par_c=None, random_state=None):
         super().__init__(beta=par_v, shape=par_c, random_state=random_state)
 
@@ -97,6 +100,9 @@ class GammaRegressionLoc(GammaRegressionBase):
 
 
 class GammaRegression(GammaRegressionBase):
+    """Gamma regression with mean :math:`\\mu = \\exp(X^\\top\\beta)`;
+    coefficients :math:`\\beta` and shape parameter estimated jointly."""
+
     def __init__(self, par_v=None, par_c=None, random_state=None):
         if par_v is None:
             super().__init__(beta=None, shape=None, random_state=random_state)

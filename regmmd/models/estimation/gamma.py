@@ -61,6 +61,8 @@ class GammaBase(EstimationModel):
 
 
 class GammaShape(GammaBase):
+    """Gamma distribution with shape estimated and rate fixed."""
+
     def __init__(self, par_v=None, par_c=None, random_state=None):
         super().__init__(shape=par_v, rate=par_c, random_state=random_state)
 
@@ -94,6 +96,8 @@ class GammaShape(GammaBase):
 
 
 class GammaRate(GammaBase):
+    """Gamma distribution with rate estimated and shape fixed."""
+
     def __init__(self, par_v=None, par_c=None, random_state=None):
         super().__init__(shape=par_c, rate=par_v, random_state=random_state)
 
@@ -129,6 +133,8 @@ class GammaRate(GammaBase):
 
 
 class Gamma(GammaBase):
+    """Gamma distribution with both shape and rate estimated jointly."""
+
     def __init__(self, par_v=None, par_c=None, random_state=None):
         if par_v is None:
             super().__init__(shape=None, rate=None, random_state=random_state)

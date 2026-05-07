@@ -45,6 +45,9 @@ class BinomialBase(EstimationModel):
 
 
 class Binomial(BinomialBase):
+    """Binomial :math:`B(n, p)` with success probability :math:`p` estimated
+    and number of trials :math:`n` fixed."""
+
     def __init__(self, par_v=None, par_c=None, random_state=None):
         super().__init__(p=par_v, n=par_c, random_state=random_state)
 

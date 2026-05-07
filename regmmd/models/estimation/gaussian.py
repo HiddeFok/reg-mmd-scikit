@@ -43,6 +43,9 @@ class GaussianBase(EstimationModel):
 
 
 class GaussianLoc(GaussianBase):
+    """Gaussian :math:`\\mathcal{N}(\\mu, \\sigma^2)` with mean :math:`\\mu`
+    estimated and standard deviation fixed."""
+
     def __init__(self, par_v=None, par_c=None, random_state=None):
         super().__init__(loc=par_v, scale=par_c, random_state=random_state)
 
@@ -92,6 +95,9 @@ class GaussianLoc(GaussianBase):
 
 
 class GaussianScale(GaussianBase):
+    """Gaussian :math:`\\mathcal{N}(\\mu, \\sigma^2)` with standard deviation
+    estimated and mean fixed."""
+
     def __init__(self, par_v=None, par_c=None, random_state=None):
         super().__init__(loc=par_c, scale=par_v, random_state=random_state)
 
@@ -125,6 +131,9 @@ class GaussianScale(GaussianBase):
 
 
 class Gaussian(GaussianBase):
+    """Gaussian :math:`\\mathcal{N}(\\mu, \\sigma^2)` with both mean and
+    standard deviation estimated jointly."""
+
     def __init__(self, par_v=None, par_c=None, random_state=None):
         if par_v is None:
             super().__init__(loc=None, scale=None, random_state=random_state)
