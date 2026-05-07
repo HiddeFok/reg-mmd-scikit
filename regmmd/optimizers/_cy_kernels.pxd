@@ -21,11 +21,3 @@ cdef void kernel_combined(
     double inv_nm1, double inv_n
 ) noexcept nogil
 
-
-cdef void kernel_tilde_combined(
-    double[::1] y_sample_buf_1, 
-    double[::1] y_sample_buf_2, 
-    double[::1] y,
-    double[::1] out,
-    KernelType kernel, double bandwidth,
-) noexcept nogil

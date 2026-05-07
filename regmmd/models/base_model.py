@@ -148,7 +148,6 @@ class RegressionModel(EstimationModel):
         bandwidth_y: Union[float, str],
         kernel_X: str,
         bandwidth_X: Union[float, str],
-        use_fast: bool = True,
     ) -> None | MMDResult:
         """Possible exact gradient descent optimization for regression.
 

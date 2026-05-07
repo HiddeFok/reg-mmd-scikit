@@ -89,6 +89,34 @@ def test_K1d_dist_invalid_kernel():
         K1d_dist(u, "InvalidKernel")
 
 
+def test_Kmd_dist_invalid_kernel():
+    u = np.arange(8).reshape(4, 2).astype(float)
+    with pytest.raises(ValueError):
+        Kmd_dist(u, "InvalidKernel")
+
+
+def test_Kmd_invalid_kernel():
+    x = np.arange(8).reshape(4, 2).astype(float)
+    y = -x
+    with pytest.raises(ValueError):
+        Kmd(x, y, "InvalidKernel")
+
+
+@pytest.mark.parametrize("kernel", KERNELS)
+def test_Kmd_dist_matches_manual(kernel):
+    u = np.array([[0.0, 0.0], [1.0, 0.0], [0.0, 2.0]])
+    bandwidth = 1.5
+    result = Kmd_dist(u, kernel=kernel, bandwidth=bandwidth)
+    norms = np.linalg.norm(u / bandwidth, axis=1)
+    if kernel == "Gaussian":
+        expected = np.exp(-(norms**2))
+    elif kernel == "Laplace":
+        expected = np.exp(-norms)
+    else:
+        expected = 1 / (2 + norms**2)
+    assert np.allclose(result, expected)
+
+
 @pytest.mark.parametrize("kernel", KERNELS)
 def test_Kmd_correct_dims(kernel):
     u = np.arange(8).reshape(4, 2)

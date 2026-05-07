@@ -196,7 +196,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         self.X_scale = None
 
     def fit(
-        self, X: NDArray, y: NDArray, use_exact: bool = True, use_fast: bool = True
+        self, X: NDArray, y: NDArray, use_exact: bool = True
     ) -> MMDResult:
         """Fit the MMD regression model according to the given training data.
 
@@ -211,11 +211,6 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
         use_exact : bool, default=True
             Use the ``model._exact_fit()`` method, if it is available, will default
             to SGD if it is not. Mainly used for performance comparisons
-
-        use_fast : bool, default=True
-            If ``True``, will try to build the ``CyModel`` version through
-            ``model._build_cy_model()``.  If successful, a Cython version of the
-            SGD loop will be called, which often results in a ``5-10x`` speed up.
 
         Returns
         -------
@@ -260,8 +255,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                 kernel_y=self.kernel_y,
                 bandwidth_y=self.bandwidth_y,
                 kernel_X=self.kernel_X,
-                bandwidth_X=self.bandwidth_X,
-                use_fast=use_fast,
+                bandwidth_X=self.bandwidth_X
             )
 
         if res is None:
@@ -276,8 +270,7 @@ class MMDRegressor(RegressorMixin, BaseEstimator):
                     burn_in=self.solver["burnin"],
                     n_step=self.solver["n_step"],
                     stepsize=self.solver["stepsize"],
-                    bandwidth=self.bandwidth_y,
-                    use_fast=use_fast
+                    bandwidth=self.bandwidth_y
                 )
             else:
                 res = _sgd_hat_regression(

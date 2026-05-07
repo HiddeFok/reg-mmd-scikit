@@ -119,32 +119,6 @@ cdef void kernel_combined(
                 val = _kernel_eval((X[i] - x_sampled[j]) / bandwidth, kernel) * inv_n
                 out[i, j] -= val
 
-cdef void kernel_tilde_combined(
-    double[::1] y_sampled_1,
-    double[::1] y_sampled_2,
-    double[::1] y,
-    double[::1] out,
-    KernelType kernel,
-    double bandwidth,
-) noexcept nogil:
-    """out[i] = K(y_sample_1 - y_sample_2) - K(y_sample_1 - y)"""
-    cdef Py_ssize_t i, n = y.shape[0]
-
-    if n >= PRANGE_THRESHOLD:
-        for i in prange(n, schedule='static'):
-            out[i] = (
-                _kernel_eval((y_sampled_1[i] - y_sampled_2[i]) / bandwidth, kernel)
-                -
-                _kernel_eval((y_sampled_1[i] - y[i]) / bandwidth, kernel)
-            )
-    else:
-        for i in range(n):
-            out[i] = (
-                _kernel_eval((y_sampled_1[i] - y_sampled_2[i]) / bandwidth, kernel)
-                -
-                _kernel_eval((y_sampled_1[i] - y[i]) / bandwidth, kernel)
-            )
-
 def py_K1d_dist(
     double[::1] u,
     double[::1] out,

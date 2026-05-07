@@ -334,3 +334,81 @@ def test_mmd_regressor_inits_params():
     assert par_c_before is None
     assert par_v_after.shape == (2,)
     assert isinstance(par_c_after, float)
+
+
+# --- Logistic via MMDRegressor / _exact_fit ---
+
+
+from regmmd.models.regression.logistic import Logistic  # noqa: E402
+
+
+def _make_binary_data(n=60, seed=0):
+    rng = np.random.default_rng(seed)
+    X = rng.normal(size=(n, 2))
+    p = 1.0 / (1.0 + np.exp(-(X @ np.array([0.7, -0.4]))))
+    y = (rng.uniform(size=n) < p).astype(float)
+    return X, y
+
+
+@pytest.mark.parametrize(
+    "bandwidth_X,expected_keys",
+    [(0, ("estimator", "trajectory")), ("auto", ("estimator", "trajectory"))],
+    ids=["tilde", "hat"],
+)
+def test_logistic_exact_fit_returns_result(bandwidth_X, expected_keys):
+    X, y = _make_binary_data()
+    par_v = np.array([0.1, -0.1])
+    model = Logistic(par_v=par_v.copy())
+    res = model._exact_fit(
+        X=X,
+        y=y,
+        par_v=par_v.copy(),
+        par_c=None,
+        solver={"n_step": 20, "stepsize": 0.5, "burnin": 5},
+        kernel_y="Gaussian",
+        bandwidth_y=1.0,
+        kernel_X="Laplace",
+        bandwidth_X=bandwidth_X,
+    )
+    assert res is not None
+    for k in expected_keys:
+        assert k in res
+
+
+def test_mmd_regressor_logistic_discrete_y_path():
+    """y is integer-valued so the discrete branch in MMDRegressor.fit runs."""
+    X, y = _make_binary_data(n=60, seed=1)
+    par_v = np.array([0.1, -0.1])
+    model = Logistic(par_v=par_v.copy())
+    reg = MMDRegressor(
+        model=model,
+        par_v=par_v.copy(),
+        solver={"n_step": 20, "stepsize": 0.5, "burnin": 5},
+        kernel_y="Gaussian",
+        bandwidth_y=1.0,
+        bandwidth_X=0,
+        fit_intercept=False,
+    )
+    reg.fit(X, y)
+    assert hasattr(reg, "beta_")
+    assert reg.intercept_ == 0.0
+    assert reg.beta_.shape == (2,)
+
+
+def test_mmd_regressor_logistic_discrete_y_hat_path():
+    """Hat estimator path (bandwidth_X='auto') with discrete y."""
+    X, y = _make_binary_data(n=40, seed=2)
+    par_v = np.array([0.1, -0.1])
+    model = Logistic(par_v=par_v.copy())
+    reg = MMDRegressor(
+        model=model,
+        par_v=par_v.copy(),
+        solver={"n_step": 5, "stepsize": 0.5, "burnin": 2},
+        kernel_y="Gaussian",
+        bandwidth_y=1.0,
+        bandwidth_X="auto",
+        kernel_X="Laplace",
+        fit_intercept=False,
+    )
+    reg.fit(X, y)
+    assert reg.beta_.shape == (2,)

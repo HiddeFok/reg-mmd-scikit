@@ -49,17 +49,9 @@ cy_estimation_model = Extension(
     libraries=["npyrandom"],
 )
 
-cy_regression_model = Extension(
-    "regmmd.models._cy_regression_models",
-    sources=["regmmd/models/_cy_regression_models.pyx"],
-    include_dirs=[np.get_include(), "."],
-    library_dirs=[numpy_random_lib_dir],
-    libraries=["npyrandom"],
-)
-
 setup(
     ext_modules=cythonize(
-        [cy_kernel, cy_sgd, cy_estimation_model, cy_regression_model],
+        [cy_kernel, cy_sgd, cy_estimation_model],
         include_path=["."],
     ),
 )

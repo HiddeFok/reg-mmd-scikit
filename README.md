@@ -53,9 +53,16 @@ the optimizer automatically falls back to the general-purpose SGD solver which
 works with any model. For a detailed overview, see the
 [documentation](https://hiddefok.github.io/reg-mmd-scikit/).
 
-### Speedup
+### Estimation optimization speedup
 
-Where possible, a `Cython` version of the model is implemented as well. 
+For the estimation procedure, the SGD optimization loop is also written in 
+Cython. To benefit from this speed, you would need to add your model to
+the `_cy_estimation_models.pyx` and `_cy_estimation_models.pyd` files
+and update the `_build_cy_model` method in the python class. No extra
+Cython functionality was added to the regression models, as the optimization
+is already quite fast, because of the algorithmic improvements that were
+made in the published papers. Specifically, all the required kernel operations
+are of order $O(n)$ instead of $O(n^2)$
 
 
 ## Examples

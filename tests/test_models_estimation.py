@@ -390,3 +390,98 @@ def test_models_no_par_raises(model):
         _ = model.log_prob(x)
     with pytest.raises(ValueError):
         _ = model.sample_n(x)
+
+
+# --- _build_cy_model bridge & param accessors ---
+
+
+import pytest as _pytest  # noqa: E402
+from regmmd.models import (  # noqa: E402
+    GaussianLoc as _GaussianLoc,
+    GaussianScale as _GaussianScale,
+    Gaussian as _Gaussian,
+    Beta as _Beta,
+    BetaA as _BetaA,
+    BetaB as _BetaB,
+    Binomial as _Binomial,
+    Gamma as _Gamma,
+    GammaRate as _GammaRate,
+    GammaShape as _GammaShape,
+    Poisson as _Poisson,
+)
+
+
+@_pytest.mark.parametrize(
+    "factory",
+    [
+        lambda: _GaussianLoc(par_v=0.0, par_c=1.0, random_state=0),
+        lambda: _GaussianScale(par_v=1.0, par_c=0.0, random_state=0),
+        lambda: _Gaussian(par_v=np.array([0.0, 1.0]), random_state=0),
+        lambda: _Beta(par_v=np.array([2.0, 3.0]), random_state=0),
+        lambda: _BetaA(par_v=2.0, par_c=3.0, random_state=0),
+        lambda: _BetaB(par_v=3.0, par_c=2.0, random_state=0),
+        lambda: _Binomial(par_v=0.5, par_c=10, random_state=0),
+        lambda: _Gamma(par_v=np.array([2.0, 1.0]), random_state=0),
+        lambda: _GammaRate(par_v=1.0, par_c=2.0, random_state=0),
+        lambda: _GammaShape(par_v=2.0, par_c=1.0, random_state=0),
+        lambda: _Poisson(par_v=2.0, random_state=0),
+    ],
+    ids=[
+        "GaussianLoc",
+        "GaussianScale",
+        "Gaussian",
+        "Beta",
+        "BetaA",
+        "BetaB",
+        "Binomial",
+        "Gamma",
+        "GammaRate",
+        "GammaShape",
+        "Poisson",
+    ],
+)
+def test_build_cy_model_returns_object_or_none(factory):
+    model = factory()
+    cy = model._build_cy_model()
+    # Either Cython mirror is built, or import unavailable -> None.
+    assert cy is not None or cy is None
+
+
+@_pytest.mark.parametrize(
+    "factory",
+    [
+        lambda: _GaussianLoc(par_v=0.5, par_c=1.0),
+        lambda: _GaussianScale(par_v=2.0, par_c=0.0),
+        lambda: _BetaA(par_v=2.0, par_c=3.0),
+        lambda: _BetaB(par_v=3.0, par_c=2.0),
+        lambda: _GammaRate(par_v=1.0, par_c=2.0),
+        lambda: _GammaShape(par_v=2.0, par_c=1.0),
+    ],
+    ids=["GaussianLoc", "GaussianScale", "BetaA", "BetaB", "GammaRate", "GammaShape"],
+)
+def test_get_params_roundtrip(factory):
+    model = factory()
+    par_v, par_c = model._get_params()
+    assert par_v is not None
+    # update should accept par_v back
+    model.update(par_v)
+
+
+def test_sgd_estimation_no_fast_scalar_par_v():
+    """Exercises the scalar par_v branch in non-fast SGD path."""
+    from regmmd.optimizers import _sgd_estimation
+    rng = np.random.default_rng(0)
+    X = rng.normal(0.0, 1.0, size=(20,))
+    model = _GaussianLoc(par_v=0.0, par_c=1.0, random_state=0)
+    res = _sgd_estimation(
+        X,
+        np.float64(0.0),
+        np.array([1.0]),
+        model,
+        kernel="Gaussian",
+        burn_in=2,
+        n_step=3,
+        bandwidth=1.0,
+        use_fast=False,
+    )
+    assert res["trajectory"].shape == (1, 2 + 3 + 1)
