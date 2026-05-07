@@ -308,7 +308,9 @@ def test_gd_logistic_hat_runs():
     assert res["convergence"] in (-1, 0, 1)
 
 
-def test_gd_logistic_hat_auto_bandwidths():
+def test_gd_logistic_hat_auto_bandwidth_x():
+    """With binary y, only ``bandwidth_x="auto"`` is meaningful — the median
+    heuristic on y collapses to zero."""
     n = 40
     X = RNG.normal(size=(n, 2))
     y = (RNG.uniform(size=(n,)) < 0.5).astype(float)
@@ -322,8 +324,8 @@ def test_gd_logistic_hat_auto_bandwidths():
         burn_in=2,
         n_step=5,
         stepsize=0.5,
-        bandwidth_y="auto",
+        bandwidth_y=1.0,
         bandwidth_x="auto",
     )
-    assert "bandwidth_y" in res
+    assert res["bandwidth_y"] == 1.0
     assert res["bandwidth_x"] > 0

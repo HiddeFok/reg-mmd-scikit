@@ -6,6 +6,7 @@ from regmmd.models.regression.linear_gaussian import LinearGaussian, LinearGauss
 from regmmd.models.regression.logistic import Logistic
 from regmmd.models.regression.gamma import GammaRegressionLoc, GammaRegression
 from regmmd.models.regression.poisson import PoissonRegression
+from regmmd.models.regression.beta import BetaRegression, BetaRegressionLoc
 
 from regmmd.models import __all_regression__
 
@@ -294,3 +295,126 @@ def test_models_no_par_raises(model):
         _ = model.sample_n(n=10, mu_given_x=x)
     with pytest.raises(ValueError):
         _ = model.predict(x)
+
+
+# ---------------------------------------------------------------------------
+# BetaRegression / BetaRegressionLoc
+# ---------------------------------------------------------------------------
+
+
+def _beta_data(n=50, seed=0):
+    rng = np.random.default_rng(seed)
+    X_loc = rng.normal(size=(n, 2))
+    mu = 1.0 / (1.0 + np.exp(-(X_loc @ np.array([0.5, -0.3]))))
+    phi = 5.0
+    y_b = rng.beta(mu * phi, (1 - mu) * phi)
+    return X_loc, np.clip(y_b, 1e-6, 1 - 1e-6)
+
+
+_BETA_FACTORIES = [
+    (
+        "BetaRegressionLoc",
+        lambda: BetaRegressionLoc(
+            par_v=np.array([0.1, -0.1]), par_c=5.0, random_state=0
+        ),
+        2,
+    ),
+    (
+        "BetaRegression",
+        lambda: BetaRegression(
+            par_v=np.array([0.1, -0.1, np.log(5.0)]), random_state=0
+        ),
+        3,
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "name,factory,n_par", _BETA_FACTORIES, ids=[c[0] for c in _BETA_FACTORIES]
+)
+def test_beta_regression_predict_in_unit_interval(name, factory, n_par):
+    X_loc, _ = _beta_data()
+    model = factory()
+    mu = model.predict(X_loc)
+    assert mu.shape == (X_loc.shape[0],)
+    assert np.all((mu > 0) & (mu < 1))
+
+
+@pytest.mark.parametrize(
+    "name,factory,n_par", _BETA_FACTORIES, ids=[c[0] for c in _BETA_FACTORIES]
+)
+def test_beta_regression_score_shape(name, factory, n_par):
+    X_loc, y_b = _beta_data()
+    model = factory()
+    score = model.score(X_loc, y_b)
+    assert score.shape == (X_loc.shape[0], n_par)
+
+
+@pytest.mark.parametrize(
+    "name,factory,n_par", _BETA_FACTORIES, ids=[c[0] for c in _BETA_FACTORIES]
+)
+def test_beta_regression_sample_in_unit_interval(name, factory, n_par):
+    X_loc, _ = _beta_data()
+    model = factory()
+    mu = model.predict(X_loc)
+    samples = model.sample_n(n=X_loc.shape[0], mu_given_x=mu)
+    assert samples.shape == (X_loc.shape[0],)
+    assert np.all((samples > 0) & (samples < 1))
+
+
+@pytest.mark.parametrize(
+    "name,factory,n_par", _BETA_FACTORIES, ids=[c[0] for c in _BETA_FACTORIES]
+)
+def test_beta_regression_log_prob_finite(name, factory, n_par):
+    X_loc, y_b = _beta_data()
+    model = factory()
+    lp = model.log_prob(X_loc, y_b)
+    assert lp.shape == (X_loc.shape[0],)
+    assert np.all(np.isfinite(lp))
+
+
+@pytest.mark.parametrize(
+    "name,empty_factory,par_shape",
+    [
+        ("BetaRegressionLoc", lambda: BetaRegressionLoc(par_v=None, par_c=None), 2),
+        ("BetaRegression", lambda: BetaRegression(par_v=None), 3),
+    ],
+    ids=["BetaRegressionLoc", "BetaRegression"],
+)
+def test_beta_regression_init_params(name, empty_factory, par_shape):
+    X_loc, y_b = _beta_data()
+    model = empty_factory()
+    par_v, _ = model._init_params(X_loc, y_b)
+    assert par_v.shape == (par_shape,)
+
+
+def test_beta_regression_loc_update_keeps_phi():
+    model = BetaRegressionLoc(par_v=np.array([0.0, 0.0]), par_c=4.0)
+    model.update(np.array([1.0, 2.0]))
+    assert np.allclose(model.beta, np.array([1.0, 2.0]))
+    assert model.phi == 4.0
+
+
+def test_beta_regression_update_recovers_log_phi():
+    model = BetaRegression(par_v=np.array([0.0, 0.0, np.log(2.0)]))
+    new = np.array([0.5, -0.5, np.log(7.0)])
+    model.update(new)
+    assert np.isclose(model.phi, 7.0)
+    par_v, _ = model._get_params()
+    assert np.allclose(par_v, new)
+
+
+@pytest.mark.parametrize(
+    "factory",
+    [
+        lambda: BetaRegressionLoc(par_v=np.array([0.0, 0.0]), par_c=4.0),
+        lambda: BetaRegression(par_v=np.array([0.0, 0.0, 0.0])),
+    ],
+    ids=["BetaRegressionLoc", "BetaRegression"],
+)
+def test_beta_regression_project_is_identity(factory):
+    model = factory()
+    par_v, _ = model._get_params()
+    par_v = par_v if isinstance(par_v, np.ndarray) else np.array([par_v])
+    out = model._project_params(par_v.copy())
+    assert np.allclose(out, par_v)

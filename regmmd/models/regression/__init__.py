@@ -2,6 +2,7 @@ from regmmd.models.regression.linear_gaussian import LinearGaussian, LinearGauss
 from regmmd.models.regression.logistic import Logistic
 from regmmd.models.regression.gamma import GammaRegression, GammaRegressionLoc
 from regmmd.models.regression.poisson import PoissonRegression
+from regmmd.models.regression.beta import BetaRegression, BetaRegressionLoc
 
 __all__ = [
     "LinearGaussian",
@@ -10,4 +11,6 @@ __all__ = [
     "GammaRegression",
     "GammaRegressionLoc",
     "PoissonRegression",
+    "BetaRegression",
+    "BetaRegressionLoc",
 ]

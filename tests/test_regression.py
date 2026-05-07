@@ -128,8 +128,9 @@ def test_mmd_regressor_not_fitted_raises():
 
 @pytest.mark.parametrize("fit_intercept", [False, True])
 def test_mmd_regressor_fitted_hat_predicts(fit_intercept):
-    X = RNG.normal(size=(100, 2))
-    noise = RNG.normal(size=(100,))
+    rng = np.random.default_rng(0)
+    X = rng.normal(size=(100, 2))
+    noise = rng.normal(size=(100,))
     beta = np.array([1, 2])
     if fit_intercept:
         y = X @ beta + 0.1 * noise + 1

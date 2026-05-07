@@ -12,6 +12,8 @@ from regmmd.models import (
     GammaRegression,
     GammaRegressionLoc,
     PoissonRegression,
+    BetaRegression,
+    BetaRegressionLoc,
 )
 from regmmd.models.base_model import RegressionModel
 from regmmd.optimizers import _sgd_hat_regression, _sgd_tilde_regression
@@ -27,6 +29,8 @@ class DefinedModels(Enum):
     GAMMA_REGRESSION = GammaRegression
     GAMMA_REGRESSION_LOC = GammaRegressionLoc
     POISSON_REGRESSION = PoissonRegression
+    BETA_REGRESSION = BetaRegression
+    BETA_REGRESSION_LOC = BetaRegressionLoc
 
 
 def _preprocess_data(
