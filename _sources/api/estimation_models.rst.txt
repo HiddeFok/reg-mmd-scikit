@@ -1,6 +1,28 @@
 Estimation Models
 -----------------
 
-.. automodule:: regmmd.models.estimation
-   :members:
-   :imported-members:
+The package ships with parametric estimation models covering the most common univariate distributions. Each model can be selected by string name in :class:`~regmmd.MMDEstimator` (e.g. ``model="gaussian-loc"``) or by passing a class instance directly. ``par_v`` denotes the variable parameter(s) that are optimised; ``par_c`` denotes constant parameter(s) that are held fixed. Click a model name for its full reference page.
+
+.. autosummary::
+   :toctree: generated/
+   :nosignatures:
+
+   regmmd.models.Gaussian
+   regmmd.models.GaussianLoc
+   regmmd.models.GaussianScale
+   regmmd.models.Beta
+   regmmd.models.BetaA
+   regmmd.models.BetaB
+   regmmd.models.Binomial
+   regmmd.models.Gamma
+   regmmd.models.GammaShape
+   regmmd.models.GammaRate
+   regmmd.models.Poisson
+   regmmd.models.Cauchy
+   regmmd.models.Dirac
+   regmmd.models.ContinuousUniformLoc
+   regmmd.models.ContinuousUniformUpper
+   regmmd.models.ContinuousUniformLowerUpper
+   regmmd.models.DiscreteUniform
+   regmmd.models.Geometric
+   regmmd.models.Pareto

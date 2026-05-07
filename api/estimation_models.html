@@ -27,21 +27,22 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../_static/scripts/fontawesome.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
 
     <script src="../_static/documentation_options.js?v=01f34227"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/estimation_models';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="canonical" href="https://hiddefok.github.io/reg-mmd-scikit/api/estimation_models.html" />
@@ -69,7 +70,9 @@
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -359,293 +362,71 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="module-regmmd.models.estimation">
-<span id="estimation-models"></span><h1>Estimation Models<a class="headerlink" href="#module-regmmd.models.estimation" title="Link to this heading">#</a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="regmmd.models.estimation.Beta">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">regmmd.models.estimation.</span></span><span class="sig-name descname"><span class="pre">Beta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.Beta" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.Beta.score">
-<span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.Beta.score" title="Link to this definition">#</a></dt>
-<dd><p>Evaluates to the gradient of the log likelihood with respect to the
-parameters at the values x.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em><em>, </em><em>the points to be evaluated</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.Beta.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.Beta.update" title="Link to this definition">#</a></dt>
-<dd><p>Update the model with new parameters</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>par_v</strong> (<em>float</em><em>, </em><em>variable parameters</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="regmmd.models.estimation.BetaA">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">regmmd.models.estimation.</span></span><span class="sig-name descname"><span class="pre">BetaA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.BetaA" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.BetaA.score">
-<span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.BetaA.score" title="Link to this definition">#</a></dt>
-<dd><p>Evaluates to the gradient of the log likelihood with respect to the
-parameters at the values x.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em><em>, </em><em>the points to be evaluated</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.BetaA.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.BetaA.update" title="Link to this definition">#</a></dt>
-<dd><p>Update the model with new parameters</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>par_v</strong> (<em>float</em><em>, </em><em>variable parameters</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="regmmd.models.estimation.BetaB">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">regmmd.models.estimation.</span></span><span class="sig-name descname"><span class="pre">BetaB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.BetaB" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.BetaB.score">
-<span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.BetaB.score" title="Link to this definition">#</a></dt>
-<dd><p>Evaluates to the gradient of the log likelihood with respect to the
-parameters at the values x.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em><em>, </em><em>the points to be evaluated</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.BetaB.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.BetaB.update" title="Link to this definition">#</a></dt>
-<dd><p>Update the model with new parameters</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>par_v</strong> (<em>float</em><em>, </em><em>variable parameters</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="regmmd.models.estimation.Binomial">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">regmmd.models.estimation.</span></span><span class="sig-name descname"><span class="pre">Binomial</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.Binomial" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.Binomial.score">
-<span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.Binomial.score" title="Link to this definition">#</a></dt>
-<dd><p>Evaluates to the gradient of the log likelihood with respect to the
-parameters at the values x.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em><em>, </em><em>the points to be evaluated</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.Binomial.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.Binomial.update" title="Link to this definition">#</a></dt>
-<dd><p>Update the model with new parameters</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>par_v</strong> (<em>float</em><em>, </em><em>variable parameters</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="regmmd.models.estimation.Gamma">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">regmmd.models.estimation.</span></span><span class="sig-name descname"><span class="pre">Gamma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.Gamma" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.Gamma.score">
-<span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.Gamma.score" title="Link to this definition">#</a></dt>
-<dd><p>Evaluates to the gradient of the log likelihood with respect to the
-parameters at the values x.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em><em>, </em><em>the points to be evaluated</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.Gamma.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.Gamma.update" title="Link to this definition">#</a></dt>
-<dd><p>Update the model with new parameters</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>par_v</strong> (<em>float</em><em>, </em><em>variable parameters</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="regmmd.models.estimation.GammaRate">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">regmmd.models.estimation.</span></span><span class="sig-name descname"><span class="pre">GammaRate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.GammaRate" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.GammaRate.score">
-<span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.GammaRate.score" title="Link to this definition">#</a></dt>
-<dd><p>Evaluates to the gradient of the log likelihood with respect to the
-parameters at the values x.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em><em>, </em><em>the points to be evaluated</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.GammaRate.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.GammaRate.update" title="Link to this definition">#</a></dt>
-<dd><p>Update the model with new parameters</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>par_v</strong> (<em>float</em><em>, </em><em>variable parameters</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="regmmd.models.estimation.GammaShape">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">regmmd.models.estimation.</span></span><span class="sig-name descname"><span class="pre">GammaShape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.GammaShape" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.GammaShape.score">
-<span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.GammaShape.score" title="Link to this definition">#</a></dt>
-<dd><p>Evaluates to the gradient of the log likelihood with respect to the
-parameters at the values x.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em><em>, </em><em>the points to be evaluated</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.GammaShape.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.GammaShape.update" title="Link to this definition">#</a></dt>
-<dd><p>Update the model with new parameters</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>par_v</strong> (<em>float</em><em>, </em><em>variable parameters</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="regmmd.models.estimation.Gaussian">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">regmmd.models.estimation.</span></span><span class="sig-name descname"><span class="pre">Gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.Gaussian" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.Gaussian.score">
-<span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.Gaussian.score" title="Link to this definition">#</a></dt>
-<dd><p>Evaluates to the gradient of the log likelihood with respect to the
-parameters at the values x.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em><em>, </em><em>the points to be evaluated</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.Gaussian.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.Gaussian.update" title="Link to this definition">#</a></dt>
-<dd><p>Update the model with new parameters</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>par_v</strong> (<em>float</em><em>, </em><em>variable parameters</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="regmmd.models.estimation.GaussianLoc">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">regmmd.models.estimation.</span></span><span class="sig-name descname"><span class="pre">GaussianLoc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.GaussianLoc" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.GaussianLoc.score">
-<span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.GaussianLoc.score" title="Link to this definition">#</a></dt>
-<dd><p>Evaluates to the gradient of the log likelihood with respect to the
-parameters at the values x.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em><em>, </em><em>the points to be evaluated</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.GaussianLoc.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.GaussianLoc.update" title="Link to this definition">#</a></dt>
-<dd><p>Update the model with new parameters</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>par_v</strong> (<em>float</em><em>, </em><em>variable parameters</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="regmmd.models.estimation.GaussianScale">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">regmmd.models.estimation.</span></span><span class="sig-name descname"><span class="pre">GaussianScale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.GaussianScale" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.GaussianScale.score">
-<span class="sig-name descname"><span class="pre">score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.GaussianScale.score" title="Link to this definition">#</a></dt>
-<dd><p>Evaluates to the gradient of the log likelihood with respect to the
-parameters at the values x.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em><em> of </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em><em>, </em><em>the points to be evaluated</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="regmmd.models.estimation.GaussianScale.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.GaussianScale.update" title="Link to this definition">#</a></dt>
-<dd><p>Update the model with new parameters</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>par_v</strong> (<em>float</em><em>, </em><em>variable parameters</em>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="regmmd.models.estimation.Poisson">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">regmmd.models.estimation.</span></span><span class="sig-name descname"><span class="pre">Poisson</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">par_v</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par_c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/hiddefok/reg-mmd-scikit/blob/main/regmmd/models/estimation.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#regmmd.models.estimation.Poisson" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
+  <section id="estimation-models">
+<h1>Estimation Models<a class="headerlink" href="#estimation-models" title="Link to this heading">#</a></h1>
+<p>The package ships with parametric estimation models covering the most common univariate distributions. Each model can be selected by string name in <code class="xref py py-class docutils literal notranslate"><span class="pre">MMDEstimator</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">model=&quot;gaussian-loc&quot;</span></code>) or by passing a class instance directly. <code class="docutils literal notranslate"><span class="pre">par_v</span></code> denotes the variable parameter(s) that are optimised; <code class="docutils literal notranslate"><span class="pre">par_c</span></code> denotes constant parameter(s) that are held fixed. Click a model name for its full reference page.</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">regmmd.models.Gaussian</span></code></p></td>
+<td><p>Gaussian <span class="math notranslate nohighlight">\(\mathcal{N}(\mu, \sigma^2)\)</span> with both mean and standard deviation estimated jointly.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">regmmd.models.GaussianLoc</span></code></p></td>
+<td><p>Gaussian <span class="math notranslate nohighlight">\(\mathcal{N}(\mu, \sigma^2)\)</span> with mean <span class="math notranslate nohighlight">\(\mu\)</span> estimated and standard deviation fixed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">regmmd.models.GaussianScale</span></code></p></td>
+<td><p>Gaussian <span class="math notranslate nohighlight">\(\mathcal{N}(\mu, \sigma^2)\)</span> with standard deviation estimated and mean fixed.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">regmmd.models.Beta</span></code></p></td>
+<td><p>Beta <span class="math notranslate nohighlight">\(\mathrm{Beta}(\alpha, \beta)\)</span> with both shape parameters estimated jointly.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">regmmd.models.BetaA</span></code></p></td>
+<td><p>Beta <span class="math notranslate nohighlight">\(\mathrm{Beta}(\alpha, \beta)\)</span> with shape <span class="math notranslate nohighlight">\(\alpha\)</span> estimated and <span class="math notranslate nohighlight">\(\beta\)</span> fixed.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">regmmd.models.BetaB</span></code></p></td>
+<td><p>Beta <span class="math notranslate nohighlight">\(\mathrm{Beta}(\alpha, \beta)\)</span> with shape <span class="math notranslate nohighlight">\(\beta\)</span> estimated and <span class="math notranslate nohighlight">\(\alpha\)</span> fixed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">regmmd.models.Binomial</span></code></p></td>
+<td><p>Binomial <span class="math notranslate nohighlight">\(B(n, p)\)</span> with success probability <span class="math notranslate nohighlight">\(p\)</span> estimated and number of trials <span class="math notranslate nohighlight">\(n\)</span> fixed.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">regmmd.models.Gamma</span></code></p></td>
+<td><p>Gamma distribution with both shape and rate estimated jointly.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">regmmd.models.GammaShape</span></code></p></td>
+<td><p>Gamma distribution with shape estimated and rate fixed.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">regmmd.models.GammaRate</span></code></p></td>
+<td><p>Gamma distribution with rate estimated and shape fixed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">regmmd.models.Poisson</span></code></p></td>
+<td><p>Poisson distribution with rate <span class="math notranslate nohighlight">\(\lambda\)</span> estimated.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">regmmd.models.Cauchy</span></code></p></td>
+<td><p>Cauchy(loc, 1) — location-only parameterisation matching the R package.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">regmmd.models.Dirac</span></code></p></td>
+<td><p>1D Dirac mass at <code class="docutils literal notranslate"><span class="pre">par_v</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">regmmd.models.ContinuousUniformLoc</span></code></p></td>
+<td><p>Continuous uniform on <code class="docutils literal notranslate"><span class="pre">[c</span> <span class="pre">-</span> <span class="pre">L/2,</span> <span class="pre">c</span> <span class="pre">+</span> <span class="pre">L/2]</span></code> — location estimated, length <code class="docutils literal notranslate"><span class="pre">L</span></code> fixed (<code class="docutils literal notranslate"><span class="pre">par_c</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">regmmd.models.ContinuousUniformUpper</span></code></p></td>
+<td><p>Continuous uniform on <code class="docutils literal notranslate"><span class="pre">[lower,</span> <span class="pre">upper]</span></code> — upper bound estimated, lower bound fixed (<code class="docutils literal notranslate"><span class="pre">par_c</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">regmmd.models.ContinuousUniformLowerUpper</span></code></p></td>
+<td><p>Continuous uniform on <code class="docutils literal notranslate"><span class="pre">[lower,</span> <span class="pre">upper]</span></code> — both bounds estimated.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">regmmd.models.DiscreteUniform</span></code></p></td>
+<td><p>Discrete uniform on <span class="math notranslate nohighlight">\(\{1, 2, ..., N\}\)</span> with <code class="docutils literal notranslate"><span class="pre">N</span></code> estimated by exact MMD minimisation.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">regmmd.models.Geometric</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">regmmd.models.Pareto</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
 </section>
 
 
@@ -688,68 +469,6 @@ parameters at the values x.</p>
 
 
   <div class="sidebar-secondary-item">
-<div
-    id="pst-page-navigation-heading-2"
-    class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-  </div>
-  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.Beta"><code class="docutils literal notranslate"><span class="pre">Beta</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.Beta.score"><code class="docutils literal notranslate"><span class="pre">Beta.score()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.Beta.update"><code class="docutils literal notranslate"><span class="pre">Beta.update()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.BetaA"><code class="docutils literal notranslate"><span class="pre">BetaA</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.BetaA.score"><code class="docutils literal notranslate"><span class="pre">BetaA.score()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.BetaA.update"><code class="docutils literal notranslate"><span class="pre">BetaA.update()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.BetaB"><code class="docutils literal notranslate"><span class="pre">BetaB</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.BetaB.score"><code class="docutils literal notranslate"><span class="pre">BetaB.score()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.BetaB.update"><code class="docutils literal notranslate"><span class="pre">BetaB.update()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.Binomial"><code class="docutils literal notranslate"><span class="pre">Binomial</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.Binomial.score"><code class="docutils literal notranslate"><span class="pre">Binomial.score()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.Binomial.update"><code class="docutils literal notranslate"><span class="pre">Binomial.update()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.Gamma"><code class="docutils literal notranslate"><span class="pre">Gamma</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.Gamma.score"><code class="docutils literal notranslate"><span class="pre">Gamma.score()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.Gamma.update"><code class="docutils literal notranslate"><span class="pre">Gamma.update()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.GammaRate"><code class="docutils literal notranslate"><span class="pre">GammaRate</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.GammaRate.score"><code class="docutils literal notranslate"><span class="pre">GammaRate.score()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.GammaRate.update"><code class="docutils literal notranslate"><span class="pre">GammaRate.update()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.GammaShape"><code class="docutils literal notranslate"><span class="pre">GammaShape</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.GammaShape.score"><code class="docutils literal notranslate"><span class="pre">GammaShape.score()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.GammaShape.update"><code class="docutils literal notranslate"><span class="pre">GammaShape.update()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.Gaussian"><code class="docutils literal notranslate"><span class="pre">Gaussian</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.Gaussian.score"><code class="docutils literal notranslate"><span class="pre">Gaussian.score()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.Gaussian.update"><code class="docutils literal notranslate"><span class="pre">Gaussian.update()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.GaussianLoc"><code class="docutils literal notranslate"><span class="pre">GaussianLoc</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.GaussianLoc.score"><code class="docutils literal notranslate"><span class="pre">GaussianLoc.score()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.GaussianLoc.update"><code class="docutils literal notranslate"><span class="pre">GaussianLoc.update()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.GaussianScale"><code class="docutils literal notranslate"><span class="pre">GaussianScale</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.GaussianScale.score"><code class="docutils literal notranslate"><span class="pre">GaussianScale.score()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.GaussianScale.update"><code class="docutils literal notranslate"><span class="pre">GaussianScale.update()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#regmmd.models.estimation.Poisson"><code class="docutils literal notranslate"><span class="pre">Poisson</span></code></a></li>
-</ul>
-  </nav></div>
-
-  <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
     <a href="../_sources/api/estimation_models.rst.txt">
@@ -771,8 +490,8 @@ parameters at the values x.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -806,7 +525,7 @@ parameters at the values x.</p>
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.1.
 </p></div>
       
     </div>

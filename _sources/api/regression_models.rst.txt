@@ -1,6 +1,17 @@
 Regression Models
 -----------------
 
-.. automodule:: regmmd.models.regression
-   :members:
-   :imported-members:
+The regression models follow the same conventions as the estimation models (see :doc:`estimation_models`). Select a model by string name in :class:`~regmmd.MMDRegressor` (e.g. ``model="linear-gaussian-loc"``) or pass a class instance directly. Click a model name for its full reference page.
+
+.. autosummary::
+   :toctree: generated/
+   :nosignatures:
+
+   regmmd.models.LinearGaussian
+   regmmd.models.LinearGaussianLoc
+   regmmd.models.Logistic
+   regmmd.models.GammaRegression
+   regmmd.models.GammaRegressionLoc
+   regmmd.models.PoissonRegression
+   regmmd.models.BetaRegression
+   regmmd.models.BetaRegressionLoc
